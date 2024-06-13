@@ -23,7 +23,7 @@ def hand_landmark(image):
     handedness_list = detection_result.handedness
     return detection_result
     
-def draw_landmarks_on_image(save_img_path, save_3d_path, rgb_image, detection_result):
+def draw_landmarks_on_image(save_img_path, rgb_image, detection_result):
   hand_landmarks_list = detection_result.hand_landmarks
   handedness_list = detection_result.handedness
   annotated_image = np.copy(rgb_image)
@@ -39,9 +39,7 @@ def draw_landmarks_on_image(save_img_path, save_3d_path, rgb_image, detection_re
 
   
   all_handlandmarks = np.array(all_handlandmarks)
-  print(all_handlandmarks.shape)
-  np.save(save_3d_path, all_handlandmarks)
-
+  
 
   # Loop through the detected hands to visualize.
   for idx in range(len(hand_landmarks_list)):
@@ -73,17 +71,24 @@ def draw_landmarks_on_image(save_img_path, save_3d_path, rgb_image, detection_re
                 FONT_SIZE, HANDEDNESS_TEXT_COLOR, FONT_THICKNESS, cv2.LINE_AA)
     
     cv2.imwrite(save_img_path, cv2.cvtColor(annotated_image, cv2.COLOR_RGB2BGR))
+  return all_handlandmarks
 
-
-video_name = 'video_4'
+video_name = 'video_0'
 
 jpg_files = [file for file in os.listdir(f'./videos/{video_name}/') if file.endswith('.png')]
 if not os.path.exists(f'./videos/{video_name}_handlandmarks'): os.makedirs(f'./videos/{video_name}_handlandmarks')
 
+save_3d_path = f'./videos/{video_name}.npy'
+all_landmarks = []
 
 for jpg in jpg_files:
   image = mp.Image.create_from_file(f'./videos/{video_name}/{jpg}')
   detection_result = hand_landmark(image)
   save_img_path = f'./videos/{video_name}_handlandmarks/{jpg}'
-  save_3d_path = f'./videos/{video_name}_handlandmarks/{jpg}.npy'
-  draw_landmarks_on_image(save_img_path, save_3d_path, image.numpy_view(), detection_result)
+  
+  landmarks = draw_landmarks_on_image(save_img_path, image.numpy_view(), detection_result)
+  all_landmarks.append(landmarks)
+
+all_landmarks = np.array(all_landmarks)
+print("Landmarks of all frames shape:", all_landmarks.shape)
+np.save(save_3d_path, all_landmarks)
