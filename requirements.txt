@@ -1,0 +1,12 @@
+torch==2.3.1
+torchvision==0.18.1
+einops==0.8.0
+lightning==2.4.0
+mediapipe==0.10.14
+git+https://github.com/facebookresearch/pytorchvideo.git
+lightning[pytorch-extra]
+google-generativeai
+pyyaml
+timm==1.0.7
+pandas==1.5.3
+torchinfo==1.8.0
