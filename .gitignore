@@ -155,3 +155,8 @@ cython_debug/
 ground_truths/
 labels/
 videos/
+
+keystroke_classify_data/
+keystroke_detect_data/
+keystroke_detect_subset/
+UCF101_subset/
