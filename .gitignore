@@ -160,3 +160,8 @@ keystroke_classify_data/
 keystroke_detect_data/
 keystroke_detect_subset/
 UCF101_subset/
+hand_landmarks/
+key_clf_data/
+raw_frames/
+pytorchvideo/
+GesRes/

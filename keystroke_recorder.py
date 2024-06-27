@@ -8,7 +8,6 @@ import keyboard
 labels = pd.DataFrame(columns=['Frame', 'Key'])
 frame_number = -1
 
-
 def log_key_stroke(event):
     global frame_number
     key = event.char if event.char else event.keysym  # Handling special keys
@@ -19,8 +18,9 @@ def log_key_stroke(event):
 
     labels.loc[len(labels.index)] = [frame_number, key]
 
+droid_cam = 'http://192.168.0.58:4747/video'
 class KeyStrokeRecorder:
-    def __init__(self, master, width = 640, height = 600, cam_url = 0):
+    def __init__(self, master, width = 640, height = 600, cam_url = droid_cam):
         self.start_time = 0
         ### UI
         self.master = master
@@ -36,20 +36,20 @@ class KeyStrokeRecorder:
         self.recording = False
         ### Prepare the folders, file name
         # Get the last video index
-        if not os.path.exists('videos'):
-            os.makedirs('videos')
+        if not os.path.exists('raw_frames'):
+            os.makedirs('raw_frames')
         if not os.path.exists('labels'):
             os.makedirs('labels')
         if not os.path.exists('ground_truths'):
             os.makedirs('ground_truths')
 
-        files = os.listdir('videos')
+        files = os.listdir('raw_frames')
         indices = [int(file.split('_')[1].split('.')[0]) for file in files]
         video_index = 0 if len(indices) == 0 else max(indices) + 1
 
         self.label_path = f'labels/video_{video_index}.csv'
         self.ground_truth_path = f'ground_truths/video_{video_index}.txt'
-        self.video_frames_path = f'videos/video_{video_index}'
+        self.video_frames_path = f'raw_frames/video_{video_index}'
     
     def record(self):
         self.recording = True
@@ -99,6 +99,8 @@ class KeyStrokeRecorder:
         # print("- Landmarks of frames:", self.video_landmarks_path)
 
         self.master.destroy()
+
+    
 
 def main():
     root = tk.Tk()
