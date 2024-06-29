@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 from PIL import Image
-from keystroke_classify_dataset import resize_image
+from gen_key_clf_data import resize_image
 import cv2
 import numpy as np
 from tqdm import tqdm

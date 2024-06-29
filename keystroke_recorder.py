@@ -5,6 +5,8 @@ import numpy as np
 import time
 import cv2
 import keyboard
+from PIL import Image
+
 labels = pd.DataFrame(columns=['Frame', 'Key'])
 frame_number = -1
 
@@ -73,12 +75,8 @@ class KeyStrokeRecorder:
             ret, frame = self.cap.read()
             if ret:
                 frame_number += 1
-                # frame = cv2.resize(frame, (640, 640))
-                cv2.imwrite(f'{self.video_frames_path}/frame_{frame_number}.png', frame)
-                # self.out.write(frame)
-                # frame =tk.PhotoImage(data=cv2.imencode('.png', frame)[1].tobytes())
-                # self.canvas.create_image(0, 0, anchor=tk.NW, image=frame)
                 self.master.update()
+                cv2.imwrite(f'{self.video_frames_path}/frame_{frame_number}.png', frame)
             else:
                 break
         

@@ -165,3 +165,6 @@ key_clf_data/
 raw_frames/
 pytorchvideo/
 GesRes/
+datasets/
+logs/
+ckpts/
