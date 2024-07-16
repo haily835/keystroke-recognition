@@ -5,97 +5,60 @@ import numpy as np
 from mediapipe import solutions
 from mediapipe.framework.formats import landmark_pb2
 import cv2
+import glob
 import os
 from tqdm import tqdm
-
-MARGIN = 10  # pixels
-FONT_SIZE = 1
-FONT_THICKNESS = 1
-HANDEDNESS_TEXT_COLOR = (88, 205, 54) # vibrant green
-
-
-  
-def draw_landmarks_on_image(save_img_path, rgb_image, detection_result, saved_hand_img = False):
-  hand_landmarks_list = detection_result.hand_landmarks
-  handedness_list = detection_result.handedness
-  annotated_image = np.copy(rgb_image)
-
-  all_handlandmarks = []
-  for idx in range(len(hand_landmarks_list)):
-    hand_landmarks = hand_landmarks_list[idx]
-    pos_3ds = []
-    for landmark in hand_landmarks:
-      pos_3ds.append([landmark.x, landmark.y, landmark.z])
-    if len(pos_3ds) == 21:
-      all_handlandmarks.append(pos_3ds)
-
-  
-  all_handlandmarks = np.array(all_handlandmarks)
-  
-  if not saved_hand_img: 
-    return all_handlandmarks
-
-  # Loop through the detected hands to visualize.
-  for idx in range(len(hand_landmarks_list)):
-    hand_landmarks = hand_landmarks_list[idx]
-    handedness = handedness_list[idx]
-
-
-    # Draw the hand landmarks.
-    hand_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
-    hand_landmarks_proto.landmark.extend([
-      landmark_pb2.NormalizedLandmark(x=landmark.x, y=landmark.y, z=landmark.z) for landmark in hand_landmarks
-    ])
-    solutions.drawing_utils.draw_landmarks(
-      annotated_image,
-      hand_landmarks_proto,
-      solutions.hands.HAND_CONNECTIONS,
-      solutions.drawing_styles.get_default_hand_landmarks_style(),
-      solutions.drawing_styles.get_default_hand_connections_style())
-    
-    # Get the top left corner of the detected hand's bounding box.
-    height, width, _ = annotated_image.shape
-    x_coordinates = [landmark.x for landmark in hand_landmarks]
-    y_coordinates = [landmark.y for landmark in hand_landmarks]
-    text_x = int(min(x_coordinates) * width)
-    text_y = int(min(y_coordinates) * height) - MARGIN
-
-    cv2.putText(annotated_image, f"{handedness[0].category_name}",
-                (text_x, text_y), cv2.FONT_HERSHEY_DUPLEX,
-                FONT_SIZE, HANDEDNESS_TEXT_COLOR, FONT_THICKNESS, cv2.LINE_AA)
-    
-    cv2.imwrite(save_img_path, cv2.cvtColor(annotated_image, cv2.COLOR_RGB2BGR))
-  return all_handlandmarks
-
-# videos = os.listdir('videos')
-# print('videos: ', videos)
-
-# mediapip detector
+import torch
 base_options = python.BaseOptions(model_asset_path='hand_landmarker.task')
 options = vision.HandLandmarkerOptions(base_options=base_options,
                                     num_hands=2)
 detector = vision.HandLandmarker.create_from_options(options)
 
-videos = ['video_7', 'video_8', 'video_9', 'video_10', 'video_11', 'video_12', 'video_13', 'video_14', 'video_15', 'video_16', 'video_0', 'video_1']
-for video_name in videos:
-  jpg_files = [file for file in os.listdir(f'./videos/{video_name}/') if file.endswith('.png')]
-    
-  # if not os.path.exists(f'./videos/{video_name}_handlandmarks'): os.makedirs(f'./videos/{video_name}_handlandmarks')
 
-  save_3d_path = f'./videos/{video_name}.npy'
-  all_landmarks = []
-  missed = []
-  for jpg in tqdm(jpg_files):
-    image = mp.Image.create_from_file(f'./videos/{video_name}/{jpg}')
+src = f'./datasets/raw_frames'
+dest = './datasets/landmarks'
+
+videos = [
+  'video_1', 'video_2', 'video_3', 'video_4', 'video_5', 'video_6', 'video_7', 'video_8', 'video_9', 'video_10',
+  'video_11', 'video_12', 'video_13', 'video_14', 'video_15', 'video_16', 'video_17', 'video_18', 'video_19',
+  'video_21', 'video_22', 'video_23', 'video_24', 'video_25', 'video_26', 'video_27', 'video_28', 'video_29', 'video_30',
+  'video_31', 'video_32', 'video_33', 'video_34', 'video_35', 'video_36',
+]
+
+for video in videos:
+  print('video: ', video)
+  image_paths = glob.glob(f"{src}/{video}/*.jpg")
+  lms = []
+  status = []
+  for path in tqdm(image_paths):
+    image = mp.Image.create_from_file(path)
     detection_result = detector.detect(image)
-    save_img_path = f'./videos/{video_name}_handlandmarks/{jpg}'
-    
-    landmarks = draw_landmarks_on_image(save_img_path, image.numpy_view(), detection_result)
-    
-    if (landmarks.shape[0] == 2 and landmarks.shape[1] == 21 and landmarks.shape[2] == 3):
-      all_landmarks.append(landmarks)
-    else: missed.append(jpg)
+    if len(detection_result.hand_landmarks) != 2: 
+      status.append(False)
+      lms.append([])
+      continue
 
-  all_landmarks = np.array(all_landmarks)
-  print("Landmarks of all frames shape:", all_landmarks.shape, f". Missed: {missed} images")
-  np.save(save_3d_path, all_landmarks)
+    image = torch.Tensor(
+                    [[(p.x, p.y, p.z) for p in detection_result.hand_landmarks[0]], 
+                     [(p.x, p.y, p.z) for p in detection_result.hand_landmarks[1]]]
+                     ).float()
+    status.append(image.shape[1] == 21)
+    lms.append(image)
+
+  for i in range(len(lms)):
+    if status[i]: continue
+    print(f"Missing at {i}")
+
+    for j in range(i + 1, len(image_paths)):
+      if status[j]: 
+        lms[i] = lms[j]
+        continue
+
+    for j in range(i-1, 0, -1):
+      if status[j]: 
+        lms[i] = lms[j]
+        continue
+  
+  lms = torch.stack(lms)
+  torch.save(lms, f'{dest}/{video}.pt')
+  print(f"Shape: {lms.shape}")
