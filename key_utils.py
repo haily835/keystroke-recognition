@@ -234,19 +234,19 @@ class KeyClf(L.LightningModule):
         pred_labels = [id2label[_id] for _id in pred_ids]
         self.test_preds += pred_labels
         self.test_targets += [id2label[_id] for _id in targets]
-        self.log('test_loss', loss, sync_dist=True)
+        self.log('test_loss', loss, sync_dist=True, prog_bar=True)
 
     def on_test_end(self):
         print(classification_report(self.test_targets, self.test_preds))
 
     def training_step(self, batch):
         loss, _ = self.common_step(batch)
-        self.log('test_loss', loss, sync_dist=True)
+        self.log('tran_loss', loss, sync_dist=True, prog_bar=True)
         return loss
 
     def validation_step(self, batch):
         loss, _ = self.common_step(batch)
-        self.log('test_loss', loss, sync_dist=True)
+        self.log('val_loss', loss, sync_dist=True, prog_bar=True)
         return loss
 
     def configure_optimizers(self):
