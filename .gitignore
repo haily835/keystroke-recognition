@@ -168,3 +168,4 @@ GesRes/
 datasets/
 logs/
 ckpts/
+lightning_logs/*
