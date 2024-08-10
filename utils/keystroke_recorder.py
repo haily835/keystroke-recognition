@@ -34,20 +34,20 @@ class KeyStrokeRecorder:
         self.recording = False
         ### Prepare the folders, file name
         # Get the last video index
-        if not os.path.exists('./datasets/angle/raw_frames'):
-            os.makedirs('./datasets/angle/raw_frames')
-        if not os.path.exists('./datasets/angle/labels/'):
-            os.makedirs('./datasets/angle/labels/')
-        if not os.path.exists('./datasets/angle/ground_truths'):
-            os.makedirs('./datasets/angle/ground_truths')
+        if not os.path.exists('./datasets/front/raw_frames'):
+            os.makedirs('./datasets/front/raw_frames')
+        if not os.path.exists('./datasets/front/labels/'):
+            os.makedirs('./datasets/front/labels/')
+        if not os.path.exists('./datasets/front/ground_truths'):
+            os.makedirs('./datasets/front/ground_truths')
 
-        files = os.listdir('./datasets/angle/raw_frames')
+        files = os.listdir('./datasets/front/raw_frames')
         indices = [int(file.split('_')[1].split('.')[0]) for file in files]
         video_index = 0 if len(indices) == 0 else max(indices) + 1
 
-        self.label_path = f'./datasets/angle/labels/video_{video_index}.csv'
-        self.ground_truth_path = f'./datasets/angle/ground_truths/video_{video_index}.txt'
-        self.video_frames_path = f'./datasets/angle/raw_frames/video_{video_index}'
+        self.label_path = f'./datasets/front/labels/video_{video_index}.csv'
+        self.ground_truth_path = f'./datasets/front/ground_truths/video_{video_index}.txt'
+        self.video_frames_path = f'./datasets/front/raw_frames/video_{video_index}'
         self.labels = pd.DataFrame(columns=['Time', 'Key'])
 
 

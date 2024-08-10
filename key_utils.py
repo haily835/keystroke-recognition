@@ -9,12 +9,9 @@ import torchmetrics
 from sklearn.metrics import classification_report
 import pandas as pd
 from einops import rearrange
-import cv2
 import os
-import gzip
 import torchvision.transforms.functional
 import torchvision.transforms.v2
-from tqdm import tqdm
 import shutil
 import glob
 from sklearn.model_selection import train_test_split
@@ -22,6 +19,7 @@ from collections import Counter
 
 DELAY = 10
 
+# id and label of all samples
 id2label = ['comma', 'dot', 'BackSpace', 'idle', 'space', 
             'a', 'b', 'c', 'd', 'e', 'f', 
             'g', 'h', 'i', 'j', 'k', 'l', 
@@ -30,8 +28,6 @@ id2label = ['comma', 'dot', 'BackSpace', 'idle', 'space',
             'y', 'z']
 
 label2id = {label: i for i, label in enumerate(id2label)}
-
-
 
 class KeyStreamDataset(torch.utils.data.Dataset):
     def __init__(self, 
@@ -156,8 +152,15 @@ class KeyStreamDataset(torch.utils.data.Dataset):
         
 
 class KeySegmentDataset(torch.utils.data.Dataset):
-    def __init__(self, video_paths, transforms):
+    def __init__(self, video_paths, ids=None, transforms=None):
+        """
+            - video_paths: path to videos
+            - ids: label id of those videos. If None, the ids will be infered by all `label2id` 
+                at the begining of this file. It will include 31 possible classes.
+            - transforms: take a tensor of frames (shape = Time, Channel, Height, Width) and apply transforms(frames)
+        """
         self.video_paths = video_paths
+        self.ids = ids
         self.transforms = transforms
 
     def __len__(self):
@@ -165,8 +168,13 @@ class KeySegmentDataset(torch.utils.data.Dataset):
     
     def __getitem__(self, idx):
         video_dir = self.video_paths[idx]
+        # print('video_dir: ', video_dir)
         
-        label = video_dir.split('/')[-2]
+        if self.ids:
+            id = self.ids[idx]
+        else:
+            label = video_dir.split('/')[-2]
+            id = label2id[label]
 
         jpg_files = sorted(glob.glob(os.path.join(video_dir, '*.jpg')))
         frames = []
@@ -179,44 +187,61 @@ class KeySegmentDataset(torch.utils.data.Dataset):
 
         if self.transforms:
             frames = self.transforms(frames)
-        
-        return frames, label2id[label]
-
-
-
+        return frames, id
     
-class KeySegmentDataModule(L.LightningDataModule):
-    def __init__(self, segment_dir, transforms,
-                 batch_size=4, num_workers=4):
+class BaseKeyDataModule(L.LightningDataModule):
+    """
+    Base class for key dataset. Subclass must implement setup_data. This function must do the following:
+    - Set id2label, label2id
+    - Set videos to the paths to all videos
+    - Set ids to the id of the label for those videos
+    - Call self.split() to perform splitting.
+    """
+
+    def __init__(self, segment_dir, transforms=None, batch_size=4, num_workers=4, train_size=0.8):
+        """
+        Note: test, val set size = (1 - train_size)/2
+        """
         super().__init__()
         self.batch_size = batch_size
         self.segment_dir = segment_dir
         self.transforms = transforms
         self.num_workers = num_workers
+        self.train_size = train_size
+        self.setup_data()
 
-        all_videos = sorted(glob.glob(f"{segment_dir}/*/*"))
-        labels = [video.split('/')[-2] for video in all_videos]
+    def setup_data(self): pass
+    def split(self):
+        """spliting after call setup"""
+        train, val_test, train_ids, val_test_ids = train_test_split(
+                                self.videos, self.ids,
+                                train_size=self.train_size, 
+                                random_state=0)
+        
+        # same size of val and test
+        val, test, val_ids, test_ids = train_test_split(
+                                val_test, 
+                                val_test_ids, 
+                                test_size=0.5, 
+                                random_state=0)
 
-        fit, test, fit_labels, test_labels = train_test_split(all_videos, labels, test_size=0.2, random_state=0)
-        train, val, train_labels, val_labels = train_test_split(fit, fit_labels, test_size=0.25, random_state=0)
-
-        train_counts = Counter(train_labels)
+        train_counts = Counter(train_ids)
         print("Train:\n", train_counts)
-        print("Val:\n", Counter(val_labels))
-        print("Test:\n", Counter(test_labels))
+        print("Val:\n", Counter(val_ids))
+        print("Test:\n", Counter(test_ids))
 
         train_weights = []
         
         # weight_for_class_i = total_samples / (num_samples_in_class_i * num_classes)
-        for key in id2label:
-            freq = train_counts[key]
-            train_weights.append(len(train_labels) / (freq * len(id2label)))
+        for id, label in enumerate(self.id2label):
+            freq = train_counts[id]
+            train_weights.append(len(train_ids) / (freq * len(self.id2label)))
 
         print('train_weights: \n', train_weights)
 
-        self.train = KeySegmentDataset(train, transforms)
-        self.val = KeySegmentDataset(val, transforms)
-        self.test = KeySegmentDataset(test, transforms)
+        self.train = KeySegmentDataset(train, train_ids, self.transforms)
+        self.val = KeySegmentDataset(val, val_ids, self.transforms)
+        self.test = KeySegmentDataset(test, test_ids, self.transforms)
         self.train_weights = train_weights
     
     def train_dataloader(self):
@@ -238,20 +263,66 @@ class KeySegmentDataModule(L.LightningDataModule):
                           num_workers=self.num_workers,
                           persistent_workers=True if self.num_workers else False,
                           shuffle=False)
+class KeyClfDataModule(BaseKeyDataModule):
+    def setup_data(self):
+        self.id2label = ['comma', 'dot', 'BackSpace', 'space', 
+                         'a', 'b', 'c', 'd', 
+                         'e', 'f', 'g', 'h', 
+                         'i', 'j', 'k', 'l', 
+                         'm', 'n', 'o', 'p', 
+                         'q', 'r', 's', 't', 
+                         'u', 'v', 'w', 'x', 
+                         'y', 'z']
+        self.label2id = {
+            'comma': 0, 'dot': 1, 'BackSpace': 2, 'space': 3, 
+            'a': 4, 'b': 5, 'c': 6, 'd': 7, 
+            'e': 8, 'f': 9, 'g': 10, 'h': 11, 
+            'i': 12, 'j': 13,  'k': 14, 'l': 15,
+            'm': 16, 'n': 17, 'o': 18, 'p': 19, 
+            'q': 20, 'r': 21, 's': 22, 't': 23, 
+            'u': 24, 'v': 25, 'w': 26, 'x': 27, 
+            'y': 28, 'z': 29
+        }
+        all_videos = sorted(glob.glob(f"{self.segment_dir}/*/*"))
+        videos = []
+        for video_path in all_videos:
+            if not "idle" in video_path:
+                videos.append(video_path)
+        
+        ids = [self.label2id[video.split('/')[-2]] for video in videos]
+        self.videos = videos
+        self.ids = ids
+        self.split()
+
+class KeyDetectDataModule(BaseKeyDataModule):
+    def setup_data(self):
+        self.id2label = ['idle', 'active']
+        self.label2id = {'idle': 0, 'active': 1}
+        self.videos = sorted(glob.glob(f"{self.segment_dir}/*/*"))
+        self.ids = [0 if "idle" in video_path else 1 for video_path in self.videos]
+        self.split()
 
 class KeyClf(L.LightningModule):
-    def __init__(self, weights,
-                 learning_rate=0.01):
-        num_classes = len(id2label)
+    def __init__(self, weights, model_name, id2label, label2id, learning_rate=0.01):
         super().__init__()
+        self.num_classes = len(id2label)
+        self.label2id = label2id
+        self.id2label= id2label
+        
+        self.model_name = model_name
+
         self.loss_fn = torch.nn.CrossEntropyLoss(torch.tensor(weights).float())
-        self.train_acc = torchmetrics.Accuracy(task="multiclass", num_classes=num_classes)
-        self.val_acc = torchmetrics.Accuracy(task="multiclass", num_classes=num_classes)
-        self.test_acc = torchmetrics.Accuracy(task="multiclass", num_classes=num_classes)
+        self.train_acc = torchmetrics.Accuracy(task="multiclass", num_classes=self.num_classes)
+        self.val_acc = torchmetrics.Accuracy(task="multiclass", num_classes=self.num_classes)
+        self.test_acc = torchmetrics.Accuracy(task="multiclass", num_classes=self.num_classes)
         self.lr = learning_rate
+        
         self.test_preds = []
         self.test_targets = []
-        self.val_loss = []
+        
+        self.cur_train_acc = None
+        self.cur_val_acc = None
+
         self.save_hyperparameters()
 
     def forward(self, batch):
@@ -265,40 +336,51 @@ class KeyClf(L.LightningModule):
     def test_step(self, batch):
         _, targets = batch
         loss, pred_ids = self.forward(batch)
-        pred_labels = [id2label[_id] for _id in pred_ids]
+        pred_labels = [self.id2label[_id] for _id in pred_ids]
         self.test_preds += pred_labels
-        self.test_targets += [id2label[_id] for _id in targets]
+        self.test_targets += [self.id2label[_id] for _id in targets]
+        
         self.log('test_loss', loss, sync_dist=True, prog_bar=True, on_step=False)
 
     def on_test_end(self):
         df = pd.DataFrame({"pred": self.test_preds, "target": self.test_targets})
-        df.to_csv('./test_results.csv')
+        df.to_csv(f'./{self.model_name}_test_results.csv')
         print(classification_report(self.test_targets, self.test_preds))
 
     def training_step(self, batch):
         _, targets = batch
         loss, pred_ids = self.forward(batch)
         
+        self.cur_train_acc = self.train_acc(pred_ids, targets.long())
+        
         self.log('train_loss', loss, 
                  sync_dist=True, prog_bar=True,  on_step=False, on_epoch=True)
         
-        self.log('train_acc', self.train_acc(pred_ids, targets.long()), 
+        self.log('train_acc', self.train_acc, 
                  sync_dist=True, prog_bar=True, on_step=False,  on_epoch=True)
         return loss
+    
+    def on_train_epoch_end(self) -> None:
+        print(f"Epoch {self.current_epoch}, train_acc: {self.cur_train_acc}")
 
     def validation_step(self, batch):
         _, targets = batch
         loss, pred_ids = self.forward(batch)
+
+        self.cur_val_acc = self.val_acc(pred_ids, targets.long())
         self.log('val_loss', loss,
                  sync_dist=True, prog_bar=True, on_step=False, on_epoch=True)
-        self.log('val_acc', self.val_acc(pred_ids, targets.long()), 
+        self.log('val_acc', self.val_acc, 
                  sync_dist=True, prog_bar=True, on_step=False, on_epoch=True)
-        
-        self.val_loss.append(loss)
+
         return loss
 
+    def on_validation_epoch_end(self) -> None:
+        print(f"Epoch {self.current_epoch}, val_acc: {self.cur_val_acc}")
+
     def configure_optimizers(self):
-        return torch.optim.Adam(self.model.parameters(), lr=self.lr)
+        return torch.optim.Adam(self.model.parameters(), lr=self.lr, weight_decay=0.1)
+
 
 if __name__ == "__main__":
     # all_videos = sorted(glob.glob(f"./datasets/angle/segments_dir/*/*"))
@@ -306,17 +388,30 @@ if __name__ == "__main__":
     # print('all_video: ', all_videos[0])
     # print('labels: ', labels[0])
     
-    for i in range(9):
-        print('i: ', i)
-        ds = KeyStreamDataset(f'video_{i}', 
-                              './datasets/angle', 
-                              f_before=3, 
-                              f_after=4, 
-                              gap=2,
-                              transforms=torchvision.transforms.v2.Compose([
-                                  torchvision.transforms.v2.Resize(224, antialias=True),
-                                ]),
-                              crop=[720, 0, 560, 720])
-        for idx, segment in tqdm(enumerate(ds.segments)):
-            ds.gen_segment(idx, 'mp4')
-    dm = KeySegmentDataModule('datasets/angle/segments_dir', None)
+    # for i in range(9):
+    #     print('i: ', i)
+    #     ds = KeyStreamDataset(f'video_{i}', 
+    #                           './datasets/angle', 
+    #                           f_before=3, 
+    #                           f_after=4,
+    #                           gap=2,
+    #                           transforms=torchvision.transforms.v2.Compose([
+    #                               torchvision.transforms.v2.Resize(224, antialias=True),
+    #                             ]),
+    #                           crop=[720, 0, 560, 720])
+    #     for idx, segment in tqdm(enumerate(ds.segments)):
+    #         ds.gen_segment(idx, 'mp4')
+    
+    
+    dm = KeyClfDataModule('datasets/angle/segments_dir', None)
+    # dm.setup()
+    # frames, id = dm.train[0]
+    # print('id: ', dm.id2label[id])
+    # torchvision.io.video.write_video('test_clf.mp4', frames.permute(0, 2, 3, 1), 3.0)
+
+
+    # detect_dm = KeyDetectDataModule('datasets/angle/segments_dir', None)
+    # detect_dm.setup()
+    # frames, id = detect_dm.train[0]
+    # print('id: ', detect_dm.id2label[id])
+    # torchvision.io.video.write_video('test_detect.mp4', frames.permute(0, 2, 3, 1), 3.0)
