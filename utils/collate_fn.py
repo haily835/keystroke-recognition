@@ -31,7 +31,6 @@ def mix_up_fn(data):
 
 
 f_transforms = torchvision.transforms.v2.Compose([
-    torchvision.transforms.v2.ColorJitter(brightness=.5, contrast=.5),
     torchvision.transforms.v2.RandomRotation(degrees=10)
 ])
 
