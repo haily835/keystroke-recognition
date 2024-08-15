@@ -3,5 +3,5 @@ torchvision
 einops
 lightning
 mediapipe
-git+https://github.com/willprice/torchvideo.git@master
+git+https://github.com/facebookresearch/pytorchvideo.git
 lightning[pytorch-extra]
