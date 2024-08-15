@@ -8,8 +8,9 @@ import keyboard
 from PIL import Image
 import shutil
 
-
 droid_cam = 'http://192.168.0.58:4747/video'
+dataset_name = 'longvideo-1'
+
 class KeyStrokeRecorder:
     def __init__(self, master: tk.Tk, width = 640, height = 600, cam_url = 0):
         self.start_time = 0
@@ -34,22 +35,22 @@ class KeyStrokeRecorder:
         self.recording = False
         ### Prepare the folders, file name
         # Get the last video index
-        if not os.path.exists('./datasets/front/raw_frames'):
-            os.makedirs('./datasets/front/raw_frames')
-        if not os.path.exists('./datasets/front/labels/'):
-            os.makedirs('./datasets/front/labels/')
-        if not os.path.exists('./datasets/front/ground_truths'):
-            os.makedirs('./datasets/front/ground_truths')
+        if not os.path.exists(f'./datasets/{dataset_name}/raw_frames'):
+            os.makedirs(f'./datasets/{dataset_name}/raw_frames')
+        if not os.path.exists(f'./datasets/{dataset_name}/labels/'):
+            os.makedirs(f'./datasets/{dataset_name}/labels/')
+        if not os.path.exists(f'./datasets/{dataset_name}/ground_truths'):
+            os.makedirs(f'./datasets/{dataset_name}/ground_truths')
 
-        files = os.listdir('./datasets/front/raw_frames')
+        files = os.listdir(f'./datasets/{dataset_name}/raw_frames')
         indices = [int(file.split('_')[1].split('.')[0]) for file in files]
         video_index = 0 if len(indices) == 0 else max(indices) + 1
 
-        self.label_path = f'./datasets/front/labels/video_{video_index}.csv'
-        self.ground_truth_path = f'./datasets/front/ground_truths/video_{video_index}.txt'
-        self.video_frames_path = f'./datasets/front/raw_frames/video_{video_index}'
-        self.labels = pd.DataFrame(columns=['Time', 'Key'])
-
+        self.info_path = f'./datasets/{dataset_name}/video_{video_index}_info.txt'
+        self.label_path = f'./datasets/{dataset_name}/labels/video_{video_index}.csv'
+        self.ground_truth_path = f'./datasets/{dataset_name}/ground_truths/video_{video_index}.txt'
+        self.video_frames_path = f'./datasets/{dataset_name}/raw_frames/video_{video_index}'
+        self.labels = pd.DataFrame(columns=['Frame', 'Key'])
 
     def record(self):
         self.recording = True
@@ -65,23 +66,31 @@ class KeyStrokeRecorder:
         self.record_button.config(text="Stop", command=self.stop)
         self.text_entry.focus()
        
-        self.start_time = time.time_ns()
+        self.start_time = time.time()
         
         while self.recording:
             ret, frame = self.cap.read()
             if ret:
                 self.frame_number += 1
                 self.master.update()
-                cv2.imwrite(f'{self.video_frames_path}/frame_{self.frame_number}.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 60])
+                cv2.imwrite(f'{self.video_frames_path}/frame_{self.frame_number}.png', frame, 
+                            # [cv2.IMWRITE_JPEG_QUALITY, 60]
+                            )
             else:
                 break
             
     def log_key_stroke(self, event):
         key = event.char if event.char else event.keysym  # Handling special keys
-        if key == '\x08':  # Check if key is delete
-            key = '[d]'
+        
+        if key == 'BackSpace':  # Check if key is delete
+            key = 'delete'
         elif key == ' ':  # Check if key is space
-            key = '[s]'
+            key = 'space'
+        elif key == ',':
+            key = 'comma'
+        elif key == '.':
+            key = 'dot'
+
         self.labels.loc[len(self.labels.index)] = [self.frame_number, key]
 
     def stop(self):
@@ -93,12 +102,28 @@ class KeyStrokeRecorder:
         text = self.text_entry.get("1.0", "end-1c")
         with open(self.ground_truth_path, "w") as f:
             f.write(text)
-
         
-        print("Video length:", (time.time() - self.start_time) )
-        print("- Typed text stored in:", self.ground_truth_path)
-        print("- Video frames:", self.video_frames_path)
-        print("- Labels of frames:", self.label_path)
+        video_length = time.time() - self.start_time
+        print('video_length: ', video_length)
+        total_frames = self.frame_number + 1
+        print('total_frames: ', total_frames)
+        total_words = len(text.split(' '))
+        print('total_words: ', total_words)
+        total_key_press = len(self.labels['Key'])
+        print('total_key_press: ', total_key_press)
+        cls_distribution = self.labels['Key'].value_counts()
+        print('cls_distribution: ', cls_distribution)
+        wpm = total_words // (video_length//60)
+        print('wpm: ', wpm)
+        
+        with open(self.info_path, "w") as info_f:
+            info_f.write(f'video_length: {video_length}\n')
+            info_f.write(f'total_frames: {total_frames}\n')
+            info_f.write(f'total_words: {total_words}\n')
+            info_f.write(f'total_key_press: {total_key_press}\n')
+            info_f.write(f'wpm: {wpm}\n')
+            info_f.write(f'cls_distribution:\n{cls_distribution}')
+
         self.master.destroy()
 
     def discard(self):

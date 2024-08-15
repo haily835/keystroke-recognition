@@ -168,4 +168,7 @@ GesRes/
 datasets/
 logs/
 ckpts/
-lightning_logs/*
+lightning_logs/
+resources/
+video_clf/
+notebooks/

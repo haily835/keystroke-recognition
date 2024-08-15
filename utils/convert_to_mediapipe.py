@@ -13,7 +13,7 @@ import torch
 from PIL import Image
 from tqdm import tqdm
 
-data_dir = './datasets/angle/segments_dir'
+data_dir = './datasets/angle-2/segments_dir'
 base_options = python.BaseOptions(model_asset_path='hand_landmarker.task')
 options = vision.HandLandmarkerOptions(base_options=base_options,
                                        num_hands=2)
@@ -21,12 +21,12 @@ detector = vision.HandLandmarker.create_from_options(options)
 
 class_dirs = sorted(os.listdir(data_dir))
 
-destination_image_dir = f"./datasets/angle/segments_landmarks"
+destination_image_dir = f"./datasets/angle-2/landmarks"
 
 if not os.path.exists(destination_image_dir):
     os.makedirs(destination_image_dir)
 
-to_img = False
+to_img = True
 for class_dir in class_dirs:
     label = class_dir
     samples = os.listdir(f"{data_dir}/{class_dir}")
@@ -35,13 +35,9 @@ for class_dir in class_dirs:
         frames = []
         jpgs = sorted(glob.glob(f"{data_dir}/{class_dir}/{sample}/*.jpg"))
         
+        landmark_frames = []
         for jpg in jpgs:
             img = torchvision.io.image.read_image(jpg)
-            h, w = img.shape[-2], img.shape[-1]
-            
-            img = torchvision.transforms.functional.resized_crop(
-                img, h//2, 0, h//2, w, (224, 224)
-            )
 
             img = img.permute(1, 2, 0).numpy()
             
@@ -87,16 +83,21 @@ for class_dir in class_dirs:
 
                     img_name = jpg.split('/')[-1]
                     
-                    if not os.path.exists(f'{destination_image_dir}/{class_dir}/{sample}'):
-                        os.makedirs(f'{destination_image_dir}/{class_dir}/{sample}')
+                    if not os.path.exists(f'{destination_image_dir}/{class_dir}'):
+                        os.makedirs(f'{destination_image_dir}/{class_dir}')
                     
-                    torchvision.io.image.write_jpeg(
-                        input = torch.tensor(annotated_image).permute(2, 0, 1), # permute back to (c, h, w)
-                        filename=f'{destination_image_dir}/{class_dir}/{sample}/{img_name}.jpg', 
-                        quality=60
-                    )
+                    landmark_frames.append(torch.tensor(annotated_image))
+                    # torchvision.io.image.write_jpeg(
+                    #     input = torch.tensor(annotated_image).permute(2, 0, 1), # permute back to (c, h, w)
+                    #     filename=f'{destination_image_dir}/{class_dir}/{sample}/{img_name}.jpg', 
+                    #     quality=60
+                    # )
             
-        
+        torchvision.io.video.write_video(
+            f'{destination_image_dir}/{class_dir}/{sample}.mp4',
+            torch.stack(landmark_frames),
+            fps=1.0
+        )
         # if (len(frames) != len(jpgs)):
         #     print("Medipipe can not identify all fingers")
         #     print(f"Skipping {data_dir}/{class_dir}/{sample}")

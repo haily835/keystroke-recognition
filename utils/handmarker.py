@@ -15,14 +15,11 @@ options = vision.HandLandmarkerOptions(base_options=base_options,
 detector = vision.HandLandmarker.create_from_options(options)
 
 
-src = f'./datasets/raw_frames'
-dest = './datasets/landmarks'
+src = f'./datasets/angle-2/raw_frames_224'
+dest = './datasets/angle-2/landmarks'
 
 videos = [
-  'video_1', 'video_2', 'video_3', 'video_4', 'video_5', 'video_6', 'video_7', 'video_8', 'video_9', 'video_10',
-  'video_11', 'video_12', 'video_13', 'video_14', 'video_15', 'video_16', 'video_17', 'video_18', 'video_19',
-  'video_21', 'video_22', 'video_23', 'video_24', 'video_25', 'video_26', 'video_27', 'video_28', 'video_29', 'video_30',
-  'video_31', 'video_32', 'video_33', 'video_34', 'video_35', 'video_36',
+  'video_0'
 ]
 
 for video in videos:
