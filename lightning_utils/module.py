@@ -97,7 +97,6 @@ class KeyClf(L.LightningModule):
                  on_epoch=True)
         return loss
 
-    def on_validation_epoch_end(self) -> None:
-        print(f"Epoch {self.current_epoch}, val_acc {self.cur_val_acc}")
+    
 
     
