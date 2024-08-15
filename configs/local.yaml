@@ -12,7 +12,7 @@ fit:
     callbacks:
       - class_path: lightning.pytorch.callbacks.EarlyStopping
         init_args:
-          patience: 5
+          patience: 10
           monitor: val_loss
     fast_dev_run: true
     max_epochs: 100
