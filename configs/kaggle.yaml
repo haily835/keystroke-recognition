@@ -34,7 +34,7 @@ fit:
   optimizer:
     class_path: torch.optim.Adam
     init_args:
-      lr: 0.01
+      lr: 0.001
   ckpt_path: null
 test:
   seed_everything: true

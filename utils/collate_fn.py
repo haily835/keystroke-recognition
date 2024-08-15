@@ -17,7 +17,7 @@ def scale_fn(data):
     
     return videos, labels
 
-mix_up = MixUp(alpha=0.2, num_classes=len(clf_id2label), label_smoothing=0.2)
+mix_up = MixUp(alpha=0.4, num_classes=len(clf_id2label), label_smoothing=0.2)
 def mix_up_fn(data):
     videos, labels = zip(*data)
     labels = torch.tensor(labels).long()
@@ -31,7 +31,8 @@ def mix_up_fn(data):
 
 
 f_transforms = torchvision.transforms.v2.Compose([
-    torchvision.transforms.v2.ColorJitter(brightness=.5, contrast=.5)
+    torchvision.transforms.v2.ColorJitter(brightness=.5, contrast=.5),
+    torchvision.transforms.v2.RandomRotation(degrees=10)
 ])
 
 def color_zoom_fn(data):

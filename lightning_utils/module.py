@@ -80,9 +80,7 @@ class KeyClf(L.LightningModule):
         #          sync_dist=True, prog_bar=True, on_step=False,  on_epoch=True)
         return loss
 
-    # def on_train_epoch_end(self) -> None:
-    #     print(f"Epoch {self.current_epoch}, train_acc {self.cur_train_acc}")
-
+    
     def validation_step(self, batch):
         videos, targets = batch
         loss, pred_ids = self.forward((videos, targets.long()))
