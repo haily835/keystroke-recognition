@@ -68,13 +68,13 @@ class KeyStreamModule(L.LightningDataModule):
         idle_gap=None: if None, the binary detect (idle or active segments) dataset will be used
         """
         super().__init__()
-
+        train_batch_size = batch_size // (len(train_collate_fns) + 1)
         self.train_loader = [
             get_dataloader(frames_dir,
                            labels_dir,
                            videos=train_videos,
                            idle_gap=idle_gap,
-                           batch_size=batch_size,
+                           batch_size=train_batch_size,
                            num_workers=num_workers,
                            collate_fn=scale_fn,
                            shuffle=True),
@@ -82,7 +82,7 @@ class KeyStreamModule(L.LightningDataModule):
                              labels_dir,
                              videos=train_videos,
                              idle_gap=idle_gap,
-                             batch_size=batch_size,
+                             batch_size=train_batch_size,
                              num_workers=num_workers,
                              collate_fn=eval(train_collate_fn),
                              shuffle=True) for train_collate_fn in train_collate_fns]

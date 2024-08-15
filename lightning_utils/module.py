@@ -67,6 +67,9 @@ class KeyClf(L.LightningModule):
                 b_targets = one_hot(b_targets, num_classes=len(self.id2label))
             targets.append(b_targets)
         all_videos = torch.concat(all_videos)
+        
+        # print(all_videos.shape)
+        
         targets = torch.concat(targets).float()
         
         loss, pred_ids = self.forward((all_videos, targets))
