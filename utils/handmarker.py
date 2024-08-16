@@ -15,8 +15,8 @@ options = vision.HandLandmarkerOptions(base_options=base_options,
 detector = vision.HandLandmarker.create_from_options(options)
 
 
-src = f'./datasets/angle-2/raw_frames_224'
-dest = './datasets/angle-2/landmarks'
+src = f'./datasets/shortvideo-1/raw_frames_224'
+dest = './datasets/shortvideo-1/landmarks'
 
 videos = [
   'video_0'
@@ -24,7 +24,7 @@ videos = [
 
 for video in videos:
   print('video: ', video)
-  image_paths = glob.glob(f"{src}/{video}/*.jpg")
+  image_paths = glob.glob(f"{src}/{video}/*.png")
   lms = []
   status = []
   for path in tqdm(image_paths):
