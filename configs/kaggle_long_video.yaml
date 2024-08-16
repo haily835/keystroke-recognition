@@ -26,7 +26,7 @@ fit:
     val_videos: ['video_1']
     test_videos: []
     idle_gap: null
-    batch_size: 12
+    batch_size: 9
     num_workers: 4
     train_collate_fns: ['mix_up_fn', 'color_zoom_fn']
     val_collate_fn: 'scale_fn'
