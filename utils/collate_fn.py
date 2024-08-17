@@ -7,15 +7,11 @@ import torchvision.transforms.v2
 from pytorchvideo.transforms.mix import MixUp
 from lightning_utils.dataset import clf_id2label
 
-def scale_fn(data):
-    videos, labels = zip(*data)
+def scale(videos):
     videos = torch.stack(videos)
-    labels = torch.tensor(labels).long()
-
     videos = videos.permute(0, 2, 1, 3, 4)
     videos = (videos / 255.0).float()
-    
-    return videos, labels
+    return videos
 
 mix_up = MixUp(alpha=0.4, num_classes=len(clf_id2label), label_smoothing=0.2)
 def mix_up_fn(data):

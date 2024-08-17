@@ -5,7 +5,7 @@ import torch.utils
 import torch.utils.data
 from torch.utils.data import DataLoader
 from lightning.pytorch.utilities import CombinedLoader
-
+import torchvision.transforms.v2 as v2
 import lightning as L
 import pandas as pd
 from lightning_utils.dataset import BaseStreamDataset
@@ -16,20 +16,44 @@ def get_dataloader(
         frames_dir,
         labels_dir,
         videos,
-        collate_fn=None,
         idle_gap=None,
         batch_size=4,
         num_workers=4,
-        transforms=None,
+        transforms=[],
+        duplicate_for_transform=False,
         shuffle=False):
 
     key_counts = pd.DataFrame()
-    datasets = [BaseStreamDataset.create_dataset(
-        video_path=f"{frames_dir}/{video}",
-        label_path=f"{labels_dir}/{video}.csv",
-        gap=idle_gap,
-        transforms=transforms
-    ) for video in videos]
+    datasets = []
+
+    if not duplicate_for_transform:
+        datasets = [BaseStreamDataset.create_dataset(
+            video_path=f"{frames_dir}/{video}",
+            label_path=f"{labels_dir}/{video}.csv",
+            gap=idle_gap,
+            transforms=v2.Compose([eval(transform) for transform in transforms]) if len(
+                transforms) else None
+        ) for video in videos]
+    else:
+        for video in videos:
+            if len(transforms):
+                for transform in transforms:
+                    datasets.append(
+                        BaseStreamDataset.create_dataset(
+                            video_path=f"{frames_dir}/{video}",
+                            label_path=f"{labels_dir}/{video}.csv",
+                            gap=idle_gap,
+                            transforms=eval(transform)
+                        )
+                    )
+            else:
+                datasets.append(
+                    BaseStreamDataset.create_dataset(
+                        video_path=f"{frames_dir}/{video}",
+                        label_path=f"{labels_dir}/{video}.csv",
+                        gap=idle_gap,
+                    )
+                )
 
     key_counts['label'] = datasets[0].get_class_counts()['label']
     for video, ds in zip(videos, datasets):
@@ -44,7 +68,6 @@ def get_dataloader(
         batch_size=batch_size,
         num_workers=num_workers,
         persistent_workers=num_workers,
-        collate_fn=collate_fn,
         shuffle=shuffle
     )
     return loader
@@ -60,50 +83,42 @@ class KeyStreamModule(L.LightningDataModule):
                  idle_gap=None,
                  batch_size=4,
                  num_workers=4,
-                 train_collate_fns=[],
-                 val_collate_fn=None,
-                 test_collate_fn=None):
+                 train_transforms=[],
+                 val_transforms=[],
+                 test_transforms=[]):
         """
         train_collate_fns: create multiple loaders for every collate functions and a loader without any collate function
         idle_gap=None: if None, the binary detect (idle or active segments) dataset will be used
         """
         super().__init__()
-        train_batch_size = batch_size // (len(train_collate_fns) + 1)
-        self.train_loader = [
-            get_dataloader(frames_dir,
-                           labels_dir,
-                           videos=train_videos,
-                           idle_gap=idle_gap,
-                           batch_size=train_batch_size,
-                           num_workers=num_workers,
-                           collate_fn=scale_fn,
-                           shuffle=True),
-            *[get_dataloader(frames_dir,
-                             labels_dir,
-                             videos=train_videos,
-                             idle_gap=idle_gap,
-                             batch_size=train_batch_size,
-                             num_workers=num_workers,
-                             collate_fn=eval(train_collate_fn),
-                             shuffle=True) for train_collate_fn in train_collate_fns]
 
-        ] if len(train_videos) else None
+        self.train_loader = get_dataloader(frames_dir,
+                                           labels_dir,
+                                           videos=train_videos,
+                                           idle_gap=idle_gap,
+                                           batch_size=batch_size,
+                                           num_workers=num_workers,
+                                           transforms=train_transforms,
+                                           duplicate_for_transform=True,
+                                           shuffle=True) if len(train_videos) else None
+
         self.val_loader = get_dataloader(
             frames_dir,
             labels_dir,
             videos=val_videos,
             idle_gap=idle_gap,
             batch_size=batch_size,
-            collate_fn=eval(val_collate_fn),
+            transforms=val_transforms,
             num_workers=num_workers,
         ) if len(val_videos) else None
+
         self.test_loader = get_dataloader(
             frames_dir,
             labels_dir,
             videos=test_videos,
             idle_gap=idle_gap,
             batch_size=batch_size,
-            collate_fn=eval(test_collate_fn),
+            transforms=test_transforms,
             num_workers=num_workers,
         ) if len(test_videos) else None
 

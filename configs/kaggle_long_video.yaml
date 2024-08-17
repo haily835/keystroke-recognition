@@ -26,11 +26,14 @@ fit:
     val_videos: ['video_1']
     test_videos: []
     idle_gap: null
-    batch_size: 6
+    batch_size: 8
     num_workers: 4
-    train_collate_fns: ['color_zoom_fn']
-    val_collate_fn: 'scale_fn'
-    test_collate_fn: 'scale_fn'
+    train_transforms: [
+      'v2.RandomRotation(degrees=10)',
+      'v2.RandomAdjustSharpness(sharpness_factor=-1)'
+    ]
+    val_transforms: []
+    test_transforms: []
   optimizer:
     class_path: torch.optim.Adam
     init_args:

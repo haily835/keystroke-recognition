@@ -36,6 +36,7 @@ class KeyClf(L.LightningModule):
 
     def forward(self, batch):
         videos, targets = batch
+        videos = videos.permute(0, 2, 1, 3, 4)
         preds = self.model(videos)
         pred_ids = torch.argmax(preds, dim=1)
         loss = self.loss_fn(preds, targets)
@@ -57,27 +58,15 @@ class KeyClf(L.LightningModule):
         df.to_csv(f'./{self.model_name}_test_results.csv')
         print(classification_report(self.test_targets, self.test_preds))
 
-    def training_step(self, batches):
-        all_videos = []
-        targets = []
-        for b in batches:
-            b_videos, b_targets = b
-            all_videos.append(b_videos)
-            if len(b_targets.size()) == 1:
-                b_targets = one_hot(b_targets, num_classes=len(self.id2label))
-            targets.append(b_targets)
-        all_videos = torch.concat(all_videos)
-        
-        # print(all_videos.shape)
-        
-        targets = torch.concat(targets).float()
-        
-        loss, pred_ids = self.forward((all_videos, targets))
+    def training_step(self, batch):
+        videos, targets = batch        
+        loss, pred_ids = self.forward((videos, targets))
+        self.cur_train_acc = self.train_acc(pred_ids, targets.long())
         self.log('train_loss', loss,
                  sync_dist=True, prog_bar=True,  on_step=False, on_epoch=True)
 
-        # self.log('train_acc', self.cur_train_acc,
-        #          sync_dist=True, prog_bar=True, on_step=False,  on_epoch=True)
+        self.log('train_acc', self.cur_train_acc,
+                 sync_dist=True, prog_bar=True, on_step=False,  on_epoch=True)
         return loss
 
     

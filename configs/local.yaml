@@ -2,9 +2,7 @@ fit:
   seed_everything: true
   trainer:
     accelerator: cpu
-    strategy: auto
     devices: auto
-    num_nodes: 1
     logger:
       class_path: lightning.pytorch.loggers.CSVLogger
       init_args:
@@ -18,49 +16,26 @@ fit:
     max_epochs: 100
   model:
     model_name: resnet101_clf_a2_mixup
-    model_str: resnet101(sample_size=224, sample_duration=8, num_classes=len(clf_id2label))
+    model_str: resnet101(sample_size=360, sample_duration=8, num_classes=len(clf_id2label))
     id2label: clf_id2label
     label2id: clf_label2id
   data:
-    frames_dir: datasets/angle-2/raw_frames_224
-    labels_dir: datasets/angle-2/labels
-    train_videos: ['video_0', 'video_1', 'video_3', 'video_4', 'video_5', 'video_6', 'video_7']
-    val_videos: ['video_9']
-    test_videos: ['video_8']
+    frames_dir: datasets/longvideo-1/low_raw_frames
+    labels_dir: datasets/longvideo-1/labels
+    train_videos: ['video_0']
+    val_videos: ['video_1']
+    test_videos: []
     idle_gap: null
-    batch_size: 6
+    batch_size: 8
     num_workers: 0
-    train_collate_fns: ['mix_up_fn', 'color_zoom_fn']
-    val_collate_fn: 'scale_fn'
-    test_collate_fn: 'scale_fn'
+    train_transforms: [
+      'v2.RandomRotation(degrees=10)',
+      'v2.RandomAdjustSharpness(sharpness_factor=2)'
+    ]
+    val_transforms: []
+    test_transforms: []
   optimizer:
     class_path: torch.optim.Adam
     init_args:
-      lr: 0.01
-  ckpt_path: null
-test:
-  seed_everything: true
-  trainer:
-    accelerator: cpu
-    devices: auto
-    logger:
-      class_path: lightning.pytorch.loggers.CSVLogger
-      init_args:
-        save_dir: logs
-    fast_dev_run: true
-  model:
-    model_name: resnet101_clf_a2_mixup
-    model_str: resnet101(sample_size=224, sample_duration=8, num_classes=len(clf_id2label))
-    id2label: clf_id2label
-    label2id: clf_label2id
-  data:
-    frames_dir: datasets/angle-2/raw_frames_224
-    labels_dir: datasets/angle-2/labels
-    train_videos: []
-    val_videos: []
-    test_videos: ['video_8']
-    idle_gap: null
-    batch_size: 4
-    num_workers: 0
-    test_collate_fn: 'scale_fn'
+      lr: 0.001
   ckpt_path: null
