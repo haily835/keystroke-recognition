@@ -30,7 +30,7 @@ fit:
     num_workers: 4
     train_transforms: [
       'v2.RandomRotation(degrees=10)',
-      'v2.RandomAdjustSharpness(sharpness_factor=-1)'
+      'v2.RandomAdjustSharpness(sharpness_factor=2)'
     ]
     val_transforms: []
     test_transforms: []
