@@ -15,22 +15,25 @@ fit:
     fast_dev_run: true
     max_epochs: 100
   model:
-    model_name: resnet101_clf_a2_mixup
-    model_str: resnet101(sample_size=360, sample_duration=8, num_classes=len(clf_id2label))
+    model_name: resnet101_clf
+    model_str: create_resnet(model_depth=101, model_num_class=len(clf_id2label))
     id2label: clf_id2label
     label2id: clf_label2id
   data:
-    frames_dir: datasets/longvideo-1/low_raw_frames
-    labels_dir: datasets/longvideo-1/labels
-    train_videos: ['video_0']
-    val_videos: ['video_1']
-    test_videos: []
+    frames_dir: datasets/test-1/raw_frames
+    labels_dir: datasets/test-1/labels
+    delay: 4
+    train_videos: ['video_0', 'video_1', 'video_2', 'video_3', 'video_4']
+    val_videos: ['video_5']
+    test_videos: ['video_6', 'video_7']
     idle_gap: null
-    batch_size: 8
+    batch_size: 2
     num_workers: 0
     train_transforms: [
       'v2.RandomRotation(degrees=10)',
-      'v2.RandomAdjustSharpness(sharpness_factor=2)'
+      'v2.RandomAdjustSharpness(sharpness_factor=2)',
+      'v2.RandomAdjustSharpness(sharpness_factor=2)',
+      'v2.ColorJitter(brightness=(0.5,1.5),contrast=(1),saturation=(0.5,1.5),hue=(-0.1,0.1))',
     ]
     val_transforms: []
     test_transforms: []

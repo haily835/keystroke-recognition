@@ -6,6 +6,8 @@ from sklearn.metrics import classification_report
 import pandas as pd
 from lightning_utils.dataset import *
 from models.resnet import *
+from pytorchvideo.models import *
+
 
 class KeyClf(L.LightningModule):
     def __init__(self, model_name, model_str, id2label, label2id):

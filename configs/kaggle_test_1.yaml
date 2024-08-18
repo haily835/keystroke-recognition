@@ -15,8 +15,8 @@ fit:
     fast_dev_run: false
     max_epochs: 100
   model:
-    model_name: resnet101_clf_a2_mixup
-    model_str: resnet101(sample_size=360, sample_duration=8, num_classes=len(clf_id2label))
+    model_name: resnet101_clf
+    model_str: create_resnet(model_depth=101, model_num_class=len(clf_id2label))
     id2label: clf_id2label
     label2id: clf_label2id
   data:
