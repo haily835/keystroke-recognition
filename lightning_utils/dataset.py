@@ -65,6 +65,10 @@ class BaseStreamDataset(torch.utils.data.Dataset):
         for i in range(start, end + 1):
             image = torchvision.io.read_image(
                 f"{self.video_path}/frame_{i}.jpg")
+            image = torchvision.transforms.functional.resize(
+                img=image, size=[360, 360],
+                antialias=True
+            )
             frames.append(image)
 
         frames = torch.stack(frames)
