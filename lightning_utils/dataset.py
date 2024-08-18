@@ -3,6 +3,7 @@ import torch.utils
 import torch.utils.data
 import pandas as pd
 import torchvision
+import torchvision.transforms.functional
 import torchvision.transforms.v2 as v2
 import numpy as np
 import os
@@ -64,7 +65,14 @@ class BaseStreamDataset(torch.utils.data.Dataset):
         for i in range(start, end + 1):
             image = torchvision.io.read_image(
                 f"{self.video_path}/frame_{i}.jpg")
+
+            image = torchvision.transforms.functional.resize(
+                img=image,
+                size=(640, 360),
+                antialias=True
+            )
             frames.append(image)
+
         frames = torch.stack(frames)
         if self.transforms:
             frames = self.transforms(frames)

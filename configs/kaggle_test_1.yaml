@@ -27,7 +27,7 @@ fit:
     val_videos: ['video_5']
     test_videos: ['video_6', 'video_7']
     idle_gap: null
-    batch_size: 4
+    batch_size: 8
     num_workers: 4
     train_transforms: [
       'v2.RandomRotation(degrees=10)',
