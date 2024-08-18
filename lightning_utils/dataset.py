@@ -3,6 +3,7 @@ import torch.utils
 import torch.utils.data
 import pandas as pd
 import torchvision
+import torchvision.transforms.v2 as v2
 import numpy as np
 import os
 
@@ -209,9 +210,10 @@ class KeyDetectDataset(BaseStreamDataset):
 
 if __name__ == "__main__":
     detect_ds = BaseStreamDataset.create_dataset(
-        video_path='datasets/angle-2/raw_frames/video_1',
-        label_path='datasets/angle-2/labels/video_1.csv',
-        gap=2
+        video_path='datasets/test-1/raw_frames/video_1',
+        label_path='datasets/test-1/labels/video_1.csv',
+        gap=2,
+        delay=4,
     )
 
     video, label = detect_ds[0]
@@ -221,13 +223,18 @@ if __name__ == "__main__":
     print(detect_ds.get_class_counts())
 
     clf_ds = BaseStreamDataset.create_dataset(
-        video_path='datasets/angle-2/raw_frames/video_1',
-        label_path='datasets/angle-2/labels/video_1.csv',
+        video_path='datasets/test-1/raw_frames/video_1',
+        label_path='datasets/test-1/labels/video_1.csv',
         gap=None,
+        delay=4,
+        transforms=v2.ColorJitter(brightness=(0.5,1.5),contrast=(1),saturation=(0.5,1.5),hue=(-0.1,0.1)),
     )
+    
     video, label = clf_ds[0]
     print('label: ', label)
     print('video: ', video.shape)
+
+    torchvision.io.video.write_video('sample.mp4', video.permute(0, 2, 3, 1), fps=3.0)
     
 
     print(clf_ds.get_class_counts())

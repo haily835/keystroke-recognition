@@ -17,6 +17,7 @@ def get_dataloader(
         labels_dir,
         videos,
         idle_gap=None,
+        delay=10,
         batch_size=4,
         num_workers=4,
         transforms=[],
@@ -31,6 +32,7 @@ def get_dataloader(
             video_path=f"{frames_dir}/{video}",
             label_path=f"{labels_dir}/{video}.csv",
             gap=idle_gap,
+            delay=delay,
             transforms=v2.Compose([eval(transform) for transform in transforms]) if len(
                 transforms) else None
         ) for video in videos]
@@ -43,6 +45,7 @@ def get_dataloader(
                             video_path=f"{frames_dir}/{video}",
                             label_path=f"{labels_dir}/{video}.csv",
                             gap=idle_gap,
+                            delay=delay,
                             transforms=eval(transform)
                         )
                     )
@@ -51,6 +54,7 @@ def get_dataloader(
                     BaseStreamDataset.create_dataset(
                         video_path=f"{frames_dir}/{video}",
                         label_path=f"{labels_dir}/{video}.csv",
+                        delay=delay,
                         gap=idle_gap,
                     )
                 )
@@ -81,6 +85,7 @@ class KeyStreamModule(L.LightningDataModule):
                  val_videos=[],
                  test_videos=[],
                  idle_gap=None,
+                 delay=10,
                  batch_size=4,
                  num_workers=4,
                  train_transforms=[],
@@ -96,6 +101,7 @@ class KeyStreamModule(L.LightningDataModule):
                                            labels_dir,
                                            videos=train_videos,
                                            idle_gap=idle_gap,
+                                           delay=delay,
                                            batch_size=batch_size,
                                            num_workers=num_workers,
                                            transforms=train_transforms,
@@ -107,6 +113,7 @@ class KeyStreamModule(L.LightningDataModule):
             labels_dir,
             videos=val_videos,
             idle_gap=idle_gap,
+            delay=delay,
             batch_size=batch_size,
             transforms=val_transforms,
             num_workers=num_workers,
@@ -117,6 +124,7 @@ class KeyStreamModule(L.LightningDataModule):
             labels_dir,
             videos=test_videos,
             idle_gap=idle_gap,
+            delay=delay,
             batch_size=batch_size,
             transforms=test_transforms,
             num_workers=num_workers,
