@@ -32,8 +32,8 @@ class KeyClf(L.LightningModule):
         self.test_preds = []
         self.test_targets = []
 
-        self.cur_train_acc = None
-        self.cur_val_acc = None
+        self.train_losses = []
+        self.val_losses = []
         self.save_hyperparameters()
 
     def forward(self, batch):
@@ -69,8 +69,8 @@ class KeyClf(L.LightningModule):
 
         self.log('train_acc', self.cur_train_acc,
                  sync_dist=True, prog_bar=True, on_step=False,  on_epoch=True)
+        
         return loss
-
     
     def validation_step(self, batch):
         videos, targets = batch
@@ -89,6 +89,8 @@ class KeyClf(L.LightningModule):
                  on_epoch=True)
         return loss
 
-    
+    def on_train_epoch_end(self) -> None:
+        print(f"EPOCH {self.current_epoch} train_acc {self.cur_train_acc}")
 
-    
+    def on_validation_epoch_end(self) -> None:
+        print(f"EPOCH {self.current_epoch} val_acc {self.cur_val_acc}")

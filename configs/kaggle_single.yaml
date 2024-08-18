@@ -20,8 +20,8 @@ fit:
     id2label: clf_id2label
     label2id: clf_label2id
   data:
-    frames_dir: /kaggle/input/test-1/test-1/raw_frames
-    labels_dir: /kaggle/input/test-1/test-1/labels
+    frames_dir: /kaggle/input/single-setting/video/raw_frames
+    labels_dir: /kaggle/input/single-setting/video/labels
     delay: 4
     train_videos: ['video_0', 'video_1', 'video_2', 'video_3', 'video_4']
     val_videos: ['video_5']
