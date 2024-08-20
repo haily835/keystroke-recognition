@@ -3,10 +3,9 @@ import glob
 import torch
 import pandas as pd
 import torchvision
-from tqdm import tqdm
 import os
-from lightning_utils.module import KeyClf
 from lightning_utils.dataset import clf_id2label, detect_id2label
+from models.resnet import resnet101, resnet50
 
 device = (
     "cuda"
@@ -33,7 +32,7 @@ def parse_arguments():
         '--data_dir',
         type=str,
         help='Dataset directory',
-        default='datasets',
+        default='datasets/video/raw_frames',
     )
 
 
@@ -65,6 +64,13 @@ def parse_arguments():
 
     return args
 
+
+def get_model_weight_from_ckpt(ckpt_path):
+    checkpoint = torch.load(ckpt_path, map_location=torch.device(device))
+    model_weights = checkpoint['state_dict']
+    for key in list(model_weights):
+        model_weights[key.replace("model.", "")] = model_weights.pop(key)
+    return model_weights
 def main():
     args = parse_arguments()
 
@@ -81,32 +87,24 @@ def main():
     print(f"Detector checkpoint: {det_ckpt}")
     print(f"Results will be saved in: {result_dir}")
 
-    
+    clf = resnet101(sample_size=360, sample_duration=8, num_classes=len(clf_id2label))
+    clf.load_state_dict(get_model_weight_from_ckpt(clf_ckpt))
 
-    clf = KeyClf.load_from_checkpoint(clf_ckpt, 
-                                      model_name='resnet101_clf',
-                                      model_str='resnet101(sample_size=360, sample_duration=8, num_classes=len(clf_id2label))',
-                                      id2label='clf_id2label',
-                                      label2id='clf_label2id')
-    det = KeyClf.load_from_checkpoint(det_ckpt, 
-                                      model_name='resnet101_clf',
-                                      model_str='resnet50(sample_size=360, sample_duration=8, num_classes=len(clf_id2label))',
-                                      id2label='clf_id2label',
-                                      label2id='clf_label2id'
-                                      )
-    clf.model.to(device)
-    det.model.to(device)
+    det = resnet50(sample_size=360, sample_duration=8, num_classes=len(detect_id2label))
+    det.load_state_dict(get_model_weight_from_ckpt(det_ckpt))
     
-    clf.freeze()
-    det.freeze()
+    clf.to(device)
+    det.to(device)
 
+    clf.eval()
+    det.eval()
+   
     if not os.path.exists(result_dir):
         os.makedirs(result_dir)
 
-    for i in range(len(videos)):
-        video_name = videos[i]
+    for video_name in videos:
         video_path = f"{data_dir}/{video_name}"
-        video_name = video_path.split('/')[-1]
+        print('video_path: ', video_path)
         jpgs = sorted(glob.glob(f"{video_path}/*.jpg"))
         print(f"-----Video: {video_name}----")
         print('Total frames: ', len(jpgs))
@@ -116,15 +114,19 @@ def main():
         detect_record = []
         clf_record = []
 
-        while curr_frame < tqdm(len(jpgs)):
+        while curr_frame < len(jpgs):
             image = torchvision.io.read_image(f"{video_path}/frame_{curr_frame}.jpg")
-
+            image = torchvision.transforms.functional.resize(
+                img=image, size=[360, 360],
+                antialias=True
+            )
             if len(windows) < 8:
                 windows.append(image)
 
             else:
                 frames = torch.stack(windows)
-                frames = frames.permute(1, 0, 2, 3).unsqueeze(dim=0).to(device)
+                
+                frames = frames.permute(1, 0, 2, 3).float().unsqueeze(dim=0).to(device)
 
                 detect_logits = torch.nn.functional.softmax(det.model(frames).squeeze())
                 detect_id = torch.argmax(detect_logits, dim=0).item()
@@ -133,13 +135,13 @@ def main():
                 detect_record.append([curr_frame - 7, detect_logits[1].item()])
 
                 if detect_label == 'active':
-                    clf_logits = torch.nn.functional.softmax(clf.model(frames).squeeze(), dim=0)
+                    clf_logits = torch.nn.functional.softmax(clf(frames).squeeze(), dim=0)
                     pred_id = torch.argmax(clf_logits, dim=0).item()
                     clf_label = clf_id2label[pred_id]
                     print(f'{curr_frame - 7}-{curr_frame}: {clf_label} with probability {clf_logits[pred_id]}')
                     clf_record.append([curr_frame - 7, clf_label, clf_logits[pred_id].item()])
 
-                windows = windows[1:]
+                    windows = windows[1:]
             curr_frame += 1
         
         detect_df = pd.DataFrame({
