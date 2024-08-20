@@ -13,8 +13,12 @@ fit:
     fast_dev_run: false
     max_epochs: 100
   model:
-    model_name: resnet101_clf
-    model_str: resnet101(sample_size=360, sample_duration=8, num_classes=len(clf_id2label))
+    name: resnet101_clf
+    classpath: models.resnet101
+    init_args:
+      sample_size: 360
+      sample_duration: 8
+      num_classes: len(clf_id2label)
     id2label: clf_id2label
     label2id: clf_label2id
   data:
@@ -45,8 +49,12 @@ test:
         save_dir: logs
     fast_dev_run: false
   model:
-    model_name: resnet101_clf
-    model_str: resnet101(sample_size=360, sample_duration=8, num_classes=len(clf_id2label))
+    name: resnet101_clf
+    classpath: models.resnet101
+    init_args:
+      sample_size: 360
+      sample_duration: 8
+      num_classes: len(clf_id2label)
     id2label: clf_id2label
     label2id: clf_label2id
   data:

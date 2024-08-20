@@ -1,3 +1,4 @@
+from typing import Dict, Any
 import torch
 import lightning as L
 from torch.nn.functional import one_hot
@@ -7,17 +8,36 @@ import pandas as pd
 from lightning_utils.dataset import *
 from models.resnet import *
 from pytorchvideo.models import *
-
+import importlib
 
 class KeyClf(L.LightningModule):
-    def __init__(self, model_name: str, model_str: str, id2label: str, label2id: str):
+    def __init__(self, 
+                 name: str, 
+                 classpath: str, 
+                 init_args: Dict[str, Any], 
+                 id2label: str, 
+                 label2id: str):
         super().__init__()
-        self.model_name = model_name
+        self.name = name
 
-        self.model = eval(model_str)
+        # Parse classpath and model arguments
+        class_module = '.'.join(classpath.split('.')[:-1])
+        class_name = classpath.split('.')[-1]
+        
+        module = importlib.__import__(
+            class_module, 
+            fromlist=[class_name]
+        )
+        args_class = getattr(module, class_name)
+
+        model_args = {
+            key: eval(str(value)) 
+            for key, value in init_args.items()
+        }
+
+        self.model = args_class(**model_args)
 
         self.loss_fn = torch.nn.CrossEntropyLoss()
-
         self.id2label = eval(id2label)
         self.label2id = eval(label2id)
         self.num_classes = len(id2label)
@@ -27,8 +47,6 @@ class KeyClf(L.LightningModule):
             task="multiclass", num_classes=self.num_classes)
         self.test_acc = torchmetrics.Accuracy(
             task="multiclass", num_classes=self.num_classes)
-        
-
         self.test_preds = []
         self.test_targets = []
 
@@ -56,8 +74,11 @@ class KeyClf(L.LightningModule):
                  prog_bar=True, on_step=False)
 
     def on_test_end(self):
+        if not os.path.exists('results'):
+            os.mkdir('results')
+
         df = pd.DataFrame({"pred": self.test_preds, "target": self.test_targets})
-        df.to_csv(f'./{self.model_name}_test_results.csv')
+        df.to_csv(f'./results/{self.model_name}_test_results.csv')
         print(classification_report(self.test_targets, self.test_preds))
 
     def training_step(self, batch):
