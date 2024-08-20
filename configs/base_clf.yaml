@@ -1,0 +1,66 @@
+fit:
+  seed_everything: true
+  trainer:
+    logger:
+      class_path: lightning.pytorch.loggers.CSVLogger
+      init_args:
+        save_dir: logs
+    callbacks:
+      - class_path: lightning.pytorch.callbacks.EarlyStopping
+        init_args:
+          patience: 10
+          monitor: val_loss
+    fast_dev_run: false
+    max_epochs: 100
+  model:
+    model_name: resnet101_clf
+    model_str: resnet101(sample_size=360, sample_duration=8, num_classes=len(clf_id2label))
+    id2label: clf_id2label
+    label2id: clf_label2id
+  data:
+    delay: 4
+    resize_shape: [360, 360]
+    train_videos: ['video_0', 'video_1', 'video_2', 'video_3', 'video_4']
+    val_videos: ['video_5']
+    test_videos: ['video_6', 'video_7']
+    idle_gap: null
+    train_transforms: [
+      'v2.RandomRotation(degrees=10)',
+      'v2.RandomAdjustSharpness(sharpness_factor=2)',
+      'v2.RandomAdjustSharpness(sharpness_factor=2)',
+      'v2.ColorJitter(brightness=(0.5,1.5),contrast=(1),saturation=(0.5,1.5),hue=(-0.1,0.1))',
+    ]
+    val_transforms: []
+    test_transforms: []
+  optimizer:
+    class_path: torch.optim.Adam
+    init_args:
+      lr: 0.001
+test:
+  seed_everything: true
+  trainer:
+    logger:
+      class_path: lightning.pytorch.loggers.CSVLogger
+      init_args:
+        save_dir: logs
+    fast_dev_run: false
+  model:
+    model_name: resnet101_clf
+    model_str: resnet101(sample_size=360, sample_duration=8, num_classes=len(clf_id2label))
+    id2label: clf_id2label
+    label2id: clf_label2id
+  data:
+    delay: 4
+    resize_shape: [360, 360]
+    train_videos: []
+    val_videos: []
+    test_videos: ['video_6', 'video_7']
+    idle_gap: null
+    train_transforms: [
+      'v2.RandomRotation(degrees=10)',
+      'v2.RandomAdjustSharpness(sharpness_factor=2)',
+      'v2.RandomAdjustSharpness(sharpness_factor=2)',
+      'v2.ColorJitter(brightness=(0.5,1.5),contrast=(1),saturation=(0.5,1.5),hue=(-0.1,0.1))',
+    ]
+    val_transforms: []
+    test_transforms: []

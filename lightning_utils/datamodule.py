@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 import torch
 import lightning as L
 import pandas as pd
@@ -19,6 +19,7 @@ def get_dataloader(
         videos,
         idle_gap=None,
         delay=10,
+        resize_shape=(360, 360),
         batch_size=4,
         num_workers=4,
         transforms=[],
@@ -33,6 +34,7 @@ def get_dataloader(
             video_path=f"{frames_dir}/{video}",
             label_path=f"{labels_dir}/{video}.csv",
             gap=idle_gap,
+            resize_shape=resize_shape,
             delay=delay,
             transforms=v2.Compose([eval(transform) for transform in transforms]) if len(
                 transforms) else None
@@ -46,6 +48,7 @@ def get_dataloader(
                             video_path=f"{frames_dir}/{video}",
                             label_path=f"{labels_dir}/{video}.csv",
                             gap=idle_gap,
+                            resize_shape=resize_shape,
                             delay=delay,
                             transforms=eval(transform)
                         )
@@ -56,6 +59,7 @@ def get_dataloader(
                         video_path=f"{frames_dir}/{video}",
                         label_path=f"{labels_dir}/{video}.csv",
                         delay=delay,
+                        resize_shape=resize_shape,
                         gap=idle_gap,
                     )
                 )
@@ -82,6 +86,7 @@ class KeyStreamModule(L.LightningDataModule):
     def __init__(self,
                  frames_dir: str,
                  labels_dir: str,
+                 resize_shape: List[int] = [360, 360],
                  train_videos: List[str] = [],
                  val_videos: List[str] = [],
                  test_videos: List[str] = [],
@@ -101,6 +106,7 @@ class KeyStreamModule(L.LightningDataModule):
         self.train_loader = get_dataloader(frames_dir,
                                            labels_dir,
                                            videos=train_videos,
+                                           resize_shape=resize_shape,
                                            idle_gap=idle_gap,
                                            delay=delay,
                                            batch_size=batch_size,
@@ -114,6 +120,7 @@ class KeyStreamModule(L.LightningDataModule):
             labels_dir,
             videos=val_videos,
             idle_gap=idle_gap,
+            resize_shape=resize_shape,
             delay=delay,
             batch_size=batch_size,
             transforms=val_transforms,
@@ -124,6 +131,7 @@ class KeyStreamModule(L.LightningDataModule):
             frames_dir,
             labels_dir,
             videos=test_videos,
+            resize_shape=resize_shape,
             idle_gap=idle_gap,
             delay=delay,
             batch_size=batch_size,

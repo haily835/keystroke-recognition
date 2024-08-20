@@ -5,17 +5,56 @@
 - keystroke detector to classify iddle and typing moments
 - keystroke classifier to identify which key typed
 
-1. Local machine with only cpu:
+1. Local machine with only cpu for development
 
 Detect model:
-
-- python main.py -c configs/local_detect.yaml fit
-- python main.py -c configs/local_detect.yaml test
+```
+python main.py -c configs/base_detect.yaml fit \
+  --trainer.accelerator cpu \
+  --trainer.fast_dev_run True\
+  --data.frames_dir datasets/videos/raw_frames \
+  --data.labels_dir datasets/videos/labels \
+  --data.num_workers 0 \
+  --data.idle_gap 2
+```
 
 Classifier model:
+```
+python main.py -c configs/base_clf.yaml fit \
+  --trainer.accelerator cpu \
+  --trainer.fast_dev_run True\
+  --data.frames_dir datasets/videos/raw_frames \
+  --data.labels_dir datasets/videos/labels \
+  --data.num_workers 0 \
+```
 
-* python main.py -c configs/local.yaml fit
-* python main.py -c configs/local.yaml test
+Test: Please pass the ckpt path if you have downloaded pretrained models
+
+Detect model:
+```
+python main.py -c configs/base_detect.yaml test \
+  --trainer.accelerator cpu \
+  --trainer.fast_dev_run True\
+  --data.frames_dir datasets/videos/raw_frames \
+  --data.labels_dir datasets/videos/labels \
+  --data.num_workers 0 \
+  --data.idle_gap 2 \
+  --ckpt_path CKPT_PATH
+```
+
+Classifier model:
+```
+python main.py -c configs/base_clf.yaml test \
+  --trainer.accelerator cpu \
+  --trainer.fast_dev_run True\
+  --data.frames_dir datasets/videos/raw_frames \
+  --data.labels_dir datasets/videos/labels \
+  --data.num_workers 0 \
+  --ckpt_path CKPT_PATH
+```
+
+More details on all available options:
+python main.py -c configs/base_clf.yaml [test or fit] -h
 
 2. Kaggle with free GPU:
 
@@ -26,17 +65,43 @@ Classifier model:
 %cd Keystroke-classifier
 !pip install -r requirements.txt
 ```
-
 Detect model:
-
-- python main.py -c configs/kaggle_detect.yaml fit
-- python main.py -c configs/kaggle_detect.yaml test
+python main.py -c configs/base_detect.yaml fit \
+  --trainer.accelerator gpu --trainer.devices 0 1  \
+  --data.frames_dir /kaggle/input/single-setting/video/raw_frames \
+  --data.labels_dir /kaggle/input/single-setting/video/labels \
+  --data.num_workers 0 \
+  --data.idle_gap 2
 
 Classifier model:
+python main.py -c configs/base_detect.yaml fit \
+  --trainer.accelerator gpu --trainer.devices 0 1  \
+  --data.frames_dir /kaggle/input/single-setting/video/raw_frames \
+  --data.labels_dir /kaggle/input/single-setting/video/labels \
+  --data.num_workers 0 \
 
-* python main.py -c configs/kaggle_clf.yaml fit
-* python main.py -c configs/kaggle_clf.yaml test
+Test on a single gpu
 
+Detect model:
+```
+python main.py -c configs/base_detect.yaml test \
+  --trainer.accelerator gpu --trainer.devices 0  \
+  --data.frames_dir /kaggle/input/single-setting/video/raw_frames \
+  --data.labels_dir /kaggle/input/single-setting/video/labels \
+  --data.num_workers 0 \
+  --data.idle_gap 2
+  --ckpt_path CKPT_PATH
+```
+
+Classifier model:
+```
+python main.py -c configs/base_detect.yaml test \
+  --trainer.accelerator gpu --trainer.devices 0  \
+  --data.frames_dir /kaggle/input/single-setting/video/raw_frames \
+  --data.labels_dir /kaggle/input/single-setting/video/labels \
+  --data.num_workers 0 \
+  --ckpt_path CKPT_PATH
+``
 Run the 2 stages on a video frames from pre-train model:
 
 ```

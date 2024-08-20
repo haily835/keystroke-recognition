@@ -8,9 +8,7 @@ from lightning_utils.dataset import clf_id2label, detect_id2label
 from models.resnet import resnet101, resnet50
 
 device = (
-    "cuda"
-    if torch.cuda.is_available()
-    else "cpu"
+    "cuda" if torch.cuda.is_available() else "cpu"
 )
 
 print(f"Using {device} device")
@@ -122,7 +120,6 @@ def main():
             )
             if len(windows) < 8:
                 windows.append(image)
-
             else:
                 frames = torch.stack(windows)
                 
