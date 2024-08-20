@@ -38,7 +38,7 @@ class BaseStreamDataset(torch.utils.data.Dataset):
     @classmethod
     def create_dataset(cls, video_path: str, label_path: str,
                        gap: int, f_before: int = 2, f_after: int = 2, delay: int = 10,
-                       resize_shape=(360, 360),
+                       resize_shape=[360, 360],
                        transforms=None):
         if gap:
             return KeyDetectDataset(
@@ -131,7 +131,7 @@ class KeyClfStreamDataset(BaseStreamDataset):
                  f_before=2,
                  f_after=2,
                  delay=10,
-                 resize_shape=(360, 360),
+                 resize_shape=[360, 360],
                  transforms=None):
 
         self.video_path = video_path
@@ -168,7 +168,7 @@ class KeyDetectDataset(BaseStreamDataset):
                  f_before=2,
                  f_after=2,
                  delay=10,
-                 resize_shape=(360, 360),
+                 resize_shape=[360, 360],
                  transforms=None):
 
         self.video_path = video_path
