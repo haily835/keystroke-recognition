@@ -15,10 +15,10 @@ fit:
     fast_dev_run: false
     max_epochs: 100
   model:
-    model_name: resnet101_clf
-    model_str: resnet50(sample_size=360, sample_duration=8, num_classes=len(clf_id2label))
-    id2label: clf_id2label
-    label2id: clf_label2id
+    model_name: resnet50_clf
+    model_str: resnet50(sample_size=360, sample_duration=8, num_classes=len(detect_id2label))
+    id2label: detect_id2label
+    label2id: detect_label2id
   data:
     frames_dir: /kaggle/input/single-setting/video/raw_frames
     labels_dir: /kaggle/input/single-setting/video/labels
@@ -53,10 +53,10 @@ test:
         save_dir: logs
     fast_dev_run: false
   model:
-    model_name: resnet101_clf
-    model_str: resnet101(sample_size=360, sample_duration=8, num_classes=len(clf_id2label))
-    id2label: clf_id2label
-    label2id: clf_label2id
+    model_name: resnet50_detect
+    model_str: resnet50(sample_size=360, sample_duration=8, num_classes=len(detect_id2label))
+    id2label: detect_id2label
+    label2id: detect_label2id
   data:
     frames_dir: /kaggle/input/single-setting/video/raw_frames
     labels_dir: /kaggle/input/single-setting/video/labels

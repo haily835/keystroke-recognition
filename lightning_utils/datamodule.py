@@ -1,3 +1,4 @@
+from typing import List
 import torch
 import lightning as L
 import pandas as pd
@@ -79,18 +80,18 @@ def get_dataloader(
 
 class KeyStreamModule(L.LightningDataModule):
     def __init__(self,
-                 frames_dir,
-                 labels_dir,
-                 train_videos=[],
-                 val_videos=[],
-                 test_videos=[],
-                 idle_gap=None,
-                 delay=10,
-                 batch_size=4,
-                 num_workers=4,
-                 train_transforms=[],
-                 val_transforms=[],
-                 test_transforms=[]):
+                 frames_dir: str,
+                 labels_dir: str,
+                 train_videos: List[str] = [],
+                 val_videos: List[str] = [],
+                 test_videos: List[str] = [],
+                 idle_gap: int = None,
+                 delay: int = 10,
+                 batch_size: int = 4,
+                 num_workers: int = 4,
+                 train_transforms: List[str] = [],
+                 val_transforms: List[str] = [],
+                 test_transforms: List[str] = []):
         """
         train_collate_fns: create multiple loaders for every collate functions and a loader without any collate function
         idle_gap=None: if None, the binary detect (idle or active segments) dataset will be used

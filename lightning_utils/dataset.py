@@ -38,7 +38,7 @@ class BaseStreamDataset(torch.utils.data.Dataset):
 
     @classmethod
     def create_dataset(cls, video_path: str, label_path: str,
-                       gap, f_before=2, f_after=2, delay=10,
+                       gap: int, f_before: int = 2, f_after: int = 2, delay: int = 10,
                        transforms=None):
         if gap:
             return KeyDetectDataset(

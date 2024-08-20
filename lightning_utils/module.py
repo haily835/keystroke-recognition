@@ -10,7 +10,7 @@ from pytorchvideo.models import *
 
 
 class KeyClf(L.LightningModule):
-    def __init__(self, model_name, model_str, id2label, label2id):
+    def __init__(self, model_name: str, model_str: str, id2label: str, label2id: str):
         super().__init__()
         self.model_name = model_name
 
