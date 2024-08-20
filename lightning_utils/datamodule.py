@@ -10,7 +10,6 @@ import torchvision.transforms.v2 as v2
 import lightning as L
 import pandas as pd
 from lightning_utils.dataset import BaseStreamDataset
-from utils.collate_fn import *
 
 
 def get_dataloader(
