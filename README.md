@@ -5,10 +5,12 @@
 - keystroke detector to classify iddle and typing moments
 - keystroke classifier to identify which key typed
 
-1. Local machine with only cpu for development
+### Local machine with only cpu for development
 
+1. Training
 Detect model:
-```
+
+```bash
 python main.py -c configs/base_detect.yaml fit \
   --trainer.accelerator cpu \
   --trainer.fast_dev_run True\
@@ -19,7 +21,8 @@ python main.py -c configs/base_detect.yaml fit \
 ```
 
 Classifier model:
-```
+
+```bash
 python main.py -c configs/base_clf.yaml fit \
   --trainer.accelerator cpu \
   --trainer.fast_dev_run True\
@@ -28,10 +31,9 @@ python main.py -c configs/base_clf.yaml fit \
   --data.num_workers 0 \
 ```
 
-Test: Please pass the ckpt path if you have downloaded pretrained models
-
+2. Test: Please pass the ckpt path if you have downloaded pretrained models
 Detect model:
-```
+```bash
 python main.py -c configs/base_detect.yaml test \
   --trainer.accelerator cpu \
   --trainer.fast_dev_run True\
@@ -43,7 +45,7 @@ python main.py -c configs/base_detect.yaml test \
 ```
 
 Classifier model:
-```
+```bash
 python main.py -c configs/base_clf.yaml test \
   --trainer.accelerator cpu \
   --trainer.fast_dev_run True\
@@ -54,64 +56,68 @@ python main.py -c configs/base_clf.yaml test \
 ```
 
 More details on all available options:
+
+```bash
 python main.py -c configs/base_clf.yaml [test or fit] -h
+```
 
-2. Kaggle with free GPU:
+### Kaggle with free GPU:
 
-- Clone the repository, install requirements.
+1. Clone the repository, install requirements.
 
 ```
 !git clone https://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@github.com/haily835/Keystroke-classifier.git
 %cd Keystroke-classifier
 !pip install -r requirements.txt
+
 ```
+2. Train:
 Detect model:
+```bash
 python main.py -c configs/base_detect.yaml fit \
-  --trainer.accelerator gpu --trainer.devices 0 1  \
+  --trainer.accelerator gpu --trainer.devices 0 1 \
   --data.frames_dir /kaggle/input/single-setting/video/raw_frames \
   --data.labels_dir /kaggle/input/single-setting/video/labels \
-  --data.num_workers 0 \
   --data.idle_gap 2
-
-Classifier model:
-python main.py -c configs/base_detect.yaml fit \
-  --trainer.accelerator gpu --trainer.devices 0 1  \
-  --data.frames_dir /kaggle/input/single-setting/video/raw_frames \
-  --data.labels_dir /kaggle/input/single-setting/video/labels \
-  --data.num_workers 0 \
-
-Test on a single gpu
-
-Detect model:
 ```
+Classifier model:
+```bash
+python main.py -c configs/base_clf.yaml fit \
+--trainer.accelerator gpu --trainer.devices 0 1  \
+--data.frames_dir /kaggle/input/single-setting/video/raw_frames \
+--data.labels_dir /kaggle/input/single-setting/video/labels
+```
+
+2. Test on a single gpu
+Detect model:
+
+```bash
 python main.py -c configs/base_detect.yaml test \
   --trainer.accelerator gpu --trainer.devices 0  \
   --data.frames_dir /kaggle/input/single-setting/video/raw_frames \
   --data.labels_dir /kaggle/input/single-setting/video/labels \
-  --data.num_workers 0 \
-  --data.idle_gap 2
+  --data.idle_gap 2 \
   --ckpt_path CKPT_PATH
 ```
 
 Classifier model:
-```
-python main.py -c configs/base_detect.yaml test \
+
+```bash
+python main.py -c configs/base_clf.yaml test \
   --trainer.accelerator gpu --trainer.devices 0  \
   --data.frames_dir /kaggle/input/single-setting/video/raw_frames \
   --data.labels_dir /kaggle/input/single-setting/video/labels \
-  --data.num_workers 0 \
   --ckpt_path CKPT_PATH
 ``
-Run the 2 stages on a video frames from pre-train model:
+```
 
-```
-python test.py [-h] [--videos VIDEOS [VIDEOS ...]] [--data_dir DATA_DIR] [--clf_ckpt CLF_CKPT] [--det_ckpt DET_CKPT] [--result_dir RESULT_DIR]
-```
+
+## Run the 2 stages on a video frames from pre-train model:
+```bash
+python test.py [-h] [--videos VIDEOS [VIDEOS ...]] [--data_dir DATA_DIR] [--clf_ckpt CLF_CKPT] [--det_ckpt DET_CKPT] [--result_dir RESULT_DIR]  -h, 
 
 Options:
-
-```
-  -h, --help            show this help message and exit
+  --help            show this help message and exit
   --videos VIDEOS [VIDEOS ...]
                         List of video paths or a single video path.
   --data_dir DATA_DIR   Dataset directory
@@ -120,6 +126,8 @@ Options:
   --result_dir RESULT_DIR
                         Directory to save the results.
 ```
+
+
 
 ## Record videos with label ground truth.
 
@@ -130,3 +138,4 @@ This issue will be further investigated, therefore for now you still need to rec
 ```
 python ./utils/keystroke_recorder.py
 ```
+
