@@ -75,4 +75,4 @@ test:
     ]
     val_transforms: []
     test_transforms: []
-  ckpt_path: /kaggle/input/single-setting/pytorch/default/1/detect_epoch14-step40935.ckpt
+  ckpt_path: /kaggle/input/ss-detect/pytorch/default/1/detect_epoch14-step40935.ckpt
