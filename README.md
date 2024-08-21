@@ -118,7 +118,6 @@ python main.py -c configs/base_clf.yaml test \
   --data.frames_dir /kaggle/input/single-setting/video/raw_frames \
   --data.labels_dir /kaggle/input/single-setting/video/labels \
   --ckpt_path CKPT_PATH
-``
 ```
 
 ## Run the 2 stages on a video frames from pre-train model:
@@ -137,6 +136,11 @@ Options:
                         Directory to save the results.
 ```
 
+```
+!(python test.py --data_dir /kaggle/input/single-setting/video/raw_frames \
+--clf_ckpt /kaggle/input/single-setting/pytorch/default/1/clf_epoch32-step57156.ckpt \
+--det_ckpt /kaggle/input/single-setting/pytorch/default/1/detect_epoch14-step40935.ckpt)
+```
 ## Record videos with label ground truth.
 
 This script was used to record the video to train the model by opening the webcam. A phone camera can be used if webcams are not available. We install Camo on a smartphone and Camo client on MacOs as an alternative to a webcam. Note that the frame number of the keypress event has some delay. For example in our case, using the usb connection, the delay is 4. That means in the CSV file, user typing key A at frame 4 was recorded, however, the correct frame number is 4 + 4 = 8.

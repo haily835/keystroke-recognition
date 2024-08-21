@@ -46,7 +46,7 @@ def parse_arguments():
         '--det_ckpt',
         type=str,
         help='Path to the detector checkpoint file.',
-        default='ckpts/single-setting/det_epoch=16-step=46393.ckpt',
+        default='ckpts/single-setting/detect_epoch=14-step=40935.ckpt',
         required=False
     )
     parser.add_argument(
@@ -125,7 +125,7 @@ def main():
                 
                 frames = frames.permute(1, 0, 2, 3).float().unsqueeze(dim=0).to(device)
 
-                detect_logits = torch.nn.functional.softmax(det.model(frames).squeeze())
+                detect_logits = torch.nn.functional.softmax(det(frames).squeeze(), dim=0)
                 detect_id = torch.argmax(detect_logits, dim=0).item()
                 detect_label = detect_id2label[detect_id]
 

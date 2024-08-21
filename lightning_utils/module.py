@@ -70,8 +70,11 @@ class KeyClf(L.LightningModule):
         self.test_preds += pred_labels
         self.test_targets += [self.id2label[_id] for _id in targets]
 
-        self.log('test_loss', loss, sync_dist=True,
-                 prog_bar=True, on_step=False)
+        self.log('test_loss', 
+                 loss, 
+                 sync_dist=True,
+                 prog_bar=True, 
+                 on_step=False)
 
     def on_test_end(self):
         if not os.path.exists('results'):
