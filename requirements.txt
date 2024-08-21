@@ -5,3 +5,4 @@ lightning
 mediapipe
 git+https://github.com/facebookresearch/pytorchvideo.git
 lightning[pytorch-extra]
+google-generativeai
