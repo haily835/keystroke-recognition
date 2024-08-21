@@ -126,9 +126,11 @@ def main():
                 frames = frames.permute(1, 0, 2, 3).float().unsqueeze(dim=0).to(device)
 
                 detect_logits = torch.nn.functional.softmax(det(frames).squeeze(), dim=0)
+                
                 detect_id = torch.argmax(detect_logits, dim=0).item()
+                
                 detect_label = detect_id2label[detect_id]
-
+                
                 detect_record.append([curr_frame - 7, detect_logits[1].item()])
 
                 if detect_label == 'active':
@@ -138,7 +140,7 @@ def main():
                     print(f'{curr_frame - 7}-{curr_frame}: {clf_label} with probability {clf_logits[pred_id]}')
                     clf_record.append([curr_frame - 7, clf_label, clf_logits[pred_id].item()])
 
-                    windows = windows[1:]
+                windows = windows[1:]
             curr_frame += 1
         
         detect_df = pd.DataFrame({
