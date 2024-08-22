@@ -33,6 +33,12 @@ def parse_arguments():
         default='datasets/video/raw_frames',
     )
 
+    parser.add_argument(
+        '--window_size',
+        type=int,
+        help='Window size to scan',
+        default=5,
+    )
 
     parser.add_argument(
         '--clf_ckpt',
@@ -78,9 +84,11 @@ def main():
     clf_ckpt = args.clf_ckpt
     det_ckpt = args.det_ckpt
     result_dir = args.result_dir
+    window_size = args.window_size
     
     print(f"Data: {data_dir}")
     print(f"Videos: {videos}")
+    print(f"Window size: {window_size}")
     print(f"Classifier checkpoint: {clf_ckpt}")
     print(f"Detector checkpoint: {det_ckpt}")
     print(f"Results will be saved in: {result_dir}")
@@ -118,7 +126,7 @@ def main():
                 img=image, size=[360, 360],
                 antialias=True
             )
-            if len(windows) < 8:
+            if len(windows) < window_size:
                 windows.append(image)
             else:
                 frames = torch.stack(windows)
@@ -131,14 +139,14 @@ def main():
                 
                 detect_label = detect_id2label[detect_id]
                 
-                detect_record.append([curr_frame - 7, detect_logits[1].item()])
+                detect_record.append([curr_frame - window_size - 1, detect_logits[1].item()])
 
                 if detect_label == 'active':
                     clf_logits = torch.nn.functional.softmax(clf(frames).squeeze(), dim=0)
                     pred_id = torch.argmax(clf_logits, dim=0).item()
                     clf_label = clf_id2label[pred_id]
-                    print(f'{curr_frame - 7}-{curr_frame}: {clf_label} with probability {clf_logits[pred_id]}')
-                    clf_record.append([curr_frame - 7, clf_label, clf_logits[pred_id].item()])
+                    print(f'{curr_frame - window_size - 1}-{curr_frame}: {clf_label} with probability {clf_logits[pred_id]}')
+                    clf_record.append([curr_frame - window_size - 1, clf_label, clf_logits[pred_id].item()])
 
                 windows = windows[1:]
             curr_frame += 1
