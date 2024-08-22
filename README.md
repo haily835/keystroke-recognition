@@ -80,7 +80,7 @@ python main.py -c configs/base_clf.yaml [test or fit] -h
 ```bash
 python main.py -c configs/base_detect.yaml fit \
   --trainer.accelerator gpu \
-  --trainer.devices 0 1 \
+  --trainer.devices 0,1 \
   --data.frames_dir /kaggle/input/single-setting/video/raw_frames \
   --data.labels_dir /kaggle/input/single-setting/video/labels \
   --data.idle_gap 2
@@ -91,7 +91,7 @@ Classifier model:
 ```bash
 python main.py -c configs/base_clf.yaml fit \
 --trainer.accelerator gpu \
---trainer.devices 0 1  \
+--trainer.devices 0,1  \
 --data.frames_dir /kaggle/input/single-setting/video/raw_frames \
 --data.labels_dir /kaggle/input/single-setting/video/labels
 ```
