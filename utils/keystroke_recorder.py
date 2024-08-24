@@ -9,7 +9,7 @@ from PIL import Image
 import shutil
 
 droid_cam = 'http://192.168.0.58:4747/video'
-dataset_name = 'longvideo-1'
+dataset_name = 'video-2'
 
 class KeyStrokeRecorder:
     def __init__(self, master: tk.Tk, width = 640, height = 600, cam_url = 0):
@@ -73,9 +73,9 @@ class KeyStrokeRecorder:
             if ret:
                 self.frame_number += 1
                 self.master.update()
-                cv2.imwrite(f'{self.video_frames_path}/frame_{self.frame_number}.png', frame, 
-                            # [cv2.IMWRITE_JPEG_QUALITY, 60]
-                            )
+                frame = cv2.resize(frame, (640, 360))
+                cv2.imwrite(f'{self.video_frames_path}/frame_{self.frame_number}.jpg', 
+                            frame, [cv2.IMWRITE_JPEG_QUALITY, 60])
             else:
                 break
             
@@ -113,15 +113,18 @@ class KeyStrokeRecorder:
         print('total_key_press: ', total_key_press)
         cls_distribution = self.labels['Key'].value_counts()
         print('cls_distribution: ', cls_distribution)
-        wpm = total_words // (video_length//60)
-        print('wpm: ', wpm)
+
+        if (video_length//60):
+            wpm = total_words // (video_length//60)
+            print('wpm: ', wpm)
         
         with open(self.info_path, "w") as info_f:
             info_f.write(f'video_length: {video_length}\n')
             info_f.write(f'total_frames: {total_frames}\n')
             info_f.write(f'total_words: {total_words}\n')
             info_f.write(f'total_key_press: {total_key_press}\n')
-            info_f.write(f'wpm: {wpm}\n')
+            if (video_length//60):
+                info_f.write(f'wpm: {wpm}\n')
             info_f.write(f'cls_distribution:\n{cls_distribution}')
 
         self.master.destroy()
