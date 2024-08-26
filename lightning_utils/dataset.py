@@ -243,6 +243,7 @@ if __name__ == "__main__":
         delay=4,
         transforms=v2.ColorJitter(brightness=(0.5, 1.5), contrast=(
             1), saturation=(0.5, 1.5), hue=(-0.1, 0.1)),
+        resize_shape=(360, 640)
     )
 
     video, label = clf_ds[0]

@@ -81,7 +81,7 @@ class KeyClf(L.LightningModule):
             os.mkdir('results')
 
         df = pd.DataFrame({"pred": self.test_preds, "target": self.test_targets})
-        df.to_csv(f'./results/{self.model_name}_test_results.csv')
+        df.to_csv(f'./results/{self.name}_test_results.csv')
         print(classification_report(self.test_targets, self.test_preds))
 
     def training_step(self, batch):
