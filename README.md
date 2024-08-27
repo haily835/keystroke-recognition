@@ -12,23 +12,24 @@
 
 ```bash
 python main.py -c configs/base_detect.yaml fit \
-  --trainer.accelerator cpu \
-  --trainer.fast_dev_run True\
-  --data.frames_dir datasets/video/raw_frames \
-  --data.labels_dir datasets/video/labels \
-  --data.num_workers 0 \
-  --data.idle_gap 2
+--trainer.accelerator cpu \
+--trainer.fast_dev_run True\
+--data.frames_dir datasets/video/raw_frames \
+--data.labels_dir datasets/video/labels \
+--data.num_workers 0 \
+--data.idle_gap 2
 ```
+
 
 Classifier model:
 
 ```bash
 python main.py -c configs/base_clf.yaml fit \
-  --trainer.accelerator cpu \
-  --trainer.fast_dev_run True\
-  --data.frames_dir datasets/video/raw_frames \
-  --data.labels_dir datasets/video/labels \
-  --data.num_workers 0
+--trainer.accelerator cpu \
+--trainer.fast_dev_run True\
+--data.frames_dir datasets/video/raw_frames \
+--data.labels_dir datasets/video/labels \
+--data.num_workers 0
 ```
 
 2. Test: Please pass the ckpt path if you have downloaded pretrained models

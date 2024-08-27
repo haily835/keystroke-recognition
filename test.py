@@ -30,21 +30,21 @@ def parse_arguments():
         '--data_dir',
         type=str,
         help='Dataset directory',
-        default='datasets/video/raw_frames',
+        default='datasets/video-2/raw_frames',
     )
 
     parser.add_argument(
         '--window_size',
         type=int,
         help='Window size to scan',
-        default=5,
+        default=8,
     )
 
     parser.add_argument(
         '--clf_ckpt',
         type=str,
         help='Path to the classifier checkpoint file.',
-        default='ckpts/single-setting/clf_epoch=32-step=57156.ckpt',
+        default='ckpts/topview/clf-epoch=21-step=76714.ckpt',
         required=False
     )
 
@@ -52,7 +52,7 @@ def parse_arguments():
         '--det_ckpt',
         type=str,
         help='Path to the detector checkpoint file.',
-        default='ckpts/single-setting/detect_epoch=14-step=40935.ckpt',
+        default='ckpts/topview/detect-epoch=15-step=34128.ckpt',
         required=False
     )
     parser.add_argument(

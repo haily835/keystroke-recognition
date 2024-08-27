@@ -1,6 +1,6 @@
 import sys
 import numpy as np
-import tools
+import models.ctrgcn.tools as tools
 
 num_node = 21
 self_link = [(i, i) for i in range(num_node)]

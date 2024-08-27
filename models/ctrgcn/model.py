@@ -2,20 +2,24 @@
 
 import math
 import pdb
+from tkinter import N
 
 import numpy as np
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
-
+import importlib
+from torchinfo import summary
 ### Model
 def import_class(name):
-    components = name.split('.')
-    mod = __import__(components[0])
-    for comp in components[1:]:
-        mod = getattr(mod, comp)
-    return mod
-
+    class_module = '.'.join(name.split('.')[:-1])
+    class_name = name.split('.')[-1]
+    module = importlib.__import__(
+            class_module, 
+            fromlist=[class_name]
+    )
+    args_class = getattr(module, class_name)
+    return args_class
 
 def conv_branch_init(conv, branches):
     weight = conv.weight
@@ -282,6 +286,8 @@ class CTRGCN(nn.Module):
             raise ValueError()
         else:
             Graph = import_class(graph)
+            print('Graph: ', Graph)
+            
             self.graph = Graph(**graph_args)
 
         A = self.graph.A # 3,25,25
@@ -314,6 +320,7 @@ class CTRGCN(nn.Module):
         if len(x.shape) == 3:
             N, T, VC = x.shape
             x = x.view(N, T, self.num_point, -1).permute(0, 3, 1, 2).contiguous().unsqueeze(-1)
+        #print(x.size())
         N, C, T, V, M = x.size()
 
         x = x.permute(0, 4, 3, 1, 2).contiguous().view(N, M * V * C, T)
@@ -337,3 +344,18 @@ class CTRGCN(nn.Module):
         x = self.drop_out(x)
 
         return self.fc(x)
+    
+
+if __name__ == '__main__':
+
+    model = CTRGCN(num_class=31, 
+                   num_point=21, 
+                   num_person=2, 
+                   graph="hand_graph.Graph", 
+                   graph_args={'labeling_mode': 'spatial'}
+            )
+
+    input = torch.rand(5, 3, 8, 21, 2)
+    out = model(input)
+    print(summary(model, input_size=(5, 3, 8, 21, 2)))
+    print(out.shape)
