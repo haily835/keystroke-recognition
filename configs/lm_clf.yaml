@@ -14,7 +14,7 @@ trainer:
 model:
   name: gcn_clf
   classpath: models.CTRGCN
-  lr: 0.00001
+  lr: 0.001
   init_args:
     num_point: 21
     num_person: 2
