@@ -54,7 +54,8 @@ python lr_tuner.py -c configs/lm_clf.yaml \
 --trainer.devices 0,1 \
 --data.frames_dir /kaggle/input/topview-lm/raw_frames \
 --data.labels_dir /kaggle/input/topview-lm/labels \
---data.landmarks_dir /kaggle/input/topview-lm/landmarks
+--data.landmarks_dir /kaggle/input/topview-lm/landmarks\
+--model.lr 0.0001
 """
 if __name__ == '__main__':
     main()

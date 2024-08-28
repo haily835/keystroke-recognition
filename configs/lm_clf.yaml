@@ -7,14 +7,13 @@ trainer:
   callbacks:
     - class_path: lightning.pytorch.callbacks.EarlyStopping
       init_args:
-        patience: 5
+        patience: 10
         monitor: val_loss
   fast_dev_run: false
   max_epochs: 100
 model:
   name: gcn_clf
   classpath: models.CTRGCN
-  lr: 0.001
   init_args:
     num_point: 21
     num_person: 2
