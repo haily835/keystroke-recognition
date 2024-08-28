@@ -38,7 +38,7 @@ class KeyClf(L.LightningModule):
         self.lr = lr
         self.id2label = eval(id2label)
         self.label2id = eval(label2id)
-        self.num_classes = len(id2label)
+        self.num_classes = len(self.id2label)
         self.train_acc = torchmetrics.Accuracy(
             task="multiclass", num_classes=self.num_classes)
         self.val_acc = torchmetrics.Accuracy(
