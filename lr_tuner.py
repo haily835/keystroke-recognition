@@ -37,7 +37,7 @@ def main():
     # Fit model
     trainer.fit(model, dm)
 
-    trainer.test(model, dm)
+    # trainer.test(model, dm)
 
 """
 Local: 
