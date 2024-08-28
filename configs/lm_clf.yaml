@@ -3,7 +3,7 @@ trainer:
   logger:
     class_path: lightning.pytorch.loggers.CSVLogger
     init_args:
-      save_dir: logs
+      save_dir: logs_clf
   callbacks:
     - class_path: lightning.pytorch.callbacks.EarlyStopping
       init_args:
