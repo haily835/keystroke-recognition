@@ -29,7 +29,3 @@ data:
   val_videos: ['video_5']
   test_videos: ['video_6', 'video_7']
   idle_gap: null
-optimizer:
-  class_path: torch.optim.Adam
-  init_args:
-    lr: 0.001

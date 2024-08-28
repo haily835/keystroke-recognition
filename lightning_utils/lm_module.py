@@ -15,6 +15,7 @@ class KeyClf(L.LightningModule):
                  classpath: str, 
                  init_args: Dict[str, Any], 
                  id2label: str, 
+                 learning_rate: float,
                  label2id: str):
         super().__init__()
         self.name = name
@@ -34,6 +35,7 @@ class KeyClf(L.LightningModule):
         self.model = args_class(**model_args)
 
         self.loss_fn = torch.nn.CrossEntropyLoss()
+        self.lr = learning_rate
         self.id2label = eval(id2label)
         self.label2id = eval(label2id)
         self.num_classes = len(id2label)
@@ -67,7 +69,7 @@ class KeyClf(L.LightningModule):
         self.test_preds += pred_labels
         self.test_targets += [self.id2label[_id] for _id in targets]
 
-        self.log('test_loss', 
+        self.log('test_loss',
                  loss, 
                  sync_dist=True,
                  prog_bar=True, 
@@ -115,3 +117,6 @@ class KeyClf(L.LightningModule):
 
     def on_validation_epoch_end(self) -> None:
         print(f"EPOCH {self.current_epoch} val_acc {self.cur_val_acc}")
+
+    def configure_optimizers(self):
+        return torch.optim.Adam(self.parameters(), lr=self.lr)
