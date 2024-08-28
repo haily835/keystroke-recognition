@@ -68,38 +68,51 @@ class LMKeyStreamModule(L.LightningDataModule):
         idle_gap=None: if None, the binary detect (idle or active segments) dataset will be used
         """
         super().__init__()
+        
+        self.frames_dir = frames_dir
+        self.landmarks_dir = landmarks_dir
+        self.labels_dir = labels_dir
+        self.train_videos = train_videos
+        self.val_videos = val_videos
+        self.test_videos = test_videos
+        self.idle_gap = idle_gap
+        self.delay = delay
+        self.batch_size = batch_size
+        self.num_workers = num_workers
 
-        self.train_loader = get_dataloader(frames_dir,
-                                           labels_dir,
-                                           landmarks_dir,
-                                           videos=train_videos,
-                                           idle_gap=idle_gap,
-                                           delay=delay,
-                                           batch_size=batch_size,
-                                           num_workers=num_workers,
-                                           shuffle=True) if len(train_videos) else None
+    def setup(self, stage) -> None:
+        if stage == 'fit':
+            self.train_loader = get_dataloader(self.frames_dir,
+                                           self.labels_dir,
+                                           self.landmarks_dir,
+                                           videos=self.train_videos,
+                                           idle_gap=self.idle_gap,
+                                           delay=self.delay,
+                                           batch_size=self.batch_size,
+                                           num_workers=self.num_workers,
+                                           shuffle=True) if len(self.train_videos) else None
 
-        self.val_loader = get_dataloader(
-            frames_dir,
-            labels_dir,
-            landmarks_dir,
-            videos=val_videos,
-            idle_gap=idle_gap,
-            delay=delay,
-            batch_size=batch_size,
-            num_workers=num_workers,
-        ) if len(val_videos) else None
-
-        self.test_loader = get_dataloader(
-            frames_dir,
-            labels_dir,
-            landmarks_dir,
-            videos=test_videos,
-            idle_gap=idle_gap,
-            delay=delay,
-            batch_size=batch_size,
-            num_workers=num_workers,
-        ) if len(test_videos) else None
+            self.val_loader = get_dataloader(
+                self.frames_dir,
+                self.labels_dir,
+                self.landmarks_dir,
+                videos=self.val_videos,
+                idle_gap=self.idle_gap,
+                delay=self.delay,
+                batch_size=self.batch_size,
+                num_workers=self.num_workers,
+            ) if len(self.val_videos) else None
+        elif stage == 'test':
+            self.test_loader = get_dataloader(
+                self.frames_dir,
+                self.labels_dir,
+                self.landmarks_dir,
+                videos=self.test_videos,
+                idle_gap=self.idle_gap,
+                delay=self.delay,
+                batch_size=self.batch_size,
+                num_workers=self.num_workers,
+            ) if len(self.test_videos) else None
 
     def train_dataloader(self):
         return self.train_loader

@@ -15,7 +15,7 @@ class KeyClf(L.LightningModule):
                  classpath: str, 
                  init_args: Dict[str, Any], 
                  id2label: str, 
-                 learning_rate: float,
+                 lr: float, # learning rate
                  label2id: str):
         super().__init__()
         self.name = name
@@ -35,7 +35,7 @@ class KeyClf(L.LightningModule):
         self.model = args_class(**model_args)
 
         self.loss_fn = torch.nn.CrossEntropyLoss()
-        self.lr = learning_rate
+        self.lr = lr
         self.id2label = eval(id2label)
         self.label2id = eval(label2id)
         self.num_classes = len(id2label)

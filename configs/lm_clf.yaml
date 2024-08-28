@@ -14,6 +14,7 @@ trainer:
 model:
   name: gcn_clf
   classpath: models.CTRGCN
+  lr: 0.00001
   init_args:
     num_point: 21
     num_person: 2
@@ -29,3 +30,4 @@ data:
   val_videos: ['video_5']
   test_videos: ['video_6', 'video_7']
   idle_gap: null
+  batch_size: 32
