@@ -10,6 +10,8 @@ import torch.nn as nn
 from torch.autograd import Variable
 import importlib
 from torchinfo import summary
+from models.ctrgcn.graph import Graph
+
 ### Model
 def import_class(name):
     class_module = '.'.join(name.split('.')[:-1])
@@ -278,18 +280,19 @@ class TCN_GCN_unit(nn.Module):
 
 
 class CTRGCN(nn.Module):
-    def __init__(self, num_class=60, num_point=25, num_person=2, graph=None, graph_args=dict(), in_channels=3,
+    def __init__(self, num_class=60, num_point=25, num_person=2, in_channels=3,
                  drop_out=0, adaptive=True):
         super(CTRGCN, self).__init__()
 
-        if graph is None:
-            raise ValueError()
-        else:
-            Graph = import_class(graph)
-            print('Graph: ', Graph)
+        # if graph is None:
+        #     raise ValueError()
+        # else:
+        #     Graph = import_class(graph)
+        #     print('Graph: ', Graph)
             
-            self.graph = Graph(**graph_args)
+        #     self.graph = Graph(**graph_args)
 
+        self.graph = Graph(labeling_mode='spatial')
         A = self.graph.A # 3,25,25
 
         self.num_class = num_class
@@ -347,13 +350,9 @@ class CTRGCN(nn.Module):
     
 
 if __name__ == '__main__':
-
     model = CTRGCN(num_class=31, 
                    num_point=21, 
-                   num_person=2, 
-                   graph="hand_graph.Graph", 
-                   graph_args={'labeling_mode': 'spatial'}
-            )
+                   num_person=2)
 
     input = torch.rand(5, 3, 8, 21, 2)
     out = model(input)
