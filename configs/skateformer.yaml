@@ -3,7 +3,7 @@ trainer:
   logger:
     class_path: lightning.pytorch.loggers.CSVLogger
     init_args:
-      save_dir: logs_clf
+      save_dir: infogcn
   callbacks:
     - class_path: lightning.pytorch.callbacks.EarlyStopping
       init_args:
@@ -12,15 +12,12 @@ trainer:
   fast_dev_run: false
   max_epochs: 100
 model:
-  name: gcn_clf
-  model_classpath: models.CTRGCN
+  name: infogcn
+  model_classpath: models.SkateFormer
   model_init_args:
-    num_point: 21
-    num_person: 2
-    graph: models.ctrgcn.hand_graph.Graph
-    graph_args: 
-      labeling_mode: spatial
-    num_class: 30
+    num_points: 21
+    num_classes: 30
+    num_frames: 8
   loss_fn_classpath: torch.nn.CrossEntropyLoss
   loss_fn_init_args: null
   id2label: clf_id2label

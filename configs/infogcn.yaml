@@ -13,12 +13,16 @@ trainer:
   max_epochs: 100
 model:
   name: infogcn
-  classpath: models.InfoGCN
-  init_args:
+  model_classpath: models.InfoGCN
+  model_init_args:
     num_point: 21
     num_person: 2
     num_class: 30
-    num_head: 12
+  loss_fn_classpath: models.infogcn.loss.InfoGCN_Loss
+  loss_fn_init_args:
+    lambda_1: 1e-1
+    lambda_2: 1e-1
+    num_class: 30
   id2label: clf_id2label
   label2id: clf_label2id
 data:

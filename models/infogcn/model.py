@@ -108,4 +108,5 @@ class InfoGCN(nn.Module):
 
         y_hat = self.decoder(z)
 
-        return y_hat
+        return y_hat, z
+

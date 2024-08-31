@@ -9,32 +9,36 @@ from lightning_utils.dataset import *
 from models.resnet import *
 from pytorchvideo.models import *
 import importlib
+
+def initialize_class(classpath: str, init_args: Dict[str, Any] | None = None):
+    class_module = '.'.join(classpath.split('.')[:-1])
+    class_name = classpath.split('.')[-1]
+    
+    module = importlib.__import__(
+        class_module, 
+        fromlist=[class_name]
+    )
+    args_class = getattr(module, class_name)
+    return args_class(**init_args) if init_args else args_class()
+
 class KeyClf(L.LightningModule):
     def __init__(self, 
                  name: str, 
-                 classpath: str, 
-                 init_args: Dict[str, Any], 
+                 model_classpath: str, 
+                 model_init_args: Dict[str, Any] | None , 
+                 loss_fn_classpath: str,
+                 loss_fn_init_args: Dict[str, Any] | None ,
                  id2label: str, 
-                 lr: float, # learning rate
-                 label2id: str):
+                 label2id: str,
+                 lr: float # learning rate
+                ):
         super().__init__()
         self.name = name
 
         # Parse classpath and model arguments
-        class_module = '.'.join(classpath.split('.')[:-1])
-        class_name = classpath.split('.')[-1]
-        
-        module = importlib.__import__(
-            class_module, 
-            fromlist=[class_name]
-        )
-        args_class = getattr(module, class_name)
+        self.model = initialize_class(model_classpath, model_init_args)
+        self.loss_fn = initialize_class(loss_fn_classpath, loss_fn_init_args)
 
-        model_args = init_args
-
-        self.model = args_class(**model_args)
-
-        self.loss_fn = torch.nn.CrossEntropyLoss()
         self.lr = lr
         self.id2label = eval(id2label)
         self.label2id = eval(label2id)
@@ -54,11 +58,16 @@ class KeyClf(L.LightningModule):
 
     def forward(self, batch):
         videos, targets = batch
-        # videos = videos.permute(0, 2, 1, 3, 4)
-    
+
         preds = self.model(videos)
-        pred_ids = torch.argmax(preds, dim=1)
-        loss = self.loss_fn(preds, targets)
+
+        if type(preds) != tuple:
+            pred_ids = torch.argmax(preds, dim=1)
+            loss = self.loss_fn(preds, targets)
+        else:
+            y_hat, z = preds
+            pred_ids = torch.argmax(y_hat, dim=1)
+            loss = self.loss_fn(y_hat, targets, z, self.model.z_prior)
 
         return loss, pred_ids
 
