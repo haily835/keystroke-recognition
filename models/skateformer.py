@@ -324,8 +324,8 @@ class SkateFormerStage(nn.Module):
 
 
 class SkateFormer(nn.Module):
-    def __init__(self, in_channels=3, depths=(2, 2, 2, 2), channels=(64, 192, 192, 192), num_classes=60,
-                 embed_dim=64, num_people=2, num_frames=64, num_points=50, kernel_size=7, num_heads=32,
+    def __init__(self, in_channels=3, depths=(2, 2, 2, 2), channels=(96, 192, 192, 192), num_classes=60,
+                 embed_dim=96, num_people=2, num_frames=64, num_points=50, kernel_size=7, num_heads=32,
                  type_1_size=(1, 1), type_2_size=(1, 1), type_3_size=(1, 1), type_4_size=(1, 1),
                  attn_drop=0., head_drop=0., drop=0., rel=True, drop_path=0., mlp_ratio=4.,
                  act_layer=nn.GELU, norm_layer_transformer=nn.LayerNorm, index_t=False, global_pool='avg'):
