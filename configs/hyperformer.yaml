@@ -17,6 +17,7 @@ model:
   model_init_args:
     num_points: 21
     num_classes: 30
+    num_of_heads: 12
   loss_fn_classpath: torch.nn.CrossEntropyLoss
   loss_fn_init_args: null
   id2label: clf_id2label
@@ -28,3 +29,4 @@ data:
   test_videos: ['video_6', 'video_7']
   idle_gap: null
   batch_size: 32
+
