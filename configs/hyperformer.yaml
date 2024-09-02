@@ -29,4 +29,3 @@ data:
   test_videos: ['video_6', 'video_7']
   idle_gap: null
   batch_size: 32
-
