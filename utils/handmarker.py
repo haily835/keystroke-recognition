@@ -18,9 +18,7 @@ detector = vision.HandLandmarker.create_from_options(options)
 src = f'./datasets/shortvideo-1/raw_frames_224'
 dest = './datasets/shortvideo-1/landmarks'
 
-videos = [
-  'video_0'
-]
+videos = ['video_0']
 
 for video in videos:
   print('video: ', video)

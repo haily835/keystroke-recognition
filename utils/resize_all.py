@@ -29,10 +29,10 @@ for video in videos:
     image = torchvision.io.read_image(path)
     h, w = image.shape[-2], image.shape[-1]
     image = torchvision.transforms.functional.resize(
-        image, (360, 360), antialias=True,
+        image, (720, 720), antialias=True,
     )
-    image_name = path.split('/')[-1]
+    image_name, _ = path.split('/')[-1].split('.')
 
     if not os.path.exists(f"{dest}/{video}"):
       os.mkdir(f"{dest}/{video}")
-    torchvision.io.write_jpeg(image, f"{dest}/{video}/{image_name}", quality=60)
+    torchvision.io.write_jpeg(image, f"{dest}/{video}/{image_name}.jpg", quality=60)
