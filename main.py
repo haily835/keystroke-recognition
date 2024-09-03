@@ -1,10 +1,10 @@
 from lightning.pytorch.cli import LightningCLI
 
-from lightning_utils.datamodule import KeyStreamModule
+from lightning_utils.lm_datamodule import LMKeyStreamModule
 from lightning_utils.module import KeyClf
 
 cli = LightningCLI(
     model_class=KeyClf,
-    datamodule_class=KeyStreamModule,
+    datamodule_class=LMKeyStreamModule,
     save_config_callback=None
 )

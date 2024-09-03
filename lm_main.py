@@ -17,6 +17,7 @@ python lm_main.py -c configs/lm_clf.yaml \
 --data.landmarks_dir datasets/video-2/landmarks
 
 Kaggle:
+
 Train:
 python lm_main.py -c configs/lm_clf.yaml \
 --trainer.accelerator gpu \
@@ -26,6 +27,7 @@ python lm_main.py -c configs/lm_clf.yaml \
 --data.labels_dir /kaggle/input/topview-lm/labels \
 --data.landmarks_dir /kaggle/input/topview-lm/landmarks\
 --model.lr 0.001
+
 Test:
 python lm_main.py -c configs/lm_clf.yaml \
 --trainer.accelerator gpu \
@@ -33,8 +35,8 @@ python lm_main.py -c configs/lm_clf.yaml \
 --data.frames_dir /kaggle/input/topview-lm/raw_frames \
 --data.labels_dir /kaggle/input/topview-lm/labels \
 --data.landmarks_dir /kaggle/input/topview-lm/landmarks\
---model.lr 0.001 \
---ckpt_path PATH \
+--model.lr 0.001
+--ckpt_path PATH\
 """
 
 cli = LightningCLI(
