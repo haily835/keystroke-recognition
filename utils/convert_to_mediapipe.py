@@ -56,20 +56,19 @@ rotate_deg = 5
 if __name__ == '__main__':
     for video in range(5):
         video_name = f'video_{video}'
+        print(video_name)
         src = f'datasets/video-2/raw_frames/{video_name}'
         dest = f'datasets/video-2/landmarks/{video_name}_d{rotate_deg}.pt'
 
-
         if not os.path.exists('datasets/video-2/landmarks'):
             os.makedirs('datasets/video-2/landmarks')
-
 
         jpgs = sorted(glob.glob(f"{src}/*.jpg"))
 
         to_img = False
 
         frames = []
-        for i in range(len(jpgs)):
+        for i in tqdm(range(len(jpgs))):
             img_path = f"{src}/frame_{i}.jpg"
             result = process_image(img_path, )
             
@@ -77,4 +76,4 @@ if __name__ == '__main__':
                 frames.append(result)
         
         print(f"Sucessed {len(frames)} in {len(jpgs)}")
-        torch.save(torch.stack(frames), dest)   
+        torch.save(torch.stack(frames), dest) 
