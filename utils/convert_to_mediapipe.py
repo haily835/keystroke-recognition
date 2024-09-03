@@ -12,6 +12,7 @@ import numpy as np
 import torch
 from PIL import Image
 from tqdm import tqdm
+from torchvision.transforms.functional import rotate
 
 base_options = python.BaseOptions(model_asset_path='hand_landmarker.task')
 options = vision.HandLandmarkerOptions(base_options=base_options,
@@ -19,8 +20,9 @@ options = vision.HandLandmarkerOptions(base_options=base_options,
 detector = vision.HandLandmarker.create_from_options(options)
 
 
-def process_image(image_path):
+def process_image(image_path, rotate_deg=0):
     img = torchvision.io.image.read_image(image_path)
+    img = rotate(img, rotate_deg)
     img = img.permute(1, 2, 0).numpy()
     pil_img = Image.fromarray(img)
     data = np.asarray(pil_img)
@@ -50,12 +52,12 @@ def process_image(image_path):
 #     if result is not None:
 #         frames.append(result)
 
-
+rotate_deg = 5
 if __name__ == '__main__':
-    for video in range(8):
+    for video in range(5):
         video_name = f'video_{video}'
         src = f'datasets/video-2/raw_frames/{video_name}'
-        dest = f'datasets/video-2/landmarks/{video_name}.pt'
+        dest = f'datasets/video-2/landmarks/{video_name}_d{rotate_deg}.pt'
 
 
         if not os.path.exists('datasets/video-2/landmarks'):
@@ -69,7 +71,7 @@ if __name__ == '__main__':
         frames = []
         for i in range(len(jpgs)):
             img_path = f"{src}/frame_{i}.jpg"
-            result = process_image(img_path)
+            result = process_image(img_path, )
             
             if result is not None:
                 frames.append(result)

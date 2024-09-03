@@ -1,4 +1,4 @@
-from typing import Dict, Any
+
 import torch
 import lightning as L
 from torch.nn.functional import one_hot
@@ -8,18 +8,8 @@ import pandas as pd
 from lightning_utils.dataset import *
 from models.resnet import *
 from pytorchvideo.models import *
-import importlib
-
-def initialize_class(classpath: str, init_args: Dict[str, Any] | None = None):
-    class_module = '.'.join(classpath.split('.')[:-1])
-    class_name = classpath.split('.')[-1]
-    
-    module = importlib.__import__(
-        class_module, 
-        fromlist=[class_name]
-    )
-    args_class = getattr(module, class_name)
-    return args_class(**init_args) if init_args else args_class()
+from typing import Dict, Any
+from utils.initialize_class import initialize_class
 
 class KeyClf(L.LightningModule):
     def __init__(self, 
