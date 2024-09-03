@@ -36,13 +36,9 @@ class BaseStreamDataset(torch.utils.data.Dataset):
     def __init__(self, *args, **kwargs): pass
 
     @classmethod
-    def create_dataset(cls, 
-                       video_path: str, 
-                       label_path: str,
-                       gap: int, 
-                       f_before: int = 3, 
-                       f_after: int = 4, 
-                       delay: int = 10, 
+    def create_dataset(cls, video_path: str, label_path: str,
+                       gap: int, f_before: int = 3, f_after: int = 4, delay: int = 10,
+                       resize_shape=[360, 360],
                        transforms=None):
         if gap:
             return KeyDetectDataset(
@@ -52,6 +48,7 @@ class BaseStreamDataset(torch.utils.data.Dataset):
                 f_after=f_after,
                 f_before=f_before,
                 delay=delay,
+                resize_shape=resize_shape,
                 transforms=transforms)
         
         return KeyClfStreamDataset(
@@ -60,6 +57,7 @@ class BaseStreamDataset(torch.utils.data.Dataset):
             f_after=f_after,
             f_before=f_before,
             delay=delay,
+            resize_shape=resize_shape,
             transforms=transforms)
 
     def __len__(self):
@@ -69,7 +67,12 @@ class BaseStreamDataset(torch.utils.data.Dataset):
         (start, end), label = self.segments[idx]
         frames = []
         for i in range(start, end + 1):
-            image = torchvision.io.read_image(f"{self.video_path}/frame_{i}.jpg")
+            image = torchvision.io.read_image(
+                f"{self.video_path}/frame_{i}.jpg")
+            image = torchvision.transforms.functional.resize(
+                img=image, size=self.resize_shape,
+                antialias=True
+            )
             frames.append(image)
 
         frames = torch.stack(frames)
@@ -128,12 +131,14 @@ class KeyClfStreamDataset(BaseStreamDataset):
                  f_before=3,
                  f_after=4,
                  delay=10,
+                 resize_shape=[360, 360],
                  transforms=None):
 
         self.video_path = video_path
         self.video_name = video_path.split('/')[-1]
         self.data_dir = video_path.split('/')[-3]
         self.transforms = transforms
+        self.resize_shape = resize_shape
         self.id2label = clf_id2label
         self.label2id = clf_label2id
 
@@ -163,12 +168,14 @@ class KeyDetectDataset(BaseStreamDataset):
                  f_before=3,
                  f_after=4,
                  delay=10,
+                 resize_shape=[360, 360],
                  transforms=None):
 
         self.video_path = video_path
         self.video_name = video_path.split('/')[-1]
         self.data_dir = video_path.split('/')[-3]
         self.transforms = transforms
+        self.resize_shape = resize_shape
 
         df = pd.read_csv(label_path)
         total_window = f_before + f_after + 1
