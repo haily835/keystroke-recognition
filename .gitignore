@@ -151,7 +151,7 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 resources/
-datasets/
+datasets/*/raw_frames/
 logs/
 ckpts/
 lightning_logs/
