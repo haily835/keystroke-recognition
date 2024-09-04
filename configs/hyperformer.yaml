@@ -25,8 +25,9 @@ model:
 data:
   delay: 4
   train_videos: ['video_0', 'video_1', 'video_2', 'video_3', 'video_4', 
-                  'video_0_d5', 'video_1_d5', 'video_2_d5', 'video_3_d5', 'video_4_d5',
-                  'video_0_d-5', 'video_1_d-5', 'video_2_d-5', 'video_3_d-5', 'video_4_d-5']
+                  # 'video_0_d5', 'video_1_d5', 'video_2_d5', 'video_3_d5', 'video_4_d5',
+                  # 'video_0_d-5', 'video_1_d-5', 'video_2_d-5', 'video_3_d-5', 'video_4_d-5'
+                ]
   val_videos: ['video_5']
   test_videos: ['video_6', 'video_7']
   idle_gap: null
