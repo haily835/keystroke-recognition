@@ -471,7 +471,7 @@ class TCN_ViT_unit(nn.Module):
 
 
 class Model(nn.Module):
-    def __init__(self, num_class=30, num_point=21, num_person=2, in_channels=3,
+    def __init__(self, num_class=30, num_point=21, num_person=2, in_channels=2,
                  drop_out=0, num_of_heads=12, 
                  joint_label=[0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4], 
                  **kwargs):
@@ -488,7 +488,7 @@ class Model(nn.Module):
         self.joint_label = joint_label
 
 
-        self.l1 = TCN_ViT_unit(3, 24*num_of_heads, A, residual=True, num_of_heads=num_of_heads, pe=True, num_point=num_point, layer=1)
+        self.l1 = TCN_ViT_unit(in_channels, 24*num_of_heads, A, residual=True, num_of_heads=num_of_heads, pe=True, num_point=num_point, layer=1)
         # * num_heads, effect of concatenation following the official implementation
         self.l2 = TCN_ViT_unit(24*num_of_heads, 24*num_of_heads, A, residual=True, num_of_heads=num_of_heads, pe=True, num_point=num_point, layer=2)
         self.l3 = TCN_ViT_unit(24*num_of_heads, 24*num_of_heads, A, residual=True, num_of_heads=num_of_heads, pe=True, num_point=num_point, layer=3)
@@ -568,3 +568,4 @@ class Model(nn.Module):
         x = self.fc(x)
 
         return x
+
