@@ -3,11 +3,11 @@ import torch.utils
 import torch.utils.data
 import pandas as pd
 import torchvision
+import torchvision.transforms.functional
 import torchvision.transforms.v2 as v2
 import numpy as np
 import os
-from PIL import Image, ImageDraw, ImageFont
-import torchvision.transforms.functional as TF
+
 from mediapipe import solutions
 from mediapipe.framework.formats import landmark_pb2
 
@@ -67,54 +67,12 @@ def draw_landmarks_on_image(detection_result, rgb_img):
 
   return torch.from_numpy(annotated_image)
 
-
-
-def create_annotated_image(lm, img_path):
-    print(lm)
-    # Open the image using PIL
-    img = Image.open(img_path)
-    img_width, img_height = img.size
-    print(img.size)
-    # Create a drawing object
-    draw = ImageDraw.Draw(img)
-
-    # Define colors for each hand
-    colors = ['red', 'blue']
-    
-    # Try to load a font, use default if not available
-    try:
-        font = ImageFont.truetype("arial.ttf", 12)
-    except IOError:
-        font = ImageFont.load_default()
-
-    # Plot landmarks for both hands
-    for hand in range(2):
-        for i in range(21):
-            x = int(lm[hand, i, 0])
-            y = int(lm[hand, i, 1])
-            
-            # Draw point
-            draw.ellipse([x-3, y-3, x+3, y+3], fill=colors[hand])
-            
-            # Draw index number
-            draw.text(
-                (x, y), str(i), font=font, fill='white', 
-                anchor='mm', stroke_width=2, stroke_fill='black'
-            )
-
-    # Convert PIL Image to tensor
-    annotated_tensor = TF.to_tensor(img)
-    return annotated_tensor * 255.0
-
-# Usage remains the same
-# annotated = create_annotated_image(lm, f"{self.video_path}/frame_{idx}.jpg")
-
 class BaseStreamDataset(torch.utils.data.Dataset):
     def __init__(self, *args, **kwargs): pass
 
     @classmethod
     def create_dataset(cls, video_path: str, landmark_path:str, label_path: str,
-                       gap: int, f_before: int = 2, f_after: int = 2, delay: int = 10):
+                       gap: int, f_before: int = 3, f_after: int = 4, delay: int = 10):
         if gap:
             return KeyDetectDataset(
                 video_path=video_path,
@@ -131,8 +89,7 @@ class BaseStreamDataset(torch.utils.data.Dataset):
             landmark_path=landmark_path,
             f_after=f_after,
             f_before=f_before,
-            delay=delay
-        )
+            delay=delay)
 
     def __len__(self):
         return len(self.segments)
@@ -157,24 +114,19 @@ class BaseStreamDataset(torch.utils.data.Dataset):
 
     def create_segment(self, dest_folder, idx, format='mp4', fps=3.0):
         (start, end), label = self.segments[idx]
-        
+       
 
         annotated = []
         for idx in range(start, end+1):
             lm = self.video[idx]
-            annotated.append(
-                create_annotated_image(lm, f"{self.video_path}/frame_{idx}.jpg").permute(1, 2, 0)
-            )
-
-        
+            annotated.append(draw_landmarks_on_image(lm.numpy(), torchvision.io.image.read_image(f"{self.video_path}/frame_{idx}.jpg").permute(1, 2, 0).numpy()))
         annotated = torch.stack(annotated)
-
+        
         if not os.path.exists(f'{dest_folder}/segments_{format}'):
             os.makedirs(f'{dest_folder}/segments_{format}')
         video_name = f'{dest_folder}/segments_{format}/{self.video_name}_{label}_f{start}_{end}.{format}'
         torchvision.io.video.write_video(
-            filename=video_name, video_array=annotated, fps=fps
-        )
+                filename=video_name, video_array=annotated, fps=fps)
 
 class KeyClfStreamDataset(BaseStreamDataset):
     def __init__(self,
@@ -206,7 +158,8 @@ class KeyClfStreamDataset(BaseStreamDataset):
             if key_value not in self.id2label:
                 continue
 
-            pos_start, pos_end = max(key_frame - f_before, 0), key_frame + f_after
+            pos_start, pos_end = max(
+                key_frame - f_before, 0), key_frame + f_after
             segments.append(([pos_start, pos_end], key_value))
         self.segments = segments
 
@@ -286,16 +239,16 @@ if __name__ == "__main__":
     # print(detect_ds.get_class_counts())
 
     clf_ds = BaseStreamDataset.create_dataset(
-        landmark_path='datasets/top-view/landmarks-mm/video_0.pt',
-        video_path='datasets/top-view/raw_frames/video_0',
-        label_path='datasets/top-view/labels/video_0.csv',
+        landmark_path='datasets/video-2/landmarks/video_1.pt',
+        video_path='datasets/video-2/raw_frames/video_1',
+        label_path='datasets/video-2/labels/video_1.csv',
         gap=None,
         delay=4
     )
 
-    clf_ds.create_segment('.', 0)
+    for i in range(len(clf_ds)):
+        clf_ds.create_segment('.', i)
     # print('label: ', clf_id2label[label])
     # print('video: ', video)
 
     # print(clf_ds.get_class_counts())
- 
