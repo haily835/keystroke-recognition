@@ -145,7 +145,7 @@ class KeyClfStreamDataset(BaseStreamDataset):
         self.transforms = transforms
         self.id2label = clf_id2label
         self.label2id = clf_label2id
-        self.video = torch.load(self.landmark_path)
+        self.video = torch.load(self.landmark_path, weights_only=True)
         df = pd.read_csv(label_path)
 
         segments = []
