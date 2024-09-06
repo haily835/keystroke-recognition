@@ -17,15 +17,15 @@ from torchvision.transforms.functional import rotate
 base_options = python.BaseOptions(model_asset_path='hand_landmarker.task')
 options = vision.HandLandmarkerOptions(
     base_options=base_options,
-    num_hands=2)
+    num_hands=2
+)
 detector = vision.HandLandmarker.create_from_options(options)
 
 
-def process_image(image_path, rotate_deg=0):
+def process_image(image_path):
     img = torchvision.io.image.read_image(image_path)
     img = img.permute(1, 2, 0).numpy()
     pil_img = Image.fromarray(img)
-    pil_img = rotate(pil_img, rotate_deg)
     data = np.asarray(pil_img)
     media_pipe_img = mp.Image(
         image_format=mp.ImageFormat.SRGB,
@@ -53,16 +53,17 @@ def process_image(image_path, rotate_deg=0):
 #     if result is not None:
 #         frames.append(result)
 
-rotate_deg = -5
 if __name__ == '__main__':
-    for video in range(5):
+    src_dir = 'datasets/topview-2/raw_frames'
+    dest_dir = 'datasets/topview-2/landmarks'
+    if not os.path.exists(dest_dir):
+        os.makedirs(dest_dir)
+
+    for video in range(13):
         video_name = f'video_{video}'
         print(video_name)
-        src = f'datasets/video-2/raw_frames/{video_name}'
-        dest = f'datasets/video-2/landmarks/{video_name}_d{rotate_deg}.pt'
-
-        if not os.path.exists('datasets/video-2/landmarks'):
-            os.makedirs('datasets/video-2/landmarks')
+        src = f'{src_dir}/{video_name}'
+        dest = f'{dest_dir}/{video_name}.pt'
 
         jpgs = sorted(glob.glob(f"{src}/*.jpg"))
 
@@ -75,6 +76,6 @@ if __name__ == '__main__':
             
             if result is not None:
                 frames.append(result)
-        
+
         print(f"Sucessed {len(frames)} in {len(jpgs)}")
         torch.save(torch.stack(frames), dest) 
