@@ -178,7 +178,7 @@ class KeyDetectDataset(BaseStreamDataset):
         self.landmark_path = landmark_path
         self.video_name = video_path.split('/')[-1]
         self.data_dir = video_path.split('/')[-3]
-        self.video = torch.load(self.landmark_path)
+        self.video = torch.load(self.landmark_path, weights_only=True)
         df = pd.read_csv(label_path)
         total_window = f_before + f_after + 1
 

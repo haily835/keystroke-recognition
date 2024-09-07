@@ -7,9 +7,10 @@ import os
 from lightning_utils.dataset import clf_id2label, detect_id2label
 from models import HyperFormer
 from utils.convert_to_mediapipe import process_image
+from lightning_utils.lm_module import KeyClf
 
 device = (
-    "cuda" if torch.cuda.is_available() else "cpu"
+    "cuda" if torch.cuda.is_available() else "mps"
 )
 
 print(f"Using {device} device")
@@ -24,14 +25,14 @@ def parse_arguments():
         type=str,
         nargs='+',  # Accept one or more values
         help='List of video paths or a single video path.',
-        default= ['video_6', 'video_7'],
+        default=['video_10', 'video_11', 'video_12'],
         
     )
     parser.add_argument(
         '--data_dir',
         type=str,
         help='Dataset directory',
-        default='datasets/video-2/raw_frames',
+        default='datasets/topview-2/landmarks',
     )
 
     parser.add_argument(
@@ -45,7 +46,7 @@ def parse_arguments():
         '--clf_ckpt',
         type=str,
         help='Path to the classifier checkpoint file.',
-        default='ckpts/hyperformer/clf-epoch=28-step=3161.ckpt',
+        default='ckpts/hf_topview_2/clf-epoch=29-step=6750.ckpt',
         required=False
     )
 
@@ -53,13 +54,13 @@ def parse_arguments():
         '--det_ckpt',
         type=str,
         help='Path to the detector checkpoint file.',
-        default='ckpts/hyperformer/det-epoch=27-step=3752.ckpt',
+        default='ckpts/hf_topview_2/detect-epoch=22-step=5727.ckpt',
         required=False
     )
 
     parser.add_argument(
         '--result_dir',
-        default='./hyperformer_stream_results',
+        default='./hf_topview2_stream_results',
         type=str,
         help='Directory to save the results.',
         required=False
@@ -95,18 +96,14 @@ def main():
     print(f"Detector checkpoint: {det_ckpt}")
     print(f"Results will be saved in: {result_dir}")
 
-    clf = HyperFormer(num_points=21, num_classes=30, num_of_heads=12)
-    clf.load_state_dict(get_model_weight_from_ckpt(clf_ckpt))
-
-    det = HyperFormer(num_points=21, num_classes=30, num_of_heads=12)
-    det.load_state_dict(get_model_weight_from_ckpt(det_ckpt))
+    clf = KeyClf.load_from_checkpoint(checkpoint_path=clf_ckpt).model
+    det = KeyClf.load_from_checkpoint(checkpoint_path=det_ckpt).model
     
     clf.to(device)
     det.to(device)
-
     clf.eval()
     det.eval()
-
+    
     if not os.path.exists(result_dir):
         os.makedirs(result_dir)
 
