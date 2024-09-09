@@ -17,9 +17,6 @@ model:
   model_init_args:
     num_point: 21
     num_person: 2
-    graph: models.ctrgcn.hand_graph.Graph
-    graph_args: 
-      labeling_mode: spatial
   loss_fn_classpath: torch.nn.CrossEntropyLoss
   loss_fn_init_args: null
 data:
