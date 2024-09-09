@@ -9,7 +9,7 @@ from PIL import Image
 import shutil
 
 droid_cam = 'http://192.168.0.58:4747/video'
-dataset_name = 'topview-2'
+dataset_name = 'rightside-2'
 
 class KeyStrokeRecorder:
     def __init__(self, master: tk.Tk, width = 640, height = 600, cam_url = 0):

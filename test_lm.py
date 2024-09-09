@@ -2,10 +2,8 @@ import argparse
 import glob
 import torch
 import pandas as pd
-import torchvision
 import os
 from lightning_utils.dataset import clf_id2label, detect_id2label
-from models import HyperFormer
 from utils.convert_to_mediapipe import process_image
 from lightning_utils.lm_module import KeyClf
 
@@ -25,14 +23,13 @@ def parse_arguments():
         type=str,
         nargs='+',  # Accept one or more values
         help='List of video paths or a single video path.',
-        default=['video_10', 'video_11', 'video_12'],
-        
+        default=['video_10'],
     )
     parser.add_argument(
         '--data_dir',
         type=str,
         help='Dataset directory',
-        default='datasets/topview-2/landmarks',
+        default='datasets/topview-2/raw_frames',
     )
 
     parser.add_argument(
@@ -46,7 +43,7 @@ def parse_arguments():
         '--clf_ckpt',
         type=str,
         help='Path to the classifier checkpoint file.',
-        default='ckpts/hf_topview_2/clf-epoch=29-step=6750.ckpt',
+        default='/Users/haily/Documents/GitHub/Research Learning/ckpts/hf-tv2/clf-epoch=22-step=4646.ckpt',
         required=False
     )
 
@@ -54,7 +51,7 @@ def parse_arguments():
         '--det_ckpt',
         type=str,
         help='Path to the detector checkpoint file.',
-        default='ckpts/hf_topview_2/detect-epoch=22-step=5727.ckpt',
+        default='/Users/haily/Documents/GitHub/Research Learning/ckpts/hf-tv2/detect-epoch=21-step=5478.ckpt',
         required=False
     )
 
@@ -68,7 +65,6 @@ def parse_arguments():
 
     # Parse the arguments
     args = parser.parse_args()
-
     return args
 
 
@@ -108,22 +104,24 @@ def main():
         os.makedirs(result_dir)
 
     for video_name in videos:
-        video_path = f"{data_dir}/{video_name}"
-        print('video_path: ', video_path)
-        jpgs = sorted(glob.glob(f"{video_path}/*.jpg"))
+        video_path = f"{data_dir}/{video_name}.pt"
         print(f"-----Video: {video_name}----")
-        print('Total frames: ', len(jpgs))
+
+        video = torch.load(video_path, weights_only=True)
+        print('Total frames: ', len(video))
+        clf.to(device)
+        clf.eval()
+        clf_record = []
 
         curr_frame = 0
         windows = []
         detect_record = []
         clf_record = []
 
-        while curr_frame < len(jpgs):
-            image = process_image(f"{video_path}/frame_{curr_frame}.jpg")
-
+        while curr_frame < len(video):
+            frame = video[curr_frame]
             if len(windows) < window_size:
-                windows.append(image)
+                windows.append(frame)
             else:
                 frames = torch.stack(windows)
                 frames = frames.permute(3, 0, 2, 1).float().unsqueeze(dim=0).to(device)

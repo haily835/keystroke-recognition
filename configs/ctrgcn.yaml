@@ -3,7 +3,7 @@ trainer:
   logger:
     class_path: lightning.pytorch.loggers.CSVLogger
     init_args:
-      save_dir: logs_clf
+      save_dir: ctrgcn
   callbacks:
     - class_path: lightning.pytorch.callbacks.EarlyStopping
       init_args:
@@ -12,7 +12,7 @@ trainer:
   fast_dev_run: false
   max_epochs: 100
 model:
-  name: gcn_clf
+  name: ctrgcn_clf
   model_classpath: models.CTRGCN
   model_init_args:
     num_point: 21
@@ -20,15 +20,13 @@ model:
     graph: models.ctrgcn.hand_graph.Graph
     graph_args: 
       labeling_mode: spatial
-    num_class: 30
   loss_fn_classpath: torch.nn.CrossEntropyLoss
   loss_fn_init_args: null
-  id2label: clf_id2label
-  label2id: clf_label2id
 data:
   delay: 4
-  train_videos: ['video_0', 'video_1', 'video_2', 'video_3', 'video_4']
-  val_videos: ['video_5']
-  test_videos: ['video_6', 'video_7']
+  train_videos: ['video_0', 'video_1', 'video_2', 'video_3', 'video_4', 
+                  'video_5', 'video_6', 'video_7']
+  val_videos: ['video_8', 'video_9']
+  test_videos: ['video_10', 'video_11', 'video_12']
   idle_gap: null
   batch_size: 32
