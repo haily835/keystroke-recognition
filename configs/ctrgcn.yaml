@@ -21,9 +21,8 @@ model:
   loss_fn_init_args: null
 data:
   delay: 4
-  train_videos: ['video_0', 'video_1', 'video_2', 'video_3', 'video_4', 
-                  'video_5', 'video_6', 'video_7']
-  val_videos: ['video_8', 'video_9']
-  test_videos: ['video_10', 'video_11', 'video_12']
+  train_videos: ['video_0', 'video_1', 'video_2', 'video_3', 'video_5', 'video_6', 'video_7']
+  val_videos: ['video_8', 'video_4']
+  test_videos: ['video_9', 'video_10', 'video_11', 'video_12']
   idle_gap: null
   batch_size: 32
