@@ -23,7 +23,7 @@ def parse_arguments():
         type=str,
         nargs='+',  # Accept one or more values
         help='List of video paths or a single video path.',
-        default=['video_10'],
+        default=['video_9', 'video_10', 'video_11'],
     )
     parser.add_argument(
         '--data_dir',
