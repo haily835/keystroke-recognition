@@ -28,7 +28,7 @@ class KeyClf(L.LightningModule):
                  model_init_args: Dict[str, Any] | None , 
                  loss_fn_classpath: str,
                  loss_fn_init_args: Dict[str, Any] | None ,
-                 id2label: str, 
+                 id2label: str,
                  label2id: str,
                  lr: float # learning rate
                 ):

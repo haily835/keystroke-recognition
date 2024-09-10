@@ -21,17 +21,24 @@ def get_dataloader(
         delay=10,
         batch_size=4,
         num_workers=4,
+        windows=[(2, 2)],
         shuffle=False):
 
     key_counts = pd.DataFrame()
     datasets = []
-    datasets = [BaseStreamDataset.create_dataset(
-            video_path=f"{frames_dir}/{video}",
-            landmark_path=f"{landmarks_dir}/{video}.pt",
-            label_path=f"{labels_dir}/{video}.csv",
-            gap=idle_gap,
-            delay=delay,
-        ) for video in videos]
+
+    for video in videos:
+        for window in windows:
+            f_before, f_after = window
+            datasets.append(BaseStreamDataset.create_dataset(
+                video_path=f"{frames_dir}/{video}",
+                landmark_path=f"{landmarks_dir}/{video}.pt",
+                label_path=f"{labels_dir}/{video}.csv",
+                gap=idle_gap,
+                delay=delay,
+                f_after=f_after,
+                f_before=f_before,
+            ))
     
     key_counts['label'] = datasets[0].get_class_counts()['label']
     for video, ds in zip(videos, datasets):
@@ -90,6 +97,7 @@ class LMKeyStreamModule(L.LightningDataModule):
                                            delay=self.delay,
                                            batch_size=self.batch_size,
                                            num_workers=self.num_workers,
+                                           windows=[(2, 2), (1, 3), (3, 1)],
                                            shuffle=True) if len(self.train_videos) else None
 
             self.val_loader = get_dataloader(
