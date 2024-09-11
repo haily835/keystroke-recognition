@@ -97,7 +97,7 @@ class LMKeyStreamModule(L.LightningDataModule):
                                            delay=self.delay,
                                            batch_size=self.batch_size,
                                            num_workers=self.num_workers,
-                                           windows=[(2, 2), (1, 3), (3, 1)],
+                                           windows=[(3, 4), (4, 3), (2, 5), (5, 2)],
                                            shuffle=True) if len(self.train_videos) else None
 
             self.val_loader = get_dataloader(
