@@ -97,7 +97,7 @@ class LMKeyStreamModule(L.LightningDataModule):
                                            delay=self.delay,
                                            batch_size=self.batch_size,
                                            num_workers=self.num_workers,
-                                           windows=[(3, 4)],
+                                           windows=[(3, 4), (4, 3), (2, 5), (5, 2)],
                                            shuffle=True) if len(self.train_videos) else None
 
             self.val_loader = get_dataloader(
@@ -108,6 +108,7 @@ class LMKeyStreamModule(L.LightningDataModule):
                 idle_gap=self.idle_gap,
                 delay=self.delay,
                 batch_size=self.batch_size,
+                windows=[(3, 4)],
                 num_workers=self.num_workers,
             ) if len(self.val_videos) else None
         elif stage == 'test':
@@ -119,6 +120,7 @@ class LMKeyStreamModule(L.LightningDataModule):
                 idle_gap=self.idle_gap,
                 delay=self.delay,
                 batch_size=self.batch_size,
+                windows=[(3, 4)],
                 num_workers=self.num_workers,
             ) if len(self.test_videos) else None
 
