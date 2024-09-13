@@ -21,5 +21,4 @@ model:
   loss_fn_classpath: torch.nn.CrossEntropyLoss
   loss_fn_init_args: null
 data:
-  delay: 4
   batch_size: 32
