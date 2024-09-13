@@ -9,7 +9,7 @@ from PIL import Image
 import shutil
 
 droid_cam = 'http://192.168.0.58:4747/video'
-dataset_name = 'rightside-2'
+dataset_name = 'sideview-2'
 
 class KeyStrokeRecorder:
     def __init__(self, master: tk.Tk, width = 640, height = 600, cam_url = 0):
@@ -114,8 +114,8 @@ class KeyStrokeRecorder:
         cls_distribution = self.labels['Key'].value_counts()
         print('cls_distribution: ', cls_distribution)
 
-        if (video_length//60):
-            wpm = total_words // (video_length//60)
+        if (video_length // 60):
+            wpm = (total_key_press // 5) // (video_length // 60) 
             print('wpm: ', wpm)
         
         with open(self.info_path, "w") as info_f:
@@ -123,7 +123,7 @@ class KeyStrokeRecorder:
             info_f.write(f'total_frames: {total_frames}\n')
             info_f.write(f'total_words: {total_words}\n')
             info_f.write(f'total_key_press: {total_key_press}\n')
-            if (video_length//60):
+            if (video_length // 60):
                 info_f.write(f'wpm: {wpm}\n')
             info_f.write(f'cls_distribution:\n{cls_distribution}')
 
