@@ -85,7 +85,8 @@ if __name__ == '__main__':
             if result is not None:
                 frames.append(result)
             else:
-                frames.append(last_succeed)
+                if last_succeed:
+                    frames.append(last_succeed)
                 print(f'Mediapipe failed at {i}')
 
         print(f"Sucessed {len(frames)} in {len(jpgs)}")
