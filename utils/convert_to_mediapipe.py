@@ -93,7 +93,7 @@ if __name__ == '__main__':
                 last_succeed = result
                 frames.append(result)
             else:
-                if last_succeed:
+                if not last_succeed is None:
                     frames.append(last_succeed)
                 print(f'Mediapipe failed at {i}')
 
