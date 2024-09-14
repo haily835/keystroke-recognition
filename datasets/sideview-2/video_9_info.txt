@@ -1,0 +1,35 @@
+video_length: 197.61785984039307
+total_frames: 5376
+total_words: 113
+total_key_press: 783
+wpm: 48
+cls_distribution:
+space     120
+e          97
+delete     61
+t          59
+a          57
+o          47
+r          40
+n          36
+i          35
+s          29
+u          22
+d          20
+m          19
+l          17
+c          17
+h          16
+y          15
+g          14
+f          11
+v          10
+dot         9
+p           8
+k           7
+w           6
+b           5
+comma       4
+j           1
+x           1
+Name: Key, dtype: int64

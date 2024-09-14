@@ -14,6 +14,9 @@ from PIL import Image
 from tqdm import tqdm
 from torchvision.transforms.functional import rotate
 
+import argparse
+
+
 base_options = python.BaseOptions(model_asset_path='hand_landmarker.task')
 options = vision.HandLandmarkerOptions(
     base_options=base_options,
@@ -45,7 +48,7 @@ def process_image(image_path):
         return torch.tensor(coords)
     return None
 
-# Usage in the main loop:
+# Usage in the main loop.
 # frames = []
 # for i in range(len(jpgs)):
 #     image_path = f"{src}/frame_{i}.jpg"
@@ -54,14 +57,18 @@ def process_image(image_path):
 #         frames.append(result)
 
 if __name__ == '__main__':
-    src_dir = 'datasets/topview-2/raw_frames'
-    dest_dir = 'datasets/topview-2/landmarks'
+    parser = argparse.ArgumentParser(description='Convert raw frames to landmarks')
+    parser.add_argument('--src_dir', type=str, required=True, help='Source directory containing raw frames')
+    parser.add_argument('--dest_dir', type=str, required=True, help='Destination directory for landmarks')
+    args = parser.parse_args()
+
+    src_dir = args.src_dir
+    dest_dir = args.dest_dir
     if not os.path.exists(dest_dir):
         os.makedirs(dest_dir)
 
-    for video in range(13):
+    for video in range(12):
         video_name = f'video_{video}'
-        print(video_name)
         src = f'{src_dir}/{video_name}'
         dest = f'{dest_dir}/{video_name}.pt'
 
@@ -70,12 +77,16 @@ if __name__ == '__main__':
         to_img = False
 
         frames = []
-        for i in tqdm(range(len(jpgs))):
+        last_succeed = None
+        for i in range(len(jpgs)):
             img_path = f"{src}/frame_{i}.jpg"
             result = process_image(img_path)
-            
+            last_succeed = result
             if result is not None:
                 frames.append(result)
+            else:
+                frames.append(last_succeed)
+                print(f'Mediapipe failed at {i}')
 
         print(f"Sucessed {len(frames)} in {len(jpgs)}")
-        torch.save(torch.stack(frames), dest) 
+        torch.save(torch.stack(frames), dest)

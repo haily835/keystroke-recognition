@@ -81,7 +81,6 @@ class KeyStrokeRecorder:
             
     def log_key_stroke(self, event):
         key = event.char if event.char else event.keysym  # Handling special keys
-        
         if key == 'BackSpace':  # Check if key is delete
             key = 'delete'
         elif key == ' ':  # Check if key is space
@@ -114,8 +113,8 @@ class KeyStrokeRecorder:
         cls_distribution = self.labels['Key'].value_counts()
         print('cls_distribution: ', cls_distribution)
 
-        if (video_length // 60):
-            wpm = (total_key_press // 5) // (video_length // 60) 
+        if (video_length / 60):
+            wpm = round((total_key_press / 5) / (video_length / 60))
             print('wpm: ', wpm)
         
         with open(self.info_path, "w") as info_f:
