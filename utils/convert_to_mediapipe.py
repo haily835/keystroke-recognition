@@ -99,4 +99,4 @@ if __name__ == '__main__':
 
         frames = torch.stack(frames)
         print(f"Sucessed {len(frames)}, shape {frames.shape}  in {len(jpgs)}")
-        torch.save(torch.stack(frames), dest)
+        torch.save(frames, dest)
