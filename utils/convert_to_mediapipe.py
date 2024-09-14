@@ -58,8 +58,17 @@ def process_image(image_path):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Convert raw frames to landmarks')
-    parser.add_argument('--src_dir', type=str, required=True, help='Source directory containing raw frames')
-    parser.add_argument('--dest_dir', type=str, required=True, help='Destination directory for landmarks')
+    parser.add_argument('--src_dir', 
+                        type=str, 
+                        required=True, 
+                        help='Source directory containing raw frames',
+                        default='datasets/rightside-2/raw_frames')
+    parser.add_argument('--dest_dir', 
+                        type=str, 
+                        required=True, 
+                        help='Destination directory for landmarks',
+                        default='datasets/rightside-2/landmarks'
+    )
     args = parser.parse_args()
 
     src_dir = args.src_dir
@@ -69,11 +78,10 @@ if __name__ == '__main__':
 
     for video in range(12):
         video_name = f'video_{video}'
+        print(f"Video {video_name}")
         src = f'{src_dir}/{video_name}'
         dest = f'{dest_dir}/{video_name}.pt'
-
         jpgs = sorted(glob.glob(f"{src}/*.jpg"))
-
         to_img = False
 
         frames = []
@@ -81,13 +89,14 @@ if __name__ == '__main__':
         for i in range(len(jpgs)):
             img_path = f"{src}/frame_{i}.jpg"
             result = process_image(img_path)
-            last_succeed = result
             if result is not None:
+                last_succeed = result
                 frames.append(result)
             else:
                 if last_succeed:
                     frames.append(last_succeed)
                 print(f'Mediapipe failed at {i}')
 
-        print(f"Sucessed {len(frames)} in {len(jpgs)}")
+        frames = torch.stack(frames)
+        print(f"Sucessed {len(frames)}, shape {frames.shape}  in {len(jpgs)}")
         torch.save(torch.stack(frames), dest)
