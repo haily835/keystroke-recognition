@@ -1,4 +1,5 @@
 from torchvision.transforms.v2 import Transform
+import torchvision.transforms.v2 as v2
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 # Mediapipe
 import mediapipe as mp
@@ -7,8 +8,6 @@ from mediapipe.tasks.python import vision
 import numpy as np
 import torch
 from PIL import Image
-
-
 
 class LandmarkTransform(Transform):
     """Return the hand landmarks coordinate of the input images"""
@@ -55,3 +54,40 @@ class VideoPermuteTransform(Transform):
     
     def _transform(self, inpt: Any, params: Dict[str, Any]) -> Any:
         return inpt.permute(1, 0, 2, 3)
+    
+target_size = (360, 360)
+
+rotation = v2.Compose([
+    v2.RandomRotation(degrees=10),
+    v2.Resize(size=target_size, antialias=True),
+    VideoPermuteTransform()
+])
+
+resize = v2.Compose([
+    v2.Resize(size=target_size, antialias=True),
+    VideoPermuteTransform()
+])
+
+sharpness = v2.Compose([
+    v2.RandomAdjustSharpness(sharpness_factor=2),
+    v2.Resize(size=target_size, antialias=True),
+    VideoPermuteTransform()
+])
+
+color = v2.Compose([
+    v2.ColorJitter(brightness=(0.5,1.5),contrast=(1),saturation=(0.5,1.5),hue=(-0.1,0.1)),
+    v2.Resize(size=target_size, antialias=True),
+    VideoPermuteTransform(),
+])
+
+perspective = v2.Compose([
+    v2.RandomPerspective(0.2),
+    v2.Resize(size=target_size, antialias=True),
+    VideoPermuteTransform()
+])
+
+zoom = v2.Compose([
+    v2.RandomZoomOut(side_range=(1, 1.5)),
+    v2.Resize(size=target_size, antialias=True),
+    VideoPermuteTransform()
+])

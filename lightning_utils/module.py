@@ -1,43 +1,28 @@
 from typing import Dict, Any
 import torch
 import lightning as L
-from torch.nn.functional import one_hot
 import  torchmetrics
 from sklearn.metrics import classification_report
 import pandas as pd
 from lightning_utils.dataset import *
 from models.resnet import *
 from pytorchvideo.models import *
-import importlib
+from utils.import_by_modulepath import initialize_class
 
 class KeyClf(L.LightningModule):
     def __init__(self, 
-                 name: str, 
-                 classpath: str, 
-                 init_args: Dict[str, Any], 
-                 id2label: str, 
-                 label2id: str):
+                 model_classpath: str, 
+                 model_init_args: Dict[str, Any] | None , 
+                 loss_fn_classpath: str,
+                 loss_fn_init_args: Dict[str, Any] | None ,
+                 id2label: str,
+                 label2id: str,
+                 lr: float # learning rate
+                ):
         super().__init__()
-        self.name = name
-
-        # Parse classpath and model arguments
-        class_module = '.'.join(classpath.split('.')[:-1])
-        class_name = classpath.split('.')[-1]
-        
-        module = importlib.__import__(
-            class_module, 
-            fromlist=[class_name]
-        )
-        args_class = getattr(module, class_name)
-
-        model_args = {
-            key: eval(str(value)) 
-            for key, value in init_args.items()
-        }
-
-        self.model = args_class(**model_args)
-
-        self.loss_fn = torch.nn.CrossEntropyLoss()
+        self.model = initialize_class(model_classpath, model_init_args)
+        self.loss_fn = initialize_class(loss_fn_classpath, loss_fn_init_args)
+        self.lr = lr
         self.id2label = eval(id2label)
         self.label2id = eval(label2id)
         self.num_classes = len(self.id2label)
@@ -56,7 +41,6 @@ class KeyClf(L.LightningModule):
 
     def forward(self, batch):
         videos, targets = batch
-        videos = videos.permute(0, 2, 1, 3, 4)
         preds = self.model(videos)
         pred_ids = torch.argmax(preds, dim=1)
         loss = self.loss_fn(preds, targets)
@@ -79,10 +63,14 @@ class KeyClf(L.LightningModule):
     def on_test_end(self):
         if not os.path.exists('results'):
             os.mkdir('results')
-
+    
         df = pd.DataFrame({"pred": self.test_preds, "target": self.test_targets})
-        df.to_csv(f'./results/{self.name}_test_results.csv')
+        if len(self.id2label) == 2:
+            df.to_csv(f'det_test_results.csv')
+        else:
+            df.to_csv(f'clf_test_results.csv')
         print(classification_report(self.test_targets, self.test_preds))
+
 
     def training_step(self, batch):
         videos, targets = batch        
@@ -118,3 +106,6 @@ class KeyClf(L.LightningModule):
 
     def on_validation_epoch_end(self) -> None:
         print(f"EPOCH {self.current_epoch} val_acc {self.cur_val_acc}")
+    
+    def configure_optimizers(self):
+        return torch.optim.Adam(self.parameters(), lr=self.lr)
