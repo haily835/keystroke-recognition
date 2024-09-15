@@ -96,6 +96,7 @@ class BaseStreamDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         (start, end), label = self.segments[idx]
+        
         frames = self.video[start: end+1]
         frames = frames.permute(3, 0, 2, 1) # permute to channels, frames, points, hands
 
@@ -135,7 +136,7 @@ class KeyClfStreamDataset(BaseStreamDataset):
                  landmark_path: str,
                  f_before=3,
                  f_after=4,
-                 delay=10,
+                 delay=4,
                  transforms=None):
 
         self.video_path = video_path
@@ -172,7 +173,7 @@ class KeyDetectDataset(BaseStreamDataset):
                  gap,
                  f_before=3,
                  f_after=4,
-                 delay=10):
+                 delay=4):
 
         self.video_path = video_path
         self.landmark_path = landmark_path

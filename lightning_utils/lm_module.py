@@ -21,9 +21,8 @@ def initialize_class(classpath: str, init_args: Dict[str, Any] | None = None):
     args_class = getattr(module, class_name)
     return args_class(**init_args) if init_args else args_class()
 
-class KeyClf(L.LightningModule):
+class LmKeyClf(L.LightningModule):
     def __init__(self, 
-                 name: str, 
                  model_classpath: str, 
                  model_init_args: Dict[str, Any] | None , 
                  loss_fn_classpath: str,
@@ -33,12 +32,10 @@ class KeyClf(L.LightningModule):
                  lr: float # learning rate
                 ):
         super().__init__()
-        self.name = name
 
         # Parse classpath and model arguments
         self.model = initialize_class(model_classpath, model_init_args)
         self.loss_fn = initialize_class(loss_fn_classpath, loss_fn_init_args)
-
         self.lr = lr
         self.id2label = eval(id2label)
         self.label2id = eval(label2id)
@@ -58,7 +55,6 @@ class KeyClf(L.LightningModule):
 
     def forward(self, batch):
         videos, targets = batch
-
         preds = self.model(videos)
 
         if type(preds) != tuple:
@@ -89,7 +85,10 @@ class KeyClf(L.LightningModule):
             os.mkdir('results')
 
         df = pd.DataFrame({"pred": self.test_preds, "target": self.test_targets})
-        df.to_csv(f'./results/{self.name}_test_results.csv')
+        if len(self.id2label) == 2:
+            df.to_csv(f'det_test_results.csv')
+        else:
+            df.to_csv(f'clf_test_results.csv')
         print(classification_report(self.test_targets, self.test_preds))
 
     def training_step(self, batch):

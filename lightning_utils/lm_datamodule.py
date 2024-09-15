@@ -5,12 +5,9 @@ import pandas as pd
 import torch.utils
 import torch.utils.data
 from torch.utils.data import DataLoader
-from lightning.pytorch.utilities import CombinedLoader
-import torchvision.transforms.v2 as v2
 import lightning as L
 import pandas as pd
 from lightning_utils.lm_dataset import BaseStreamDataset
-
 
 def get_dataloader(
         frames_dir,
@@ -27,8 +24,8 @@ def get_dataloader(
     key_counts = pd.DataFrame()
     datasets = []
 
-    for video in videos:
-        for window in windows:
+    for window in windows:
+        for video in videos:
             f_before, f_after = window
             datasets.append(BaseStreamDataset.create_dataset(
                 video_path=f"{frames_dir}/{video}",
@@ -58,7 +55,7 @@ def get_dataloader(
     return loader
 
 
-class LMKeyStreamModule(L.LightningDataModule):
+class LmKeyStreamModule(L.LightningDataModule):
     def __init__(self,
                  frames_dir: str,
                  landmarks_dir: str,
@@ -66,6 +63,9 @@ class LMKeyStreamModule(L.LightningDataModule):
                  train_videos: List[str] = [],
                  val_videos: List[str] = [],
                  test_videos: List[str] = [],
+                 train_windows: List[List[int]] = [[2, 2], [3, 1], [1, 3]],
+                 val_windows: List[List[int]] = [[2, 2]],
+                 test_windows: List[List[int]] = [[2, 2]],
                  idle_gap: int = None,
                  delay: int = 10,
                  batch_size: int = 4,
@@ -86,6 +86,9 @@ class LMKeyStreamModule(L.LightningDataModule):
         self.delay = delay
         self.batch_size = batch_size
         self.num_workers = num_workers
+        self.train_windows = train_windows
+        self.val_windows = val_windows
+        self.test_windows = test_windows
 
     def setup(self, stage) -> None:
         if stage == 'fit':
@@ -97,7 +100,7 @@ class LMKeyStreamModule(L.LightningDataModule):
                                            delay=self.delay,
                                            batch_size=self.batch_size,
                                            num_workers=self.num_workers,
-                                           windows=[(3, 4), (4, 3), (2, 5), (5, 2)],
+                                           windows=self.train_windows,
                                            shuffle=True) if len(self.train_videos) else None
 
             self.val_loader = get_dataloader(
@@ -108,7 +111,7 @@ class LMKeyStreamModule(L.LightningDataModule):
                 idle_gap=self.idle_gap,
                 delay=self.delay,
                 batch_size=self.batch_size,
-                windows=[(3, 4)],
+                windows=self.val_windows,
                 num_workers=self.num_workers,
             ) if len(self.val_videos) else None
         elif stage == 'test':
@@ -120,7 +123,7 @@ class LMKeyStreamModule(L.LightningDataModule):
                 idle_gap=self.idle_gap,
                 delay=self.delay,
                 batch_size=self.batch_size,
-                windows=[(3, 4)],
+                windows=self.test_windows,
                 num_workers=self.num_workers,
             ) if len(self.test_videos) else None
 

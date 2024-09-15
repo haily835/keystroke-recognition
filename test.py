@@ -1,14 +1,16 @@
 import argparse
 import glob
+from lightning.pytorch.cli import LightningCLI
 import torch
 import pandas as pd
-import torchvision
 import os
 from lightning_utils.dataset import clf_id2label, detect_id2label
-from models.resnet import resnet101, resnet50
+from lightning_utils.lm_module import LmKeyClf
+from utils.import_by_modulepath import import_by_modulepath
+
 
 device = (
-    "cuda" if torch.cuda.is_available() else "cpu"
+    "cuda" if torch.cuda.is_available() else "mps"
 )
 
 print(f"Using {device} device")
@@ -23,14 +25,13 @@ def parse_arguments():
         type=str,
         nargs='+',  # Accept one or more values
         help='List of video paths or a single video path.',
-        default= ['video_6', 'video_7'],
-        
+        default=['video_10'],
     )
     parser.add_argument(
         '--data_dir',
         type=str,
         help='Dataset directory',
-        default='datasets/video-2/raw_frames',
+        default='datasets/topview-2/landmarks',
     )
 
     parser.add_argument(
@@ -44,7 +45,7 @@ def parse_arguments():
         '--clf_ckpt',
         type=str,
         help='Path to the classifier checkpoint file.',
-        default='ckpts/topview/clf-epoch=21-step=76714.ckpt',
+        default='/Users/haily/Documents/GitHub/Research Learning/ckpts/hf-tv2/clf-epoch=22-step=4646.ckpt',
         required=False
     )
 
@@ -52,20 +53,26 @@ def parse_arguments():
         '--det_ckpt',
         type=str,
         help='Path to the detector checkpoint file.',
-        default='ckpts/topview/detect-epoch=15-step=34128.ckpt',
+        default='/Users/haily/Documents/GitHub/Research Learning/ckpts/hf-tv2/detect-epoch=21-step=5478.ckpt',
         required=False
     )
+
     parser.add_argument(
         '--result_dir',
-        default='./stream_results',
+        default='./hf_topview2_stream_results',
         type=str,
         help='Directory to save the results.',
         required=False
     )
 
+    parser.add_argument(
+        '--module_classpath',
+        type=str,
+        help='Lightning module class',
+        default='lightning_utils.lm_module.LmKeyClf',
+    )
     # Parse the arguments
     args = parser.parse_args()
-
     return args
 
 
@@ -77,7 +84,6 @@ def get_model_weight_from_ckpt(ckpt_path):
     return model_weights
 def main():
     args = parse_arguments()
-
     # Access the arguments
     videos = args.videos
     data_dir = args.data_dir
@@ -85,67 +91,69 @@ def main():
     det_ckpt = args.det_ckpt
     result_dir = args.result_dir
     window_size = args.window_size
-    
+    module = import_by_modulepath(args.module_classpath)
+
     print(f"Data: {data_dir}")
     print(f"Videos: {videos}")
     print(f"Window size: {window_size}")
     print(f"Classifier checkpoint: {clf_ckpt}")
     print(f"Detector checkpoint: {det_ckpt}")
     print(f"Results will be saved in: {result_dir}")
+    clf_checkpoint = torch.load(clf_ckpt, map_location=lambda storage, loc: storage)
+    det_checkpoint = torch.load(det_ckpt, map_location=lambda storage, loc: storage)
 
-    clf = resnet101(sample_size=360, sample_duration=8, num_classes=len(clf_id2label))
-    clf.load_state_dict(get_model_weight_from_ckpt(clf_ckpt))
-
-    det = resnet50(sample_size=360, sample_duration=8, num_classes=len(detect_id2label))
-    det.load_state_dict(get_model_weight_from_ckpt(det_ckpt))
+    clf_init_args = clf_checkpoint["hyper_parameters"]['init_args']
+    det_init_args = det_checkpoint["hyper_parameters"]['init_args']
     
+
+    clf = module.load_from_checkpoint(**clf_init_args, checkpoint_path=clf_ckpt).model
+    det = module.load_from_checkpoint(**det_init_args, checkpoint_path=det_ckpt).model
+
     clf.to(device)
     det.to(device)
-
     clf.eval()
     det.eval()
-   
+    
     if not os.path.exists(result_dir):
         os.makedirs(result_dir)
 
     for video_name in videos:
-        video_path = f"{data_dir}/{video_name}"
-        print('video_path: ', video_path)
-        jpgs = sorted(glob.glob(f"{video_path}/*.jpg"))
+        video_path = f"{data_dir}/{video_name}.pt"
         print(f"-----Video: {video_name}----")
-        print('Total frames: ', len(jpgs))
+
+        video = torch.load(video_path, weights_only=True)
+        print('Total frames: ', len(video))
+        clf.to(device)
+        clf.eval()
+        clf_record = []
 
         curr_frame = 0
         windows = []
         detect_record = []
         clf_record = []
 
-        while curr_frame < len(jpgs):
-            image = torchvision.io.read_image(f"{video_path}/frame_{curr_frame}.jpg")
-            image = torchvision.transforms.functional.resize(
-                img=image, size=[360, 360],
-                antialias=True
-            )
+        while curr_frame < 10:
+            frame = video[curr_frame]
             if len(windows) < window_size:
-                windows.append(image)
+                windows.append(frame)
             else:
                 frames = torch.stack(windows)
-                
-                frames = frames.permute(1, 0, 2, 3).float().unsqueeze(dim=0).to(device)
+                frames = frames.permute(3, 0, 2, 1).float().unsqueeze(dim=0).to(device)
 
                 detect_logits = torch.nn.functional.softmax(det(frames).squeeze(), dim=0)
                 
                 detect_id = torch.argmax(detect_logits, dim=0).item()
                 
                 detect_label = detect_id2label[detect_id]
-                
+                # print('detect_label: ', detect_label)
+
                 detect_record.append([curr_frame - window_size - 1, detect_logits[1].item()])
 
                 if detect_label == 'active':
                     clf_logits = torch.nn.functional.softmax(clf(frames).squeeze(), dim=0)
                     pred_id = torch.argmax(clf_logits, dim=0).item()
                     clf_label = clf_id2label[pred_id]
-                    print(f'{curr_frame - window_size - 1}-{curr_frame}: {clf_label} with probability {clf_logits[pred_id]}')
+                    # print(f'{curr_frame - window_size - 1}-{curr_frame}: {clf_label} with probability {clf_logits[pred_id]}')
                     clf_record.append([curr_frame - window_size - 1, clf_label, clf_logits[pred_id].item()])
 
                 windows = windows[1:]
