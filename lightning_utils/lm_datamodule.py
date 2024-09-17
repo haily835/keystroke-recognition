@@ -28,9 +28,9 @@ def get_dataloader(
         for video in videos:
             f_before, f_after = window
             datasets.append(BaseStreamDataset.create_dataset(
-                video_path=f"{frames_dir}/{video}",
-                landmark_path=f"{landmarks_dir}/{video}.pt",
-                label_path=f"{labels_dir}/{video}.csv",
+                video_path=f"{frames_dir}/video_{video}",
+                landmark_path=f"{landmarks_dir}/video_{video}.pt",
+                label_path=f"{labels_dir}/video_{video}.csv",
                 gap=idle_gap,
                 delay=delay,
                 f_after=f_after,
