@@ -16,7 +16,7 @@ from models.infogcn.modules import import_class, bn_init, EncodingBlock
 from models.infogcn.graph import Graph
 
 class InfoGCN(nn.Module):
-    def __init__(self, num_class=60, num_point=25, num_person=2, in_channels=3,
+    def __init__(self, num_class=30, num_point=21, num_person=2, in_channels=3,
                  drop_out=0, num_head=3, noise_ratio=0.1, k=0, gain=1):
         super(InfoGCN, self).__init__()
 
