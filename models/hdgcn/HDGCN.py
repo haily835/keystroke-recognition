@@ -244,7 +244,7 @@ class AHA(nn.Module):
         
         self.num_layers = num_layers
         
-        groups = get_groups(dataset='NTU', CoM=CoM)
+        groups = get_groups(dataset='Lm', CoM=CoM)
 
         for i, group in enumerate(groups):
             group = [i - 1 for i in group]
