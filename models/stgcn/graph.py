@@ -23,7 +23,7 @@ class Graph():
     """
 
     def __init__(self,
-                 layout='openpose',
+                 layout='lm',
                  strategy='uniform',
                  max_hop=1,
                  dilation=1):
