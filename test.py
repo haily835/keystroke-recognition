@@ -22,30 +22,30 @@ def parse_arguments():
     # Add arguments
     parser.add_argument(
         '--videos',
-        type=str,
+        type=int,
         nargs='+',  # Accept one or more values
         help='List of video paths or a single video path.',
-        default=['video_10'],
+        default=[6, 7, 19, 20],
     )
     parser.add_argument(
         '--data_dir',
         type=str,
         help='Dataset directory',
-        default='datasets/topview-2/landmarks',
+        default='datasets/topview/landmarks',
     )
 
     parser.add_argument(
         '--window_size',
         type=int,
         help='Window size to scan',
-        default=8,
+        default=5,
     )
 
     parser.add_argument(
         '--clf_ckpt',
         type=str,
         help='Path to the classifier checkpoint file.',
-        default='/Users/haily/Documents/GitHub/Research Learning/ckpts/hf-tv2/clf-epoch=22-step=4646.ckpt',
+        default='ckpts/epoch=24-step=88100.ckpt',
         required=False
     )
 
@@ -59,7 +59,7 @@ def parse_arguments():
 
     parser.add_argument(
         '--result_dir',
-        default='./hf_topview2_stream_results',
+        default='./stream_results',
         type=str,
         help='Directory to save the results.',
         required=False
@@ -101,8 +101,9 @@ def main():
     print(f"Results will be saved in: {result_dir}")
     clf_checkpoint = torch.load(clf_ckpt, map_location=lambda storage, loc: storage)
     det_checkpoint = torch.load(det_ckpt, map_location=lambda storage, loc: storage)
-
-    clf_init_args = clf_checkpoint["hyper_parameters"]['init_args']
+    print(clf_checkpoint["hyper_parameters"].keys())
+    clf_init_args = clf_checkpoint["hyper_parameters"]
+    
     det_init_args = det_checkpoint["hyper_parameters"]['init_args']
     
 
@@ -118,7 +119,7 @@ def main():
         os.makedirs(result_dir)
 
     for video_name in videos:
-        video_path = f"{data_dir}/{video_name}.pt"
+        video_path = f"{data_dir}/video_{video_name}.pt"
         print(f"-----Video: {video_name}----")
 
         video = torch.load(video_path, weights_only=True)
@@ -132,14 +133,13 @@ def main():
         detect_record = []
         clf_record = []
 
-        while curr_frame < 10:
+        while curr_frame < len(video):
             frame = video[curr_frame]
             if len(windows) < window_size:
                 windows.append(frame)
             else:
                 frames = torch.stack(windows)
                 frames = frames.permute(3, 0, 2, 1).float().unsqueeze(dim=0).to(device)
-
                 detect_logits = torch.nn.functional.softmax(det(frames).squeeze(), dim=0)
                 
                 detect_id = torch.argmax(detect_logits, dim=0).item()
