@@ -156,7 +156,7 @@ def main():
                     # print(f'{curr_frame - window_size - 1}-{curr_frame}: {clf_label} with probability {clf_logits[pred_id]}')
                     clf_record.append([curr_frame - window_size - 1, clf_label, clf_logits[pred_id].item()])
 
-                windows = windows[1:]
+                windows = []
             curr_frame += 1
         
         detect_df = pd.DataFrame({
