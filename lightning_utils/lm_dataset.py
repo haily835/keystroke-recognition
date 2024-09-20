@@ -221,7 +221,7 @@ class KeyDetectDataset(BaseStreamDataset):
                 while (j + total_window - 1) <= neg_end:
                     segments.append(
                         ([j, j + total_window - 1], self.id2label[0]))
-                    j += total_window
+                    j += 1
         self.segments = segments
 
 
