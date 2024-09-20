@@ -104,7 +104,7 @@ def main():
     print(clf_checkpoint["hyper_parameters"].keys())
     clf_init_args = clf_checkpoint["hyper_parameters"]
     
-    det_init_args = det_checkpoint["hyper_parameters"]['init_args']
+    det_init_args = det_checkpoint["hyper_parameters"]
     
 
     clf = module.load_from_checkpoint(**clf_init_args, checkpoint_path=clf_ckpt).model
