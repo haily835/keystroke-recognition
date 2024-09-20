@@ -38,7 +38,7 @@ def parse_arguments():
         '--window_size',
         type=int,
         help='Window size to scan',
-        default=5,
+        default=8,
     )
 
     parser.add_argument(
