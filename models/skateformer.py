@@ -324,8 +324,15 @@ class SkateFormerStage(nn.Module):
 
 
 class SkateFormer(nn.Module):
-    def __init__(self, in_channels=3, depths=(2, 2, 2, 2), channels=(96, 192, 192, 192), num_classes=60,
-                 embed_dim=96, num_people=2, num_frames=64, num_points=50, kernel_size=7, num_heads=32,
+    def __init__(self, in_channels=3, 
+                 num_class=30,
+                 num_point=21, 
+                 num_person=2,
+                 num_frames=8,
+                 depths=(2, 2, 2, 2), 
+                 channels=(96, 192, 192, 192),
+                 embed_dim=96, 
+                 kernel_size=7, num_heads=32,
                  type_1_size=(1, 1), type_2_size=(1, 1), type_3_size=(1, 1), type_4_size=(1, 1),
                  attn_drop=0., head_drop=0., drop=0., rel=True, drop_path=0., mlp_ratio=4.,
                  act_layer=nn.GELU, norm_layer_transformer=nn.LayerNorm, index_t=False, global_pool='avg'):
@@ -334,7 +341,7 @@ class SkateFormer(nn.Module):
 
         assert len(depths) == len(channels), "For each stage a channel dimension must be given."
         assert global_pool in ["avg", "max"], f"Only avg and max is supported but {global_pool} is given"
-        self.num_classes: int = num_classes
+        self.num_classes: int = num_class
         self.head_drop = head_drop
         self.index_t = index_t
         self.embed_dim = embed_dim
@@ -357,11 +364,11 @@ class SkateFormer(nn.Module):
         self.stem = nn.ModuleList(stem)
 
         if self.index_t:
-            self.joint_person_embedding = nn.Parameter(torch.zeros(embed_dim, num_points * num_people))
+            self.joint_person_embedding = nn.Parameter(torch.zeros(embed_dim, num_point * num_person))
             trunc_normal_(self.joint_person_embedding, std=.02)
         else:
             self.joint_person_temporal_embedding = nn.Parameter(
-                torch.zeros(1, embed_dim, num_frames, num_points * num_people))
+                torch.zeros(1, embed_dim, num_frames, num_point * num_person))
             trunc_normal_(self.joint_person_temporal_embedding, std=.02)
 
         # Init blocks
@@ -374,7 +381,7 @@ class SkateFormer(nn.Module):
                     in_channels=embed_dim if index == 0 else channels[index - 1],
                     out_channels=channel,
                     first_depth=index == 0,
-                    num_points=num_points * num_people,
+                    num_points=num_point * num_person,
                     kernel_size=kernel_size,
                     num_heads=num_heads,
                     type_1_size=type_1_size,
@@ -392,7 +399,7 @@ class SkateFormer(nn.Module):
             )
         self.stages = nn.ModuleList(stages)
         self.global_pool: str = global_pool
-        self.head = nn.Linear(channels[-1], num_classes)
+        self.head = nn.Linear(channels[-1], num_class)
 
     @torch.jit.ignore
     def no_weight_decay(self):

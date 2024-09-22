@@ -280,7 +280,7 @@ class TCN_GCN_unit(nn.Module):
 
 
 class CTRGCN(nn.Module):
-    def __init__(self, num_class=60, num_point=25, num_person=2, in_channels=3,
+    def __init__(self, num_class=30, num_point=21, num_person=2, in_channels=3,
                  drop_out=0, adaptive=True):
         super(CTRGCN, self).__init__()
 

@@ -25,7 +25,7 @@ def parse_arguments():
         type=int,
         nargs='+',  # Accept one or more values
         help='List of video paths or a single video path.',
-        default=[6, 7, 19, 20],
+        default=[0],
     )
     parser.add_argument(
         '--data_dir',
@@ -82,6 +82,7 @@ def get_model_weight_from_ckpt(ckpt_path):
     for key in list(model_weights):
         model_weights[key.replace("model.", "")] = model_weights.pop(key)
     return model_weights
+
 def main():
     args = parse_arguments()
     # Access the arguments
@@ -101,10 +102,8 @@ def main():
     print(f"Results will be saved in: {result_dir}")
     clf_checkpoint = torch.load(clf_ckpt, map_location=lambda storage, loc: storage)
     det_checkpoint = torch.load(det_ckpt, map_location=lambda storage, loc: storage)
-    print(clf_checkpoint["hyper_parameters"].keys())
-    clf_init_args = clf_checkpoint["hyper_parameters"]
-    
-    det_init_args = det_checkpoint["hyper_parameters"]
+    clf_init_args = clf_checkpoint["hyper_parameters"]['init_args']
+    det_init_args = det_checkpoint["hyper_parameters"]['init_args']
     
 
     clf = module.load_from_checkpoint(**clf_init_args, checkpoint_path=clf_ckpt).model
@@ -133,7 +132,7 @@ def main():
         detect_record = []
         clf_record = []
 
-        while curr_frame < len(video):
+        while curr_frame < 5:
             frame = video[curr_frame]
             if len(windows) < window_size:
                 windows.append(frame)
@@ -147,16 +146,16 @@ def main():
                 detect_label = detect_id2label[detect_id]
                 # print('detect_label: ', detect_label)
 
-                detect_record.append([curr_frame - window_size - 1, detect_logits[1].item()])
+                detect_record.append([curr_frame - window_size, detect_logits[1].item()])
 
                 if detect_label == 'active':
                     clf_logits = torch.nn.functional.softmax(clf(frames).squeeze(), dim=0)
                     pred_id = torch.argmax(clf_logits, dim=0).item()
                     clf_label = clf_id2label[pred_id]
-                    # print(f'{curr_frame - window_size - 1}-{curr_frame}: {clf_label} with probability {clf_logits[pred_id]}')
-                    clf_record.append([curr_frame - window_size - 1, clf_label, clf_logits[pred_id].item()])
+                    print(f'{curr_frame - window_size}-{curr_frame}: {clf_label} with probability {clf_logits[pred_id]}')
+                    clf_record.append([curr_frame - window_size, clf_label, clf_logits[pred_id].item()])
 
-                windows = []
+                windows = windows[1:]
             curr_frame += 1
         
         detect_df = pd.DataFrame({

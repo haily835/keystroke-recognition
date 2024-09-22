@@ -470,12 +470,12 @@ class TCN_ViT_unit(nn.Module):
         return y
 
 
-class Model(nn.Module):
+class HyperGT(nn.Module):
     def __init__(self, num_class=30, num_point=21, num_person=2, in_channels=3,
-                 drop_out=0, num_of_heads=9, 
+                 drop_out=0, num_of_heads=12, 
                  joint_label=[0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4], 
                  **kwargs):
-        super(Model, self).__init__()
+        super(HyperGT, self).__init__()
 
         self.graph = Graph(labeling_mode='spatial')
         A = self.graph.A  # 3,25,25

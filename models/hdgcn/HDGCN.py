@@ -402,13 +402,13 @@ class TCN_GCN_unit(nn.Module):
         return y
 
 
-class Model(nn.Module):
+class HDGCN(nn.Module):
     def __init__(self, 
                  num_class=30, num_point=21, num_person=2, 
                  # graph=None, graph_args=dict(), 
                  in_channels=3,
                  drop_out=0, adaptive=True):
-        super(Model, self).__init__()
+        super(HDGCN, self).__init__()
 
         # if graph is None:
         #     raise ValueError()

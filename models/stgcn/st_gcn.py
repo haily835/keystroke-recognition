@@ -6,7 +6,7 @@ from torch.autograd import Variable
 from models.stgcn.tgcn import ConvTemporalGraphical
 from models.stgcn.graph import Graph
 
-class Model(nn.Module):
+class STGCN(nn.Module):
     r"""Spatial temporal graph convolutional networks.
 
     Args:
@@ -27,10 +27,10 @@ class Model(nn.Module):
     """
 
     def __init__(self, 
-                 in_channels, 
-                 num_class, 
+                 in_channels=3, 
+                 num_class=30, 
                  # graph_args,
-                 edge_importance_weighting, 
+                 edge_importance_weighting=True, 
                  **kwargs):
         super().__init__()
 
