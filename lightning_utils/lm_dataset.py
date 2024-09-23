@@ -127,7 +127,10 @@ class BaseStreamDataset(torch.utils.data.Dataset):
             os.makedirs(f'{dest_folder}/segments_{format}')
         video_name = f'{dest_folder}/segments_{format}/{self.video_name}_{label}_f{start}_{end}.{format}'
         torchvision.io.video.write_video(
-                filename=video_name, video_array=annotated, fps=fps)
+            filename=video_name, 
+            video_array=annotated, 
+            fps=fps
+        )
 
 class KeyClfStreamDataset(BaseStreamDataset):
     def __init__(self,
@@ -221,7 +224,7 @@ class KeyDetectDataset(BaseStreamDataset):
                 while (j + total_window - 1) <= neg_end:
                     segments.append(
                         ([j, j + total_window - 1], self.id2label[0]))
-                    j += 1
+                    j += total_window
         self.segments = segments
 
 
@@ -240,9 +243,9 @@ if __name__ == "__main__":
     # print(detect_ds.get_class_counts())
 
     clf_ds = BaseStreamDataset.create_dataset(
-        landmark_path='datasets/video-2/landmarks/video_1.pt',
-        video_path='datasets/video-2/raw_frames/video_1',
-        label_path='datasets/video-2/labels/video_1.csv',
+        landmark_path='datasets/topview/landmarks/video_1.pt',
+        video_path='datasets/topview/raw_frames/video_1',
+        label_path='datasets/topview/labels/video_1.csv',
         gap=None,
         delay=4
     )
@@ -251,5 +254,4 @@ if __name__ == "__main__":
         clf_ds.create_segment('.', i)
     # print('label: ', clf_id2label[label])
     # print('video: ', video)
-
     # print(clf_ds.get_class_counts())
