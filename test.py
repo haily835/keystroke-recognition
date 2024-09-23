@@ -151,7 +151,7 @@ def main():
 
         df = pd.DataFrame({
             'Start frame': [record[0] - window_size for record in detect_record],
-            'Active Prob': [record[1] - window_size for record in detect_record],
+            'Active Prob': [record[1] for record in detect_record],
             'Key prediction': [record[1] for record in clf_record],
             'Key Prob': [record[2] for record in clf_record],
         })
