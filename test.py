@@ -145,24 +145,19 @@ def main():
                 clf_logits = torch.nn.functional.softmax(clf(frames).squeeze(), dim=0)
                 pred_id = torch.argmax(clf_logits, dim=0).item()
                 clf_label = clf_id2label[pred_id]
-                print(clf_label)
-
+            
                 clf_record.append([curr_frame, clf_label, clf_logits[pred_id].item()])
                 windows = windows[1:]
 
-        detect_df = pd.DataFrame({
+        df = pd.DataFrame({
             'Start frame': [record[0] - window_size for record in detect_record],
             'Active Prob': [record[1] - window_size for record in detect_record],
-        })
-
-        clf_df = pd.DataFrame({
-            'Start frame': [record[0] - window_size for record in clf_record],
             'Key prediction': [record[1] for record in clf_record],
-            'Prob': [record[2] for record in clf_record],
+            'Key Prob': [record[2] for record in clf_record],
         })
 
-        detect_df.to_csv(f'{result_dir}/{video_name}_detect.csv', index=False)
-        clf_df.to_csv(f'{result_dir}/{video_name}_clf.csv', index=False)
+        df.to_csv(f'{result_dir}/{video_name}.csv', index=False)
+
 
 if __name__ == "__main__":
     main()
