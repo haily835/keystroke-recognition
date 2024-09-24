@@ -55,7 +55,7 @@ class VideoPermuteTransform(Transform):
     def _transform(self, inpt: Any, params: Dict[str, Any]) -> Any:
         return inpt.permute(1, 0, 2, 3)
     
-target_size = (360, 360)
+target_size = (60, 60)
 
 rotation = v2.Compose([
     v2.RandomRotation(degrees=10),

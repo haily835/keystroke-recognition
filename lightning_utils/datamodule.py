@@ -33,8 +33,8 @@ def get_dataloader(
                 f_before, f_after = window
                 datasets.append(
                     BaseStreamDataset.create_dataset(
-                        video_path=f"{frames_dir}/{video}",
-                        label_path=f"{labels_dir}/{video}.csv",
+                        video_path=f"{frames_dir}/video_{video}",
+                        label_path=f"{labels_dir}/video_{video}.csv",
                         gap=idle_gap,
                         delay=delay,
                         f_after=f_after,
@@ -48,7 +48,8 @@ def get_dataloader(
         key_counts[video] = ds.get_class_counts()['count']
 
     merged = torch.utils.data.ConcatDataset(datasets)
-    print('Key counts: \n', key_counts)
+    key_counts.to_csv('key_counts.csv')
+    # print('Key counts: \n', key_counts)
     print("Total samples: ", len(merged))
 
     loader = DataLoader(
@@ -65,9 +66,9 @@ class KeyStreamModule(L.LightningDataModule):
     def __init__(self,
                  frames_dir: str,
                  labels_dir: str,
-                 train_videos: List[str] = [],
-                 val_videos: List[str] = [],
-                 test_videos: List[str] = [],
+                 train_videos: List[int] = [],
+                 val_videos: List[int] = [],
+                 test_videos: List[int] = [],
                  train_windows: List[List[int]] = [[2, 2], [3, 1], [1, 3]],
                  val_windows: List[List[int]] = [[2, 2]],
                  test_windows: List[List[int]] = [[2, 2]],

@@ -98,7 +98,7 @@ class Bottleneck(nn.Module):
 
 
 class ResNet(nn.Module):
-    def __init__(self, block, layers, sample_size, sample_duration, shortcut_type='B', num_classes=400):
+    def __init__(self, block, layers, sample_size, sample_duration=8, shortcut_type='B', num_classes=30):
         """
         block: basic block or bottle neck
         layers: define Resnet architecture 34, 101, 152 etc
