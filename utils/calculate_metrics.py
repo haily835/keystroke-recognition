@@ -1,5 +1,5 @@
 import pandas as pd
-from sklearn.metrics import accuracy_score, precision_score, f1_score, recall_score
+from sklearn.metrics import accuracy_score, precision_score, f1_score, recall_score, classification_report
 
 def calculate_metrics(csv_file_path):
     # Read the CSV file
@@ -22,6 +22,6 @@ def calculate_metrics(csv_file_path):
 
 
     # Return the metrics as a vector
-    return f"{accuracy:.4f} & {precision:.4f} & {f1:.4f} & {recall:.4f}"
+    return f"{accuracy:.4f} & {precision:.4f} & {f1:.4f} & {recall:.4f}", classification_report(y_true, y_pred)
     # return [accuracy, precision, f1, recall]
 

@@ -76,13 +76,9 @@ def remove_consecutive_letters(s):
     
     return ''.join(result)
 
-def process_prediction(clf_probs, det_probs):
-
-    clf_result = pd.read_csv(clf_probs)
-    det_result = pd.read_csv(det_probs)
-
-    chars = clf_result[clf_result['Prob'] > 0.8]['Key prediction'].to_list()
-    # chars = clf_result['Key prediction'].to_list()
+def process_prediction(result_csv, active_thres = 0.5, key_thres = 0.9):
+    result = pd.read_csv(result_csv)
+    chars = result[result['Active Prob'] > active_thres][result['Key Prob'] > key_thres]['Key prediction'].to_list()
     processed = []
 
     i = 0

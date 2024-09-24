@@ -44,13 +44,18 @@ FONT_SIZE = 1
 FONT_THICKNESS = 1
 HANDEDNESS_TEXT_COLOR = (88, 205, 54) # vibrant green
 
-def draw_landmarks_on_image(detection_result, rgb_img):
-  annotated_image = np.copy(rgb_img)
-    
+def draw_landmarks_on_image(detection_result, rgb_img, mode):
+  if mode == 'image':
+    annotated_image = np.copy(rgb_img)
+    return torch.from_numpy(annotated_image)
+  elif mode == 'skeleton':
+    annotated_image = np.zeros_like(rgb_img)
+  elif mode == 'both':
+    annotated_image = np.copy(rgb_img)
+
   # Loop through the detected hands to visualize.
   for idx in range(len(detection_result)):
     hand_landmarks = detection_result[idx]
-
 
     # Draw the hand landmarks.
     hand_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
@@ -113,14 +118,18 @@ class BaseStreamDataset(torch.utils.data.Dataset):
         df = pd.DataFrame({'label': self.id2label, 'count': counts})
         return df
 
-    def create_segment(self, dest_folder, idx, format='mp4', fps=3.0):
+    def create_segment(self, dest_folder, idx, format='mp4', fps=3.0, mode='image'):
         (start, end), label = self.segments[idx]
        
 
         annotated = []
         for idx in range(start, end+1):
             lm = self.video[idx]
-            annotated.append(draw_landmarks_on_image(lm.numpy(), torchvision.io.image.read_image(f"{self.video_path}/frame_{idx}.jpg").permute(1, 2, 0).numpy()))
+            annotated.append(draw_landmarks_on_image(
+                lm.numpy(), 
+                torchvision.io.image.read_image(f"{self.video_path}/frame_{idx}.jpg").permute(1, 2, 0).numpy(),
+                mode=mode
+            ))
         annotated = torch.stack(annotated)
         
         if not os.path.exists(f'{dest_folder}/segments_{format}'):
@@ -247,11 +256,12 @@ if __name__ == "__main__":
         video_path='datasets/topview/raw_frames/video_1',
         label_path='datasets/topview/labels/video_1.csv',
         gap=None,
-        delay=4
+        delay=3
     )
-
-    for i in range(len(clf_ds)):
-        clf_ds.create_segment('.', i)
+    clf_ds.create_segment('.', 0, mode='image')
+    
+    # for i in range(len(clf_ds)):
+    #     clf_ds.create_segment('.', i)
     # print('label: ', clf_id2label[label])
     # print('video: ', video)
     # print(clf_ds.get_class_counts())

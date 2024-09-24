@@ -67,7 +67,7 @@ model:
     model_classpath: models.CTRGCN
     model_init_args:
       num_class: 2
-      num_point: 21
+      in_channels: 3
     loss_fn_classpath: torch.nn.CrossEntropyLoss
     loss_fn_init_args: null
     id2label: detect_id2label
@@ -85,24 +85,11 @@ data:
     - 2
     - 3
     - 4
-    - 8
-    - 9
-    - 10
-    - 11
-    - 12
-    - 13
-    - 14
-    - 15
-    - 16
     val_videos:
     - 5
-    - 17
-    - 18
     test_videos:
     - 6
     - 7
-    - 19
-    - 20
     train_windows:
     - - 3
       - 4
@@ -112,7 +99,7 @@ data:
     test_windows:
     - - 3
       - 4
-    idle_gap: 2
-    delay: 4
+    idle_gap: 1
+    delay: 3
     batch_size: 32
-    num_workers: 4
+    num_workers: 8

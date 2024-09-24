@@ -1,15 +1,15 @@
 # lightning.pytorch==2.4.0
 seed_everything: 0
 trainer:
-  # accelerator: gpu
+  accelerator: gpu
   strategy: auto
-  # devices: 0,1
+  devices: 0,1
   num_nodes: 1
   precision: null
   logger:
     class_path: lightning.pytorch.loggers.CSVLogger
     init_args:
-      save_dir: logs/hdgcn_clf
+      save_dir: logs/HDGCN_clf
       name: lightning_logs
       version: null
       prefix: ''
@@ -67,6 +67,7 @@ model:
     model_classpath: models.HDGCN
     model_init_args:
       num_class: 30
+      in_channels: 3
     loss_fn_classpath: torch.nn.CrossEntropyLoss
     loss_fn_init_args: null
     id2label: clf_id2label
@@ -84,24 +85,11 @@ data:
     - 2
     - 3
     - 4
-    - 8
-    - 9
-    - 10
-    - 11
-    - 12
-    - 13
-    - 14
-    - 15
-    - 16
     val_videos:
     - 5
-    - 17
-    - 18
     test_videos:
     - 6
     - 7
-    - 19
-    - 20
     train_windows:
     - - 3
       - 4
@@ -112,6 +100,6 @@ data:
     - - 3
       - 4
     idle_gap: null
-    delay: 4
+    delay: 3
     batch_size: 32
-    num_workers: 4
+    num_workers: 8
