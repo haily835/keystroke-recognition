@@ -3,6 +3,7 @@ import glob
 from lightning.pytorch.cli import LightningCLI
 import torch
 import pandas as pd
+import torchvision
 import os
 from lightning_utils.dataset import clf_id2label, detect_id2label
 from lightning_utils.lm_module import LmKeyClf
@@ -10,7 +11,7 @@ from utils.import_by_modulepath import import_by_modulepath
 
 
 device = (
-    "cuda" if torch.cuda.is_available() else "mps"
+    "cuda" if torch.cuda.is_available() else "cpu"
 )
 
 print(f"Using {device} device")
@@ -32,6 +33,13 @@ def parse_arguments():
         type=str,
         help='Dataset directory',
         default='datasets/topview/landmarks',
+    )
+
+    parser.add_argument(
+        '--landmark',
+        type=int,
+        help='File is in image form or landmarks',
+        default=1,
     )
 
     parser.add_argument(
@@ -92,6 +100,8 @@ def main():
     det_ckpt = args.det_ckpt
     result_dir = args.result_dir
     window_size = args.window_size
+    landmark = args.landmark
+    print('landmark: ', landmark)
     module = import_by_modulepath(args.module_classpath)
 
     print(f"Data: {data_dir}")
@@ -105,7 +115,6 @@ def main():
     clf_init_args = clf_checkpoint["hyper_parameters"]
     det_init_args = det_checkpoint["hyper_parameters"]
     
-
     clf = module.load_from_checkpoint(**clf_init_args, checkpoint_path=clf_ckpt).model
     det = module.load_from_checkpoint(**det_init_args, checkpoint_path=det_ckpt).model
 
@@ -113,15 +122,18 @@ def main():
     det.to(device)
     clf.eval()
     det.eval()
-    
+
     if not os.path.exists(result_dir):
         os.makedirs(result_dir)
 
     for video_name in videos:
-        video_path = f"{data_dir}/video_{video_name}.pt"
         print(f"-----Video: {video_name}----")
-
-        video = torch.load(video_path, weights_only=True)
+        if landmark:
+            video_path = f"{data_dir}/video_{video_name}.pt"
+            video = torch.load(video_path, weights_only=True)
+        else:
+            video = glob.glob(f"{data_dir}/video_{video_name}/*.jpg")
+        
         print('Total frames: ', len(video))
         clf.to(device)
         clf.eval()
@@ -134,18 +146,26 @@ def main():
         
         while curr_frame < len(video):
             frame = video[curr_frame]
+
+            if not landmark:
+                frame = torchvision.io.read_image(
+                    f"{data_dir}/video_{video_name}/frame_{curr_frame}.jpg"
+                )
+                
             if len(windows) < window_size:
                 windows.append(frame)
                 curr_frame += 1
             else:
                 frames = torch.stack(windows)
-                frames = frames.permute(3, 0, 2, 1).float().unsqueeze(dim=0).to(device)
+                if landmark:
+                    frames = frames.permute(3, 0, 2, 1).float().unsqueeze(dim=0).to(device)
+                else:
+                    frames = frames.permute(1, 0, 2, 3).float().unsqueeze(dim=0).to(device)
                 detect_logits = torch.nn.functional.softmax(det(frames).squeeze(), dim=0)
                 detect_record.append([curr_frame, detect_logits[1].item()])
                 clf_logits = torch.nn.functional.softmax(clf(frames).squeeze(), dim=0)
                 pred_id = torch.argmax(clf_logits, dim=0).item()
                 clf_label = clf_id2label[pred_id]
-            
                 clf_record.append([curr_frame, clf_label, clf_logits[pred_id].item()])
                 windows = windows[1:]
 
@@ -157,7 +177,6 @@ def main():
         })
 
         df.to_csv(f'{result_dir}/{video_name}.csv', index=False)
-
 
 if __name__ == "__main__":
     main()

@@ -117,7 +117,8 @@ class BaseStreamDataset(torch.utils.data.Dataset):
         else:
             video_name = f'{self.data_dir}/segments_{format}/{self.video_name}_{label}_f{start}_{end}.{format}'
             torchvision.io.video.write_video(
-                filename=video_name, video_array=frames, fps=fps)
+                filename=video_name, video_array=frames, fps=fps
+            )
 
 
 class KeyClfStreamDataset(BaseStreamDataset):
@@ -152,7 +153,6 @@ class KeyClfStreamDataset(BaseStreamDataset):
                 key_frame - f_before, 0), key_frame + f_after
             segments.append(([pos_start, pos_end], key_value))
         self.segments = segments
-
 
 class KeyDetectDataset(BaseStreamDataset):
     def __init__(self,
@@ -243,6 +243,8 @@ if __name__ == "__main__":
     print('video: ', video.shape)
 
     torchvision.io.video.write_video(
-        'sample.mp4', video.permute(0, 2, 3, 1), fps=3.0)
+        'sample.mp4', 
+        video.permute(0, 2, 3, 1), 
+        fps=3.0)
 
     print(clf_ds.get_class_counts())
