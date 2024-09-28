@@ -8,3 +8,6 @@ lightning[pytorch-extra]
 google-generativeai
 pyyaml
 timm
+mmcv==1.3.6
+pandas
+torchinfo

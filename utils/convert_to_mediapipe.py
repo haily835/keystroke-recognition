@@ -60,14 +60,14 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Convert raw frames to landmarks')
     parser.add_argument('--src_dir', 
                         type=str, 
-                        required=True, 
+                        required=False, 
                         help='Source directory containing raw frames',
-                        default='datasets/rightside-2/raw_frames')
+                        default='datasets/topview/raw_frames')
     parser.add_argument('--dest_dir', 
                         type=str, 
-                        required=True, 
+                        required=False, 
                         help='Destination directory for landmarks',
-                        default='datasets/rightside-2/landmarks'
+                        default='datasets/topview/landmarks'
     )
     args = parser.parse_args()
 
@@ -76,7 +76,7 @@ if __name__ == '__main__':
     if not os.path.exists(dest_dir):
         os.makedirs(dest_dir)
 
-    for video in range(12):
+    for video in range(21, 29):
         video_name = f'video_{video}'
         print(f"Video {video_name}")
         src = f'{src_dir}/{video_name}'

@@ -54,16 +54,18 @@ class KeyClf(L.LightningModule):
         self.test_preds += pred_labels
         self.test_targets += [self.id2label[_id] for _id in targets]
 
-        self.log('test_loss', 
-                 loss, 
-                 sync_dist=True,
-                 prog_bar=True, 
-                 on_step=False)
+        self.log(
+            'test_loss',
+            loss,
+            sync_dist=True,
+            prog_bar=True,
+            on_step=False,
+        )
 
     def on_test_end(self):
         if not os.path.exists('results'):
             os.mkdir('results')
-    
+
         df = pd.DataFrame({"pred": self.test_preds, "target": self.test_targets})
         if len(self.id2label) == 2:
             df.to_csv(f'det_test_results.csv')
