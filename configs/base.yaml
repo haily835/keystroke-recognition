@@ -28,33 +28,33 @@ data:
     frames_dir: ./datasets/topview/raw_frames
     landmarks_dir: ./datasets/topview/landmarks
     labels_dir: ./datasets/topview/labels
-  train_videos:
-    - 'video_0'
-    - 'video_1'
-    - 'video_2'
-    - 'video_3'
-    - 'video_4'
-    - 'video_5'
-    - 'video_6'
-  val_videos:
-    - 'video_7'
-    - 'video_8'
-  test_videos: 
-    - 'video_9'
-    - 'video_10'
-    - 'video_11'
-  train_windows:
-    - - 2
-      - 2
-    - - 3
-      - 1
-    - - 1
-      - 3
-  val_windows:
-    - - 2
-      - 2
-  test_windows:
-    - - 2
-      - 2
-  idle_gap: null
-  batch_size: 32
+    train_videos:
+      - 'video_0'
+      - 'video_1'
+      - 'video_2'
+      - 'video_3'
+      - 'video_4'
+      - 'video_5'
+      - 'video_6'
+    val_videos:
+      - 'video_7'
+      - 'video_8'
+    test_videos: 
+      - 'video_9'
+      - 'video_10'
+      - 'video_11'
+    train_windows:
+      - - 2
+        - 2
+      - - 3
+        - 1
+      - - 1
+        - 3
+    val_windows:
+      - - 2
+        - 2
+    test_windows:
+      - - 2
+        - 2
+    idle_gap: null
+    batch_size: 32
