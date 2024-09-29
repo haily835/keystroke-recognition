@@ -23,7 +23,11 @@ model:
     label2id: clf_label2id
     lr: 0.001
 data:
-  delay: 4
+  class_path: lightning_utils.lm_datamodule.LmKeyStreamModule
+  init_args:
+    frames_dir: ./datasets/topview/raw_frames
+    landmarks_dir: ./datasets/topview/landmarks
+    labels_dir: ./datasets/topview/labels
   train_videos:
     - 'video_0'
     - 'video_1'
