@@ -163,9 +163,9 @@ class KeyClfStreamDataset(BaseStreamDataset):
 
         if not df['Frame'].is_unique:
             duplicated = df['Frame'].duplicated(keep=False)
-            print(f"Duplicate segment found {len(duplicated)}/ {len(df)}")
-            print(df[duplicated])
-            df = df[not df['Frame'].duplicated()]
+            # print(f"Duplicate segment found {len(duplicated)}/ {len(df)}")
+            # print(df[duplicated])
+            df = df[~df['Frame'].duplicated()]
             
         segments = []
 

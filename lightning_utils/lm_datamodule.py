@@ -42,7 +42,7 @@ def get_dataloader(
         key_counts[video] = ds.get_class_counts()['count']
 
     merged = torch.utils.data.ConcatDataset(datasets)
-    print('Key counts: \n', key_counts)
+    # print('Key counts: \n', key_counts)
     print("Total samples: ", len(merged))
 
     loader = DataLoader(
