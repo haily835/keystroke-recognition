@@ -177,8 +177,7 @@ class KeyClfStreamDataset(BaseStreamDataset):
             if key_value not in self.id2label:
                 continue
 
-            pos_start, pos_end = max(
-                key_frame - f_before, 0), key_frame + f_after
+            pos_start, pos_end = max(key_frame - f_before, 0), min(key_frame + f_after, len(self.video))
             
             if (pos_end - pos_start + 1) == total:
                 segments.append(([pos_start, pos_end], key_value))
@@ -207,20 +206,21 @@ class KeyDetectDataset(BaseStreamDataset):
 
         self.id2label = detect_id2label
         self.label2id = detect_label2id
+        total = f_after + f_before + 1
 
         for index, row in df.iterrows():
             # Frame number where key was pressed
             key_frame = int(row['Frame']) + delay
             key_value = row['Key']  # Key pressed
 
-            pos_start, pos_end = max(
-                key_frame - f_before, 0), key_frame + f_after
+            pos_start, pos_end = max(key_frame - f_before, 0), min(key_frame + f_after, len(self.video))
 
             # Current video with keystroke
-            if key_value not in clf_id2label:
-                segments.append(([pos_start, pos_end], self.id2label[0]))
-            else:
-                segments.append(([pos_start, pos_end], self.id2label[1]))
+            if (pos_end - pos_start + 1) == total:
+                if key_value not in clf_id2label:
+                    segments.append(([pos_start, pos_end], self.id2label[0]))
+                else:
+                    segments.append(([pos_start, pos_end], self.id2label[1]))
 
             # Infer idle frames.
             is_idle_before = False
@@ -259,7 +259,11 @@ if __name__ == "__main__":
 
     # print(detect_ds.get_class_counts())
     test = [0, 795, 355, 590, 1038, 329, 163, 455]
-    for video_id in range(0, 8):
+    ids = []
+    for i in range(0, 29):
+        if i != 21:
+            ids.append(i)
+    for video_id in ids:
         print('video_id: ', video_id)
         clf_ds = BaseStreamDataset.create_dataset(
             landmark_path=f'datasets/topview/landmarks/video_{video_id}.pt',
@@ -269,13 +273,29 @@ if __name__ == "__main__":
             delay=3
         )
 
-        clf_ds.create_segment('.', test[video_id], mode='image')
+        # clf_ds.create_segment('.', test[video_id], mode='image')
         
-        # for i in range(len(clf_ds)):
-        #     video, label = clf_ds.__getitem__(i)
-            # if video.shape[1] != 8:
-            #     print(f"i {i}, label {label}")
+        for i in range(len(clf_ds)):
+            video, label = clf_ds.__getitem__(i)
+            if video.shape[1] != 8:
+                print(f"i {i}, label {label}")
 
+    for video_id in ids:
+        print('video_id: ', video_id)
+        clf_ds = BaseStreamDataset.create_dataset(
+            landmark_path=f'datasets/topview/landmarks/video_{video_id}.pt',
+            video_path=f'datasets/topview/raw_frames/video_{video_id}',
+            label_path=f'datasets/topview/labels/video_{video_id}.csv',
+            gap=1,
+            delay=3
+        )
+
+        # clf_ds.create_segment('.', test[video_id], mode='image')
+        
+        for i in range(len(clf_ds)):
+            video, label = clf_ds.__getitem__(i)
+            if video.shape[1] != 8:
+                print(f"i {i}, label {label}")
     # print('label: ', clf_id2label[label])
     # print('video: ', video)
     # print(clf_ds.get_class_counts())
