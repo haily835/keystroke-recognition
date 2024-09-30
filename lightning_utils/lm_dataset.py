@@ -166,9 +166,9 @@ class KeyClfStreamDataset(BaseStreamDataset):
             # print(f"Duplicate segment found {len(duplicated)}/ {len(df)}")
             # print(df[duplicated])
             df = df[~df['Frame'].duplicated()]
-            
+        
         segments = []
-
+        total = f_after + f_before + 1
         for index, row in df.iterrows():
             key_value = row['Key']  # Key pressed
             # Frame number where key was pressed
@@ -179,7 +179,9 @@ class KeyClfStreamDataset(BaseStreamDataset):
 
             pos_start, pos_end = max(
                 key_frame - f_before, 0), key_frame + f_after
-            segments.append(([pos_start, pos_end], key_value))
+            
+            if (pos_end - pos_start + 1) == total:
+                segments.append(([pos_start, pos_end], key_value))
         self.segments = segments
 
 
