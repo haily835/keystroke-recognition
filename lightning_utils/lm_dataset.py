@@ -161,6 +161,12 @@ class KeyClfStreamDataset(BaseStreamDataset):
         self.video = torch.load(self.landmark_path, weights_only=True)
         df = pd.read_csv(label_path)
 
+        if not df['Frame'].is_unique:
+            duplicated = df['Frame'].duplicated(keep=False)
+            print(f"Duplicate segment found {len(duplicated)}/ {len(df)}")
+            print(df[duplicated])
+            df = df[not df['Frame'].duplicated()]
+            
         segments = []
 
         for index, row in df.iterrows():
@@ -250,18 +256,24 @@ if __name__ == "__main__":
     # print('video: ', video.shape)
 
     # print(detect_ds.get_class_counts())
+    test = [0, 795, 355, 590, 1038, 329, 163, 455]
+    for video_id in range(0, 8):
+        print('video_id: ', video_id)
+        clf_ds = BaseStreamDataset.create_dataset(
+            landmark_path=f'datasets/topview/landmarks/video_{video_id}.pt',
+            video_path=f'datasets/topview/raw_frames/video_{video_id}',
+            label_path=f'datasets/topview/labels/video_{video_id}.csv',
+            gap=None,
+            delay=3
+        )
 
-    clf_ds = BaseStreamDataset.create_dataset(
-        landmark_path='datasets/topview/landmarks/video_1.pt',
-        video_path='datasets/topview/raw_frames/video_1',
-        label_path='datasets/topview/labels/video_1.csv',
-        gap=None,
-        delay=3
-    )
-    clf_ds.create_segment('.', 0, mode='image')
-    
-    # for i in range(len(clf_ds)):
-    #     clf_ds.create_segment('.', i)
+        clf_ds.create_segment('.', test[video_id], mode='image')
+        
+        # for i in range(len(clf_ds)):
+        #     video, label = clf_ds.__getitem__(i)
+            # if video.shape[1] != 8:
+            #     print(f"i {i}, label {label}")
+
     # print('label: ', clf_id2label[label])
     # print('video: ', video)
     # print(clf_ds.get_class_counts())
