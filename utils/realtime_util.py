@@ -104,9 +104,10 @@ def process_prediction(result_csv, active_thres = 0.5, key_thres = 0.9):
 
 def evaluate(prediction, gt):
     prediction = filter_string(prediction)
-    print(prediction)
-    print(edit_distance_similarity(prediction, gt))
-    print(word_error_rate(gt, prediction))
+    print("Corrected: ", prediction)
+    print("Ground truth: ", gt)
+    print("Edit distance similarity:", edit_distance_similarity(prediction, gt))
+    print("Word error rate:", word_error_rate(gt, prediction))
 
     return edit_distance_similarity(prediction, gt), word_error_rate(gt, prediction)
     
