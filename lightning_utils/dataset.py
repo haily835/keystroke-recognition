@@ -7,6 +7,7 @@ import torchvision.transforms.functional
 import torchvision.transforms.v2 as v2
 import numpy as np
 import os
+import glob
 
 clf_id2label = ['comma', 'dot', 'delete', 'space',
                          'a', 'b', 'c', 'd',
@@ -138,7 +139,8 @@ class KeyClfStreamDataset(BaseStreamDataset):
         self.label2id = clf_label2id
 
         df = pd.read_csv(label_path)
-
+        total = f_after + f_before + 1
+        last_frame = len(glob.glob(f"{video_path}/*.jpg")) - 1
         segments = []
 
         for index, row in df.iterrows():
@@ -149,9 +151,9 @@ class KeyClfStreamDataset(BaseStreamDataset):
             if key_value not in self.id2label:
                 continue
 
-            pos_start, pos_end = max(
-                key_frame - f_before, 0), key_frame + f_after
-            segments.append(([pos_start, pos_end], key_value))
+            pos_start, pos_end = max(key_frame - f_before, 0), min(key_frame + f_after, last_frame)
+            if (pos_end - pos_start + 1) == total:
+                segments.append(([pos_start, pos_end], key_value))
         self.segments = segments
 
 class KeyDetectDataset(BaseStreamDataset):
@@ -168,6 +170,7 @@ class KeyDetectDataset(BaseStreamDataset):
         self.video_name = video_path.split('/')[-1]
         self.data_dir = video_path.split('/')[-3]
         self.transforms = transforms
+        last_frame = len(glob.glob(f"{video_path}/*.jpg")) - 1
 
         df = pd.read_csv(label_path)
         total_window = f_before + f_after + 1
@@ -182,14 +185,14 @@ class KeyDetectDataset(BaseStreamDataset):
             key_frame = int(row['Frame']) + delay
             key_value = row['Key']  # Key pressed
 
-            pos_start, pos_end = max(
-                key_frame - f_before, 0), key_frame + f_after
+            pos_start, pos_end = max(key_frame - f_before, 0), min(key_frame + f_after, last_frame)
 
             # Current video with keystroke
-            if key_value not in clf_id2label:
-                segments.append(([pos_start, pos_end], self.id2label[0]))
-            else:
-                segments.append(([pos_start, pos_end], self.id2label[1]))
+            if (pos_end - pos_start + 1) == total_window:
+                if key_value not in clf_id2label:
+                    segments.append(([pos_start, pos_end], self.id2label[0]))
+                else:
+                    segments.append(([pos_start, pos_end], self.id2label[1]))
 
             # Infer idle frames.
             is_idle_before = False

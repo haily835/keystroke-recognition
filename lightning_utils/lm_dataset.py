@@ -169,6 +169,7 @@ class KeyClfStreamDataset(BaseStreamDataset):
         
         segments = []
         total = f_after + f_before + 1
+        last_frame = len(self.video) - 1
         for index, row in df.iterrows():
             key_value = row['Key']  # Key pressed
             # Frame number where key was pressed
@@ -177,7 +178,7 @@ class KeyClfStreamDataset(BaseStreamDataset):
             if key_value not in self.id2label:
                 continue
 
-            pos_start, pos_end = max(key_frame - f_before, 0), min(key_frame + f_after, len(self.video))
+            pos_start, pos_end = max(key_frame - f_before, 0), min(key_frame + f_after, last_frame)
             
             if (pos_end - pos_start + 1) == total:
                 segments.append(([pos_start, pos_end], key_value))
@@ -206,17 +207,17 @@ class KeyDetectDataset(BaseStreamDataset):
 
         self.id2label = detect_id2label
         self.label2id = detect_label2id
-        total = f_after + f_before + 1
-
+        
+        last_frame = len(self.video) - 1
         for index, row in df.iterrows():
             # Frame number where key was pressed
             key_frame = int(row['Frame']) + delay
             key_value = row['Key']  # Key pressed
 
-            pos_start, pos_end = max(key_frame - f_before, 0), min(key_frame + f_after, len(self.video))
+            pos_start, pos_end = max(key_frame - f_before, 0), min(key_frame + f_after, last_frame)
 
             # Current video with keystroke
-            if (pos_end - pos_start + 1) == total:
+            if (pos_end - pos_start + 1) == total_window:
                 if key_value not in clf_id2label:
                     segments.append(([pos_start, pos_end], self.id2label[0]))
                 else:

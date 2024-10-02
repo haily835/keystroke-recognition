@@ -93,7 +93,7 @@ class LmKeyClf(L.LightningModule):
                  sync_dist=True, prog_bar=True, on_step=False,  on_epoch=True)
         
         return loss
-    
+
     def validation_step(self, batch):
         videos, targets = batch
         loss, pred_ids = self.forward((videos, targets.long()))

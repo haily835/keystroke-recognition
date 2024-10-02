@@ -12,11 +12,6 @@ trainer:
 model:
   class_path: lightning_utils.lm_module.LmKeyClf
   init_args:
-    model_classpath: models.HyperGT
-    model_init_args:
-      num_class: 30
-      in_channels: 3
-      num_of_heads: 4
     loss_fn_classpath: torch.nn.CrossEntropyLoss
     loss_fn_init_args: null
     id2label: clf_id2label
