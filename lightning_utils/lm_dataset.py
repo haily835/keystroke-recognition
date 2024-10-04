@@ -123,11 +123,17 @@ class BaseStreamDataset(torch.utils.data.Dataset):
        
 
         annotated = []
+        
+
         for idx in range(start, end+1):
             lm = self.video[idx]
+            if mode == 'image' or mode == 'both':
+                img = torchvision.io.image.read_image(f"{self.video_path}/frame_{idx}.jpg").permute(1, 2, 0).numpy()
+            else:
+                img = np.zeros(shape=[360, 640, 3])
             annotated.append(draw_landmarks_on_image(
                 lm.numpy(), 
-                torchvision.io.image.read_image(f"{self.video_path}/frame_{idx}.jpg").permute(1, 2, 0).numpy(),
+                img,
                 mode=mode
             ))
         annotated = torch.stack(annotated)
@@ -247,34 +253,22 @@ class KeyDetectDataset(BaseStreamDataset):
 
 
 if __name__ == "__main__":
-    # detect_ds = BaseStreamDataset.create_dataset(
-    #     video_path='datasets/video-2/raw_frames/video_1',
-    #     label_path='datasets/video-2/labels/video_1.csv',
-    #     gap=2,
-    #     delay=4,
-    # )
-
-    # video, label = detect_ds[0]
-    # print('label: ', label)
-    # print('video: ', video.shape)
-
-    # print(detect_ds.get_class_counts())
-    test = [0, 795, 355, 590, 1038, 329, 163, 455]
+    # test = [0, 795, 355, 590, 1038, 329, 163, 455]
     ids = []
-    for i in range(0, 29):
+    for i in range(0, 12):
         if i != 21:
             ids.append(i)
     for video_id in ids:
         print('video_id: ', video_id)
         clf_ds = BaseStreamDataset.create_dataset(
-            landmark_path=f'datasets/topview/landmarks/video_{video_id}.pt',
-            video_path=f'datasets/topview/raw_frames/video_{video_id}',
-            label_path=f'datasets/topview/labels/video_{video_id}.csv',
+            landmark_path=f'datasets/sideview/landmarks/video_{video_id}.pt',
+            video_path=f'datasets/sideview/raw_frames/video_{video_id}',
+            label_path=f'datasets/sideview/labels/video_{video_id}.csv',
             gap=None,
             delay=3
         )
 
-        # clf_ds.create_segment('.', test[video_id], mode='image')
+        clf_ds.create_segment('.', ids[video_id], mode='skeleton')
         
         for i in range(len(clf_ds)):
             video, label = clf_ds.__getitem__(i)
@@ -284,9 +278,9 @@ if __name__ == "__main__":
     for video_id in ids:
         print('video_id: ', video_id)
         clf_ds = BaseStreamDataset.create_dataset(
-            landmark_path=f'datasets/topview/landmarks/video_{video_id}.pt',
-            video_path=f'datasets/topview/raw_frames/video_{video_id}',
-            label_path=f'datasets/topview/labels/video_{video_id}.csv',
+            landmark_path=f'datasets/sideview/landmarks/video_{video_id}.pt',
+            video_path=f'datasets/sideview/raw_frames/video_{video_id}',
+            label_path=f'datasets/sideview/labels/video_{video_id}.csv',
             gap=1,
             delay=3
         )
