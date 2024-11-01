@@ -1,4 +1,4 @@
-# Keystroke inference
+# Skeleton-based Keystroke recognition 
 
 ## Training and testing
 
