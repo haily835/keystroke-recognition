@@ -1,5 +1,9 @@
 # Skeleton-based Keystroke recognition 
 
+## Dataset
+- Our dataset in the skeleton format (using MediaPipe) can be found in `datasets` folder.
+- Raw images are available on Kaggle: 
+
 ## Training and testing
 
 - keystroke detector to classify iddle and typing moments
