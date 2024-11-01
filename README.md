@@ -6,10 +6,10 @@
 
 ## Training and testing
 
-- keystroke detector to classify iddle and typing moments
-- keystroke classifier to identify which key typed
+- keystroke detector to classify idle and typing moments
+- keystroke classifier to identify which key is pressed
 
-### Local machine with only cpu for development
+### Local machine with CPU for development
 
 1. Training
    Detect model:
@@ -68,9 +68,9 @@ More details on all available options:
 python main.py -c configs/base_clf.yaml [test or fit] -h
 ```
 
-### Kaggle with free GPU:
+### Kaggle notebook with GPU:
 
-1. Clone the repository, install requirements.
+1. Clone the repository, and install requirements.
 
 ```
 !git clone https://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@github.com/haily835/Keystroke-classifier.git
@@ -125,7 +125,7 @@ python main.py -c configs/base_clf.yaml test \
   --ckpt_path CKPT_PATH
 ```
 
-## Run the 2 stages on a video frames from pre-train model:
+## Run the 2 stages on video frames from the pre-train model:
 
 ```bash
 python test.py [-h] [--videos VIDEOS [VIDEOS ...]] [--data_dir DATA_DIR] [--clf_ckpt CLF_CKPT] [--det_ckpt DET_CKPT] [--result_dir RESULT_DIR]  -h, 
