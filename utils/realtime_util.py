@@ -1,7 +1,7 @@
 import pandas as pd
 import re
 from openai import OpenAI
-from configs.api_keys import OPEN_AI
+# from configs.api_keys import OPEN_AI
 
 # metrics 
 def edit_distance_similarity(str1, str2):
@@ -78,7 +78,8 @@ def remove_consecutive_letters(s):
 
 def process_prediction(result_csv, active_thres = 0.5, key_thres = 0.9):
     result = pd.read_csv(result_csv)
-    chars = result[result['Active Prob'] > active_thres][result['Key Prob'] > key_thres]['Key prediction'].to_list()
+    mask = (result['Active Prob'] > active_thres) & (result['Key Prob'] > key_thres)
+    chars = result.loc[mask, 'Key prediction'].tolist()
     processed = []
 
     i = 0

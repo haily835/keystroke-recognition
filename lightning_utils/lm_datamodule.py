@@ -40,10 +40,10 @@ def get_dataloader(
     key_counts['label'] = datasets[0].get_class_counts()['label']
     for video, ds in zip(videos, datasets):
         key_counts[video] = ds.get_class_counts()['count']
-
+    key_counts.to_csv("count.csv")
     merged = torch.utils.data.ConcatDataset(datasets)
-    # print('Key counts: \n', key_counts)
-    print("Total samples: ", len(merged))
+    print('Key counts: \n', key_counts)
+    # print("Total samples: ", len(merged))
 
     loader = DataLoader(
         merged,
@@ -135,3 +135,4 @@ class LmKeyStreamModule(L.LightningDataModule):
 
     def test_dataloader(self):
         return self.test_loader
+    

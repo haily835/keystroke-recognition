@@ -268,7 +268,7 @@ if __name__ == "__main__":
             delay=3
         )
 
-        clf_ds.create_segment('.', ids[video_id], mode='skeleton')
+        clf_ds.create_segment('datasets/sideview/', ids[video_id], mode='skeleton')
         
         for i in range(len(clf_ds)):
             video, label = clf_ds.__getitem__(i)
@@ -286,7 +286,7 @@ if __name__ == "__main__":
         )
 
         # clf_ds.create_segment('.', test[video_id], mode='image')
-        
+
         for i in range(len(clf_ds)):
             video, label = clf_ds.__getitem__(i)
             if video.shape[1] != 8:
