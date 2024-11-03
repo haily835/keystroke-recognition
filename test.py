@@ -151,7 +151,7 @@ def main():
                 frame = torchvision.io.read_image(
                     f"{data_dir}/video_{video_name}/frame_{curr_frame}.jpg"
                 )
-                
+
             if len(windows) < window_size:
                 windows.append(frame)
                 curr_frame += 1
