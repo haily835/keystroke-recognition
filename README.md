@@ -2,7 +2,7 @@
 
 ## Dataset
 - Our dataset in the skeleton format (using MediaPipe) can be found in `datasets` folder.
-- Raw images are available on Kaggle: 
+- Raw images are available on Kaggle: https://www.kaggle.com/datasets/haily1234/keystroke-recognition-keyvr
 
 ## Training and testing
 
