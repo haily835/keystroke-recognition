@@ -9,7 +9,7 @@ trainer:
   logger:
     class_path: lightning.pytorch.loggers.CSVLogger
     init_args:
-      save_dir: logs/HDGCN_clf
+      save_dir: logs/HDGCN_add_data_clf
       name: lightning_logs
       version: null
       prefix: ''
@@ -60,7 +60,6 @@ trainer:
   sync_batchnorm: false
   reload_dataloaders_every_n_epochs: 0
   default_root_dir: null
-ckpt_path: null
 model:
   class_path: lightning_utils.lm_module.LmKeyClf
   init_args:
@@ -85,11 +84,32 @@ data:
     - 2
     - 3
     - 4
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    - 17
+    - 22
+    - 23
+    - 24
+    - 25
     val_videos:
     - 5
+    - 8
+    - 18
+    - 26
     test_videos:
     - 6
     - 7
+    - 19
+    - 20
+    - 27
+    - 28
     train_windows:
     - - 3
       - 4
@@ -102,4 +122,7 @@ data:
     idle_gap: null
     delay: 3
     batch_size: 32
-    num_workers: 8
+    num_workers: 4
+optimizer: null
+lr_scheduler: null
+ckpt_path: null
