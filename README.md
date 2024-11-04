@@ -11,7 +11,10 @@
 - training 2 models can be found in `main.ipynb`
 
 ## Demo
-![Demo](https://github.com/haily835/keystroke-recognition/blob/main/output.mp4)
+
+
+https://github.com/user-attachments/assets/be02d1f0-9db9-4d98-a339-f56778290c12
+
 
 
 ## Reproduce results
