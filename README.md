@@ -11,11 +11,8 @@
 - training 2 models can be found in `main.ipynb`
 
 ## Demo
-<!-- Alternate HTML5 video tag for direct embedding -->
-<video width="640" height="480" controls>
-  <source src="https://github.com/haily835/keystroke-recognition/blob/main/output.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+![Demo](https://github.com/haily835/keystroke-recognition/blob/main/output.mp4)
+
 
 ## Reproduce results
 - config_path: path to yaml file associating with checkpoint (ie. Hyperformer detector: ckpts/HyperGT/det/config.yaml; ckpts/HyperGT/clf/config.yaml)
