@@ -20,8 +20,8 @@ https://github.com/user-attachments/assets/be02d1f0-9db9-4d98-a339-f56778290c12
 ## Reproduce results
 - config_path: path to yaml file associating with checkpoint (ie. Hyperformer detector: ckpts/HyperGT/det/config.yaml; ckpts/HyperGT/clf/config.yaml)
 - ckpt_path: path to model checkpoint (ie. Hyperformer detector: ckpts/HyperGT/det/epoch=12-step=6929.ckpt; classifier ckpts/HyperGT/clf/epoch=17-step=7722.ckpt)
-- accelerator: none cpu
-- test_devices
+- accelerator: none
+- test_devices: cpu
 
 ```
 !python train.py test -c {config_path} \
