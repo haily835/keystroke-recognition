@@ -22,7 +22,9 @@
 - ckpt_path: path to model checkpoint (ie. Hyperformer detector: ckpts/HyperGT/det/epoch=12-step=6929.ckpt; classifier ckpts/HyperGT/clf/epoch=17-step=7722.ckpt)
 - accelerator: none cpu
 - test_devices
-```!python train.py test -c {config_path} \
+
+```
+!python train.py test -c {config_path} \
 --trainer.accelerator {accelerator} \
 --trainer.devices {test_devices} \
 --ckpt_path {ckpt_path}
