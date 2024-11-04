@@ -1,4 +1,4 @@
-# Skeleton-based Keystroke recognition 
+# Skeleton-based Keystroke Recognition 
 
 ## Dataset
 - Our dataset in the skeleton format (using MediaPipe) can be found in `datasets` folder.
