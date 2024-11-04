@@ -75,9 +75,9 @@ model:
 data:
   class_path: lightning_utils.lm_datamodule.LmKeyStreamModule
   init_args:
-    frames_dir: ./datasets/topview/raw_frames
-    landmarks_dir: ./datasets/topview/landmarks
-    labels_dir: ./datasets/topview/labels
+    frames_dir: ./datasets/KeyVR/raw_frames
+    landmarks_dir: ./datasets/KeyVR/landmarks
+    labels_dir: ./datasets/KeyVR/labels
     train_videos:
     - 0
     - 1
