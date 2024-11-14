@@ -89,17 +89,19 @@ class BaseStreamDataset(torch.utils.data.Dataset):
         df = pd.DataFrame({'label': self.id2label, 'count': counts})
         return df
 
-    def create_segment(self, dest_folder, idx, format='mp4', fps=3.0):
+    def create_segment(self, idx, dest_folder=None, format='mp4', fps=3.0):
         """
         create video formats or copy the frames of a segment, apply transforms if any.
         """
-        (start, end), id = self.segments[idx]
-        label = self.id2label[id]
-        if not os.path.exists(dest_folder):
-            os.makedirs(dest_folder)
+        (start, end), label = self.segments[idx]
+        
+        # label = self.id2label[id]
+        if dest_folder:
+            if not os.path.exists(dest_folder):
+                os.makedirs(dest_folder)
 
         frames, id = self.__getitem__(idx)
-        frames = frames.permute(1, 2, 3, 0) * 255
+        frames = frames.permute(1, 2, 3, 0)
         label = self.id2label[id]
 
         if format == 'dir':
@@ -115,13 +117,14 @@ class BaseStreamDataset(torch.utils.data.Dataset):
                                                 frame,
                                                 quality=60)
 
-        else:
+        elif format:
             video_name = f'{self.data_dir}/segments_{format}/{self.video_name}_{label}_f{start}_{end}.{format}'
             torchvision.io.video.write_video(
                 filename=video_name, video_array=frames, fps=fps
             )
 
-
+        else:
+            return frames, label
 class KeyClfStreamDataset(BaseStreamDataset):
     def __init__(self,
                  video_path: str,
