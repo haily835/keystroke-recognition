@@ -118,7 +118,7 @@ class BaseStreamDataset(torch.utils.data.Dataset):
         df = pd.DataFrame({'label': self.id2label, 'count': counts})
         return df
 
-    def create_segment(self, dest_folder, idx, format='mp4', fps=3.0, mode='image'):
+    def create_segment(self, idx, dest_folder=None, format='mp4', fps=3.0, mode='image'):
         (start, end), label = self.segments[idx]
        
 
@@ -127,7 +127,7 @@ class BaseStreamDataset(torch.utils.data.Dataset):
 
         for idx in range(start, end+1):
             lm = self.video[idx]
-            if mode == 'image' or mode == 'both':
+            if mode == 'image' or mode == 'image_and_skeleton':
                 img = torchvision.io.image.read_image(f"{self.video_path}/frame_{idx}.jpg").permute(1, 2, 0).numpy()
             else:
                 img = np.zeros(shape=[360, 640, 3])
@@ -138,15 +138,17 @@ class BaseStreamDataset(torch.utils.data.Dataset):
             ))
         annotated = torch.stack(annotated)
         
-        if not os.path.exists(f'{dest_folder}/segments_{format}'):
-            os.makedirs(f'{dest_folder}/segments_{format}')
-        video_name = f'{dest_folder}/segments_{format}/{self.video_name}_{label}_f{start}_{end}.{format}'
-        torchvision.io.video.write_video(
-            filename=video_name, 
-            video_array=annotated, 
-            fps=fps
-        )
-
+        if format:
+            if not os.path.exists(f'{dest_folder}/segments_{format}'):
+                os.makedirs(f'{dest_folder}/segments_{format}')
+            video_name = f'{dest_folder}/segments_{format}/{self.video_name}_{label}_f{start}_{end}.{format}'
+            torchvision.io.video.write_video(
+                filename=video_name, 
+                video_array=annotated, 
+                fps=fps
+            )
+        else:
+            return annotated, label
 class KeyClfStreamDataset(BaseStreamDataset):
     def __init__(self,
                  video_path: str,
