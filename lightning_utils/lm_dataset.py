@@ -12,25 +12,17 @@ from mediapipe import solutions
 from mediapipe.framework.formats import landmark_pb2
 
 
-clf_id2label = ['comma', 'dot', 'delete', 'space',
-                         'a', 'b', 'c', 'd',
-                         'e', 'f', 'g', 'h',
-                         'i', 'j', 'k', 'l',
-                         'm', 'n', 'o', 'p',
-                         'q', 'r', 's', 't',
-                         'u', 'v', 'w', 'x',
-                         'y', 'z']
+clf_id2label = ['comma', 'dot', 'delete', 'space', 'shift_l', 'shift_r',
+                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                'a', 'b', 'c', 'd',
+                'e', 'f', 'g', 'h',
+                'i', 'j', 'k', 'l',
+                'm', 'n', 'o', 'p',
+                'q', 'r', 's', 't',
+                'u', 'v', 'w', 'x',
+                'y', 'z']
 
-clf_label2id = {
-    'comma': 0, 'dot': 1, 'delete': 2, 'space': 3,
-    'a': 4, 'b': 5, 'c': 6, 'd': 7,
-            'e': 8, 'f': 9, 'g': 10, 'h': 11,
-            'i': 12, 'j': 13,  'k': 14, 'l': 15,
-            'm': 16, 'n': 17, 'o': 18, 'p': 19,
-            'q': 20, 'r': 21, 's': 22, 't': 23,
-            'u': 24, 'v': 25, 'w': 26, 'x': 27,
-            'y': 28, 'z': 29
-}
+clf_label2id = {label: idx for idx, label in enumerate(clf_id2label)}
 
 detect_id2label = ['idle', 'active']
 detect_label2id = {'idle': 0, 'active': 1}

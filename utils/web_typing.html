@@ -1,183 +1,315 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Typing Test with Highlighted Text</title>
-  <style>
-    body { font-family: Arial, sans-serif; }
-    .text-section { margin-bottom: 40px; }
-    .display-text { 
-      width: 100%; 
-      min-height: 100px; 
-      font-size: 14px; 
-      margin-bottom: 10px; 
-      white-space: pre-wrap; 
-      word-wrap: break-word; 
-      border: none; 
-      background: none; 
-      color: black; 
-      overflow-wrap: break-word;
-      display: block;
-      padding: 10px;
-    }
-    .typing-area { width: 100%; height: 100px; font-size: 14px; margin-bottom: 10px; }
-    .button { margin-top: 10px; display: block; }
-    #log { margin-top: 20px; }
-  </style>
-</head>
-<body>
-  <h1>Typing Test with Highlighted Text</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Typing Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4; /* Light background for better contrast */
+        color: #333; /* Darker text color for readability */
+        margin: 0;
+        padding: 20px;
+      }
+      .text-section {
+        margin-bottom: 40px;
+        padding: 20px;
+        background-color: #fff; /* White background for text sections */
+        border-radius: 8px; /* Rounded corners */
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+      }
+      .display-text {
+        width: 100%;
+        min-height: 100px;
+        font-size: 14px;
+        margin-bottom: 10px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        border: 1px solid #ccc; /* Border for better visibility */
+        background: #fafafa; /* Slightly off-white background */
+        color: black;
+        overflow-wrap: break-word;
+        display: block;
+        padding: 10px;
+        border-radius: 4px; /* Rounded corners */
+      }
+      .typing-area {
+        width: 100%;
+        height: 100px;
+        font-size: 14px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc; /* Border for better visibility */
+        border-radius: 4px; /* Rounded corners */
+        padding: 10px; /* Padding for better text input */
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); /* Inner shadow for depth */
+      }
+      .button {
+        margin-top: 5px;
+        margin-bottom: 5px;
+        display: block;
+        padding: 5px 5px; /* Padding for buttons */
+        background-color: #007bff; /* Bootstrap primary color */
+        color: white;
+        border: none;
+        border-radius: 4px; /* Rounded corners */
+        cursor: pointer;
+        transition: background-color 0.3s; /* Smooth transition */
+      }
+      .button:hover {
+        background-color: #0056b3; /* Darker shade on hover */
+      }
+      #log {
+        margin-top: 20px;
+        font-size: 12px;
+        color: #666; /* Lighter color for logs */
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/gh/Kagami/ffmpeg.js/ffmpeg.min.js"></script>
+  </head>
+  <body>
+    <h1>Typing Test</h1>
 
-  <div id="text-container"></div> <!-- This will hold all the text sections -->
-  
-  <script>
-    const textContainer = document.getElementById('text-container');
-    const textsToType = [
+    <div id="text-container"></div>
+    <!-- This will hold all the text sections -->
+
+    <script>
+      const textContainer = document.getElementById("text-container");
+      const textsToType = [
+        "The quick brown fox jumps over 123 lazy dogs five times! On January 1st, 2025, 7 zebras danced gracefully, eating 89 pizzas under 6 bright lamps. Curious owls (4 total) observed as 3 frogs croaked near the 0 degree pond. Bees buzzed 12 times before spotting 23 flowers growing in a vibrant A to Z rainbow. Xylophones, said the quirky parrots, make a joyful sound every 5 to 9 seconds.Meanwhile, 345 sailors sang sea shanties beneath 678 twinkling stars, their voices echoing 890 chords into the vast abyss.",
+
+      
+        "Amid the vibrant festival on June 5th, 2024, 7 lively musicians played tunes from A to Z. Crowds cheered as 8 zebras dashed past 9 glowing lanterns, while 345 balloons floated above the scene. The quick fox jumped over 12 lazy dogs 6 times, barking loudly each time. An owl hooted 3 times as 0 frogs hopped along the muddy path, observing the scattered petals of a rainbow-colored bouquet. By midnight, 89 twinkling stars illuminated the stage, and 567 partygoers sang in harmony, clapping and shouting numbers like 1, 2, 3, and 4 with unbridled joy, celebrating life to the fullest.",
+
+
+        "On a crisp October evening, 5 daring adventurers set out to explore the forest, carrying maps marked from A to Z. They discovered 12 hidden caves, 8 sparkling streams, and 9 glowing fireflies that lit up the night. The quick brown fox dashed past 7 lazy squirrels, while 3 owls hooted loudly from 5 towering trees. Nearby, a group of 6 frogs leaped over 0 rocks into a pond that shimmered like silver under the moonlight. As they camped, 345 stars twinkled above, and they counted 678 fireflies circling around, marveling at the magical beauty of numbers and nature entwined.",
+
+
+        "Beneath the bright evening sky, 5 young explorers gathered to count the stars, each taking turns naming constellations from A to Z. The quick brown fox leapt gracefully over 7 sleepy dogs, while 3 chirping crickets serenaded the night. In the distance, 12 owls hooted, and 6 frogs splashed in a pond reflecting 89 twinkling stars. Around the campfire, they shared stories of the 345 adventures they'd dreamed of, punctuated by laughter and the sound of 0 worries in the world. By midnight, they had counted 678 glowing fireflies and marveled at how nature, like numbers, always found a way to bring magic to life.",
+
+        "In the bustling town square, 5 jugglers performed tricks with glowing balls marked A to Z, dazzling a crowd of 345 cheering onlookers. A quick brown fox darted between 7 colorful stalls, while 6 frogs croaked melodiously by a 0-degree fountain. Nearby, 12 musicians played a lively tune, their instruments creating a symphony of sound. As the clock struck 8, 9 firecrackers lit up the sky, and 89 children clapped in delight. The energy of the night was electric, with 678 stars twinkling above and laughter echoing from all corners, celebrating the unbreakable rhythm of life, letters, and numbers.",
+
+        "On a breezy summer afternoon, 5 adventurers trekked through a vibrant meadow, their backpacks labeled from A to Z. A quick brown fox dashed past 7 grazing deer, while 6 frogs hopped near a glimmering stream. Overhead, 9 birds circled the sky, and 12 dragonflies danced above 0 ripples in the water. Nearby, 345 flowers bloomed in radiant colors, attracting 89 buzzing bees. As dusk fell, the group gazed at 678 stars lighting up the heavens, marveling at the beauty of nature's endless patterns and the harmony between the alphabet and numbers in their journey.",
+
+        "At dawn, 5 curious children wandered into the enchanted forest, guided by a trail marked with letters A through Z. The quick brown fox playfully darted between 7 towering trees, while 6 frogs leapt into a 0-degree crystal-clear pond. Overhead, 9 sparrows chirped as they flew past 12 shimmering cobwebs glistening in the light. The adventurers counted 89 mushrooms growing in a spiral and spotted 345 fireflies blinking in rhythmic harmony. By nightfall, under a sky boasting 678 glittering stars, they shared stories, blending the magic of letters and numbers into an unforgettable tale.",
+
+
+        "Under the warm glow of 678 stars, 5 travelers ventured through a lively marketplace filled with signs from A to Z. A quick brown fox darted past 7 bustling stalls selling everything from 12 jars of honey to 89 vibrant scarves. Nearby, 6 frogs croaked in harmony beside a fountain at 0 degrees, its waters sparkling in the moonlight. Children laughed as they counted 345 lanterns lighting up the square, while 9 musicians played a cheerful tune. The night buzzed with energy, a perfect blend of numbers, letters, and the boundless joy of life.",
+
+        "As the sun set over the hills, 5 hikers gathered around a campfire, their backpacks embroidered with letters from A to Z. A quick brown fox darted past 7 chirping crickets and 6 frogs leaping near the 0-degree lake. Overhead, 9 bats flitted through the twilight, while 12 fireflies blinked in rhythm among the trees. The hikers shared stories of their 89-mile journey, marveling at the beauty of the 345 wildflowers blooming in the valley. Under the glow of 678 stars, they laughed and embraced the harmony of letters, numbers, and natures wonders.",
+
+
+        "On a cool spring evening, 5 friends explored a magical garden where flowers bloomed in patterns from A to Z. A quick brown fox dashed between 7 rows of roses, while 6 frogs sang near a pond chilled to 0 degrees. Overhead, 9 swallows darted gracefully, and 12 glowing butterflies danced in the air. The group counted 89 shining crystals embedded in a nearby fountain and marveled at 345 twinkling lights strung through the trees. As the clock struck midnight, 678 stars sparkled above, casting a celestial glow over the enchanted scene",
+
         "good afternoon. the board of directors meetings have been scheduled as follows january previously confirmed, may, july, and october. the time of each meeting will be from  am to noon, however, further logistical details will be announced at a later date, prior to each meeting. please feel free to contact either keith larney or me if you have any questions. thank you.",
+
         "dear dr. lay. i am pleased to invite you to join my cera colleages and me at our annual executive conference shooting the rapids strategies and risks for the energy future to be held february in houston texas this is the premier international gathering offering senior executives new ideas, insights and strategic thinking on the issues of facing the global energy industry. i believed you will find the conference and the related topic timely and of considerable value. our focus will be on the critical implications of the current market turmoil for energy strategies, investment, regulatory backlash, competitive dynamics, and industry structure. presentation cover all key regions and energy sectors, oil, natural gas, and power and their interconnection. the conference is the centerpiece of cera week, as well as informal interaction and networking. last year, participants included some executives from over countries. complete details on ceraweek can be found at. to register, please go directly to http cera .com cfm track email register.cera.com or call us. i hope you will join us. sincerely, daniel yergin chairman cambridge energy research associates.",
-        "dear jane, i hope this message finds you in good spirits. i am writting to update you on the quirky project we have been working on. the task has been quite challenging, with many tricky aspects that required a great deal of precision and expertise. our team including jack and zara, has been diligently addressing these complex issues. recently we encountered a few unexpected bugs that led to some confusion. however, thanks to quick thinking and effective troubleshooting, we managed to overcome these problems. the projects success relies heavily on accurate execution and careful analysis, and we are pleased to report significant progress. the project involves extensive use of innovative technologies and advanced algorithms. xray analysis and precise measurements are key to our approach. with zipping and zapping through data, we are confident that we will achieve excellent results. we appreciate your patience and ongoing support throughout this process. please let us know if you have any questions or if there is anything specific you would like us to address. we are more than happy to provide additional details or arrange a quick call. thank you once again for your cooperation. we look forward to sharing more updates soon. best regards, john q. xavier.",
-        "dear ken, first off, i have a friend who is setting up a plant in corconran northern calif. to manufacture a welded reinforcement grid building structure systems. they will need vamp. service. i suggested that they would be better of making an electricity provision agreement with you rather than pg e. his name is hans bauman. he can be reached at. please have your people contact him asap as he plans to open for bussiness in november. next, the aspen accord conference in sweden went extraordinarily well... especially with the california issue in such a bound. i know that there is a business opportunity that can be developed and would be pleased, when the timing is right to discuss this with you. after all ken, your california experience should show that the improvement in position in the marketplace could be better. why not, on your next trip to aspen, give me a call and drop by orange county airport and i ll ride up with you. we can talk about what i see as lost opportunities and how to capture them. my new life is going amazingly well. im working in an advisory capacity in california. chicago and sweden.. and taking time to smell the roses. hope you are doing the same. best regards, john.",
-        "a. apple, ant, artist, airplane, arrow, adventure, armor, alien, avenue, anchor.  \nb. banana, boat, bridge, butterfly, balloon, button, bakery, breeze, bracelet, bicycle \nc. cat, car, circle, castle, cloud, candle, camera, chair, clock, cactus \nd. dog, dolphin, dragon, door, diamond, dancer, desert, desk, drum, dinosaur \ne. elephant, eagle, envelope, engine, earth, egg, eraser, elevator, energy, emerald \nf. fish, frog, forest, feather, fire, fence, flute, flower, fruit, flag \ng. grape, ghost, garden, guitar, goat, galaxy, gold, glove, gift, grass \nh. house, horse, honey, hammer, hill, hat, heart, hero, hotel, hedge \ni. ice, island, igloo, insect, idea, ivory, iron, inch, ink, invite \nj. jelly, jacket, jungle, jar, juice, jewel, jump, jigsaw, jet, journey \nk. kite, key, kangaroo, knife, king, kitten, knee, kitchen, knot, knowledge \nl. lemon, ladder, lake, lion, leaf, lamp, lizard, laptop, letter, lighthouse \nm. moon, mountain, mouse, music, map, mirror, monkey, magic, mushroom, magnet \nn. nest, needle, night, nurse, notebook, napkin, necklace, net, number, nap \no. orange, owl, ocean, onion, olive, orbit, octopus, orchard, oven, oak \np. pizza, parrot, piano, pumpkin, pencil, planet, paper, pearl, pillow, pepper \nq. queen, quill, quilt, quiz, quarter, quack, quiver, quartz, quest, queue \nr. rabbit, rainbow, river, rocket, rose, robot, ring, road, radio, ribbon \ns. sun, snake, star, spoon, sand, shark, snow, smile, stone, sugar \nt. tree, tiger, train, table, trumpet, turtle, towel, tomato, tent, truck \nu. umbrella, unicorn, universe, uniform, uphill, upload, utensil, uncle, urban, uproot \nv. violin, volcano, vehicle, village, velvet, vase, voice, vine, valley, victory \nw. water, whale, window, wolf, wind, wizard, wall, watch, wing, wood \nx. xylophone, xenon, xerox, xray, xenophobia, xylem, xaxis, xeriscape, xenolith, xerophyte \ny. yellow, yacht, yogurt, yawn, yard, yolk, yarn, year, yeti, yield \nz. zebra, zoo, zipper, zero, zombie, zigzag, zenith, zest, zodiac, zone",
-        "john, i left a message about this last week but wanted to follow up with additional information for your review we have three offerings currently available or coming soon that i feel would complement the small mid cap and fixed income exposure you already have through redwood sequoia and willow quantitative allocation llc integrates four quantitative investment models to drive aggressive and potentially leveraged asset allocation decisions generates exposure to stock and bond markets through indexing techniques and futures transactions portfolio market exposures can range from plus  percent to minus  percent of net assets this is clearly different from the largely nonleveraged stockpicker funds you already own i would consider this to be a predominantly largecap investment i think of it as an index fund with a brain and on steroids call me and ill explain that comment in more detail juniper crossover fund llc managed by orbimed advisors and focused on global biotech and pharma up to  percent participation in private equity this could be a way to get you some private equity exposure with a worldclass manager tamarack international fund llc long short stockpicker fund focused on the international midcap market i feel this fund is very similar in style to the managers you already own but would give you exposure to the international markets that you currently lack this is a new fund and the first closing will probably be in june of course the summaries above are for information purposes only and do not constitute an offer to sell or solicitation of an offer to buy interests in these funds please call me if youre interested in any of the strategies outlined above and ill have the appropriate offering memorandum sent to you thanks",
-        "hello john, thank you for shopping at buy.com we guarantee your satisfaction with our high quality products and customer support since your experience with order did not live up to our high standards we have issued you a credit in the amount of . please allow  days for your bank to apply this credit to your account if you have any questions please visit customer support at httpswww.us.buy.comcorpsupport thank you again for shopping with us we look forward to serving you in the future sincerely buy.com",
-        "i think i should give you a little background on small ventures bill perkins and i have a strong personal and professional relationship he is an extremely creative individual whalley actually commented on him today as someone who thinks outside the box bill actually sat in a bar four years ago and said the next tradeable market would be bandwidth he has been successful in the gas business when he has had someone to filter his ideas as such he provides an informal consulting role to enron he throws out ideas and every once in a while he comes up with a great one he pointed out an anomalous pricing occurrence in the options market a market i normally dont follow closely that i translated into a multimillion dollar trade for enron in return i have agreed to have enron intermediate his trades within reason i want to emphasize that continuing this relationship should be considered a high priority i am willing to accept some of the credit risk exposure as a cost of doing business bill understands his role as an independent in the market and performs the right riskreward trades for someone with finite capital i place very high confidence in bill not conducting high risk trades having said that we certainly need to monitor his credit exposure and continue to require lcs just understand that he is at a different level of sophistication than any other noninvestment grade counterparty",
-        "i understand there was some concern in regards to the transco z spread option he traded he was absolutely right about the valuation and we on the trading desk knew it as well there are a couple isolated products that enron does not do a good job of valuing because of systems limitations this was one product our spread options are booked in excel using option pricing models created by the research group the problem with these models is that they are strictly theoretical and dont take into account gas fundamental price limitations for instance it is less probable though not impossible for a transport spread from a production area to a market area to go within variable cost than the models predict thus it is necessary to apply a correlation skew curve on top of the overlying correlation used obviously we have this function in our pricing models i was not aware this methodology had not been transferred to the valuation models this has since been changed fortunately these incidents tend to be extremely rare as very few noninvestment grade companies trade these types of products",
-        "finally on friday bill wanted to do a trade that reduced his exposure to enron i gave mike maggi the go ahead to do the trade without consulting credit i do not believe that i acted out of line in approving this trade considering the circumstances if you believe differently please advise thanks john",
-        "the five boxing wizards jump quickly,. pack my box with five dozen liquor jugs,. go lazy fat vixen be shrewed jump quickly,. when zoombies arrives, quickly fax judge pat,. amazingly few discotheques provide juke boxes,. puzzled women bequeatha jerks very exotic gifts. the quick onyx goblin jumps over the lazy dwarf. brawny gods just flocked up to quiz and vex him. watch jeopardy, alex trebeks fun tv quiz game. six big devils from japan quickly forgot how to waltz. five or six big devils from japan quickly forgot how to waltz. five or six big jet planes zoomed quickly be the tower. jack amazed a few girls by dropping the antique onyx vase. a quick movement of the enermy will jeopardize six gun boats. jaded zoombies acted quaintly but kept driving their oxen forward. no kidding lorenzo called off his trip to mexico city just because they told him the conquistador were extinct.",
-        "dear quincy, i hope you are doing well. i wanted to update you on our latest project, which has been quite the journey. the work involves a series of complex tasks, each with its unique challenges. our team, including kevin and zelda, has been diligently working to tackle these issues. recently, we faced several quirky situations that required immediate attention. thankfully, we managed to address them with the help of our innovative techniques and quick adjustments. the process has been quite rigorous, but we are making significant strides. our project is driven by advanced algorithms and cuttingedge technology. the key aspects include xray data analysis, zipping through extensive datasets, and precise measurements. we have had to navigate through tricky scenarios, but we are confident in the direction we are heading. if you have any questions or need more details, please feel free to reach out. we are available for a quick call if that would be more convenient. your feedback and insights are highly valued and will help us ensure the project meets all expectations. thank you for your continued support and understanding. we look forward to sharing more updates with you soon. best regards jack q. zimmer",
-        "dear team, i hope you all had a fantastic time at our recent employee appreciation event. it was truly a pleasure to see everyone come together and enjoy the festivities. your enthusiasm and positive energy made the event a resounding success. we wanted to take a moment to extend our heartfelt gratitude for your hard work and dedication. events like these are a small token of appreciation for the incredible effort you put into your roles every day. as we move forward, lets carry forward this spirit of camaraderie and teamwork. your contributions are invaluable to our companys success, and we look forward to achieving even greater milestones together. once again, thank you for being an integral part of our team. heres to continued success and many more memorable moments ahead. best regards, katty",
-        "regarding the ebs deal, from a business perspective we need to do a level set very quickly. compaq wants to get this settled and move on in a positive light. compaq will honor its commitments but we need to make sure that enron does the same. the bottom line is there needs to be a resetting of expectations relative to compaqs revenue from ebs versus what actually got booked. our expectations were m a year based on the forecast provided by ebs, certainly not m based on what we agreed to yesterday. i find it very difficult in the spirit of partnership to hear that we are being held accountable for our portion of the deal when we dont have the revenue to offset it. based on what i have heard, both parties had shortcomings based on expectations that were set. i will speak to keith and rob this morning to see how it was left. i also need to get your perspective on the transaction. jennifer, if there is a business opportunity, compaq certainly wants to continue pursuing that with enron, provided its equitable for both sides. i realize that this is a difficult situation, but we will get through it."
-    ];
-    
-    let allTimings = [];
+      ];
 
-    // Create typing sections dynamically
-    textsToType.forEach((text, index) => {
-      const textSection = document.createElement('div');
-      textSection.classList.add('text-section');
+      let allTimings = [];
 
-      const displayText = document.createElement('div');
-      displayText.classList.add('display-text');
-      displayText.setAttribute('contenteditable', false);
-      displayText.setAttribute('role', 'textbox');
-      displayText.setAttribute('aria-multiline', 'true');
-      displayText.textContent = text;
+      // Create typing sections dynamically
+      textsToType.forEach((text, index) => {
+        const textSection = document.createElement("div");
+        textSection.classList.add("text-section");
 
-      const typingArea = document.createElement('textarea');
-      typingArea.classList.add('typing-area');
-      typingArea.setAttribute('placeholder', 'Type here...');
-      typingArea.dataset.index = index;
+        const displayText = document.createElement("div");
+        displayText.classList.add("display-text");
+        displayText.setAttribute("contenteditable", false);
+        displayText.setAttribute("role", "textbox");
+        displayText.setAttribute("aria-multiline", "true");
+        displayText.textContent = text;
 
-      const logDiv = document.createElement('div');
-      logDiv.classList.add('log');
-      logDiv.innerHTML = `<strong>Log for Text ${index + 1}:</strong>`;
+        const typingArea = document.createElement("textarea");
+        typingArea.classList.add("typing-area");
+        typingArea.setAttribute("placeholder", "Type here...");
+        typingArea.dataset.index = index;
 
-      const downloadBtn = document.createElement('button');
-      downloadBtn.textContent = `Download ${index + 1}`;
-      downloadBtn.classList.add('button');
-      downloadBtn.dataset.index = index;
+        const videoDiv = document.createElement("h3");
+        videoDiv.innerHTML = `Text ${index + 1}:`;
+        const logDiv = document.createElement("div");
+        logDiv.classList.add("log");
+        logDiv.innerHTML = `<strong> Step 2: Type the text below</strong>`;
 
-      const clearBtn = document.createElement('button');
-      clearBtn.textContent = `Clear ${index + 1}`;
-      clearBtn.classList.add('button');
-      clearBtn.dataset.index = index;
 
-      // Append the elements to the text section
-      textSection.appendChild(logDiv);
-      textSection.appendChild(displayText);
-      textSection.appendChild(typingArea);
-      textSection.appendChild(downloadBtn);
-      textSection.appendChild(clearBtn);
-      textContainer.appendChild(textSection);
+        const clearBtn = document.createElement("button");
+        clearBtn.textContent = `Clear ${index + 1}`;
+        clearBtn.classList.add("button");
+        clearBtn.dataset.index = index;
 
-      // Initialize timing data for each text section
-      allTimings[index] = [];
+        // Append the elements to the text section
 
-      // Add event listener for keydown in each typing area
-      typingArea.addEventListener('keydown', function(event) {
-        const milliseconds = Date.now(); // Capture time in milliseconds
-        let key = formatKey(event);
+        let mediaRecorder; // Declare mediaRecorder
+        let recordedChunks = []; // Store recorded video chunks
+        let startTime; // Declare a variable to store the start time
+        let frameCounter = 0; // Initialize frame counter
 
-        if (key) {
-          const log = { key: key, time: milliseconds };
-          allTimings[index].push(log);
-          // logDiv.innerHTML += `<p>Key: ${key}, Time: ${milliseconds} ms</p>`;
+        // Add this function to start video recording
+        function startRecording() {
+          const constraints = {
+            video: true,
+            audio: false
+          };
+
+          navigator.mediaDevices.getUserMedia(constraints)
+            .then((stream) => {
+              const videoTrack = stream.getVideoTracks()[0];
+              console.log('Current frame rate:', videoTrack.getSettings().frameRate);
+
+              const options = {
+                mimeType: 'video/mp4;codecs=avc1.42E01E', // Attempt to use MP4 codec
+                videoBitsPerSecond: 5000000
+              };
+
+              mediaRecorder = new MediaRecorder(stream, options);
+
+              mediaRecorder.start(10); // Request data every 33.33ms for 30 FPS
+              startTime = Date.now();
+              console.log(`Recording started at: ${startTime} ms`);
+
+              mediaRecorder.ondataavailable = function(event) {
+                recordedChunks.push(event.data);
+              };
+
+              mediaRecorder.onstop = function() {
+                const endTime = Date.now();
+                const totalTime = (endTime - startTime) / 1000; // Convert to seconds
+                const totalFrames = recordedChunks.length;
+                const calculatedFPS = totalFrames / totalTime;
+                console.log(`Calculated FPS: ${calculatedFPS.toFixed(2)}`);
+
+                const blob = new Blob(recordedChunks, { type: options.mimeType });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `video-${index}.mp4`;
+                a.click();
+                URL.revokeObjectURL(url);
+                recordedChunks = [];
+              };
+            })
+            .catch((error) => {
+              console.error("Error accessing media devices:", error);
+            });
         }
-      });
 
-      // Add event listener for input to update display text
-      typingArea.addEventListener('input', function() {
-        const typedText = typingArea.value;
-        updateDisplayText(displayText, text, typedText);
-      });
-
-      // Download button functionality
-      downloadBtn.addEventListener('click', function() {
-        downloadCSV(index);
-      });
-
-      // Clear button functionality
-      clearBtn.addEventListener('click', function() {
-        typingArea.value = ''; // Clear the typing area
-        updateDisplayText(displayText, text, ''); // Clear the highlighted text
-        logDiv.innerHTML = `<strong>Log for Text ${index + 1}:</strong>`; // Clear the log
-        allTimings[index] = []; // Clear the timing data
-      });
-    });
-
-    function updateDisplayText(displayElement, referenceText, typedText) {
-      let highlightedText = '';
-      let currentIndex = 0;
-
-      for (let i = 0; i < referenceText.length; i++) {
-        if (currentIndex < typedText.length && referenceText[i] === typedText[currentIndex]) {
-          highlightedText += `<span style="color: green;">${referenceText[i]}</span>`;
-          currentIndex++;
-        } else {
-          highlightedText += `<span style="color: red;">${referenceText[i]}</span>`;
-        }
-      }
-
-      displayElement.innerHTML = highlightedText;
-    }
-
-    function formatKey(event) {
-      switch (event.key) {
-        case 'Backspace':
-          return 'delete';
-        case '.':
-          return 'dot';
-        case ',':
-          return 'comma';
-        case ' ':
-          return 'space';
-        default:
-          // Only log a-z
-          if (/^[a-z]$/i.test(event.key)) {
-            return event.key.toLowerCase(); // Normalize to lowercase
+        // Add this function to stop video recording
+        function stopRecording() {
+          if (mediaRecorder) {
+            mediaRecorder.stop();
+            downloadCSV(index)
+          } else {
+            console.log("Can not stop");
           }
-          return null;
-      }
-    }
+        }
 
-    // Function to generate and download CSV for each text
-    function downloadCSV(index) {
-      let csvContent = "Key,Time (ms)\n";
-      const currentTimings = allTimings[index];
-      currentTimings.forEach(record => {
-        csvContent += `${record.key},${record.time}\n`;
+        // Add buttons to start and stop recording
+        const startBtn = document.createElement("button");
+        startBtn.innerHTML = "Step 1: Start Recording"; // Play symbol for start
+        startBtn.classList.add("button");
+        startBtn.title = "Start Recording"; // Tooltip for accessibility
+        startBtn.addEventListener("click", startRecording);
+
+        const stopBtn = document.createElement("button");
+        stopBtn.innerHTML = "Step 3: Stop Recording"; // Square symbol for stop
+        stopBtn.classList.add("button");
+        stopBtn.title = "Step 3: Stop Recording"; // Tooltip for accessibility
+        stopBtn.addEventListener("click", stopRecording);
+
+        textSection.appendChild(videoDiv);
+        textSection.appendChild(startBtn);
+        textSection.appendChild(logDiv);
+        
+        textSection.appendChild(displayText);
+        textSection.appendChild(typingArea);
+        textSection.appendChild(stopBtn);
+
+        // textSection.appendChild(downloadBtn);
+        textSection.appendChild(clearBtn);
+        textContainer.appendChild(textSection);
+
+        // Initialize timing data for each text section
+        allTimings[index] = [];
+
+        // Add event listener for keydown in each typing area
+        typingArea.addEventListener("keydown", function (event) {
+          const milliseconds = Date.now(); // Capture time in milliseconds
+          let key = formatKey(event);
+
+          if (key) {
+            const log = { key: key, time: milliseconds - startTime };
+            allTimings[index].push(log);
+            // logDiv.innerHTML += `<p>Key: ${key}, Time: ${milliseconds} ms</p>`;
+          }
+        });
+
+        // Add event listener for input to update display text
+        typingArea.addEventListener("input", function () {
+          const typedText = typingArea.value;
+          updateDisplayText(displayText, text, typedText);
+        });
+
+        clearBtn.addEventListener("click", function () {
+          typingArea.value = ""; // Clear the typing area
+          updateDisplayText(displayText, text, ""); // Clear the highlighted text
+          logDiv.innerHTML = `<strong>Log for Text ${index + 1}:</strong>`; // Clear the log
+          allTimings[index] = []; // Clear the timing data
+        });
       });
 
-      // Create a Blob and trigger a download
-      const blob = new Blob([csvContent], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `key_timings_text_${index + 1}.csv`;
-      a.click();
-      window.URL.revokeObjectURL(url);
-    }
-  </script>
-</body>
+      function updateDisplayText(displayElement, referenceText, typedText) {
+        let highlightedText = "";
+        let currentIndex = 0;
+
+        for (let i = 0; i < referenceText.length; i++) {
+          if (
+            currentIndex < typedText.length &&
+            referenceText[i] === typedText[currentIndex]
+          ) {
+            highlightedText += `<span style="color: green;">${referenceText[i]}</span>`;
+            currentIndex++;
+          } else {
+            highlightedText += `<span style="color: red;">${referenceText[i]}</span>`;
+          }
+        }
+
+        displayElement.innerHTML = highlightedText;
+      }
+
+      function formatKey(event) {
+        switch (event.key) {
+          case "Backspace":
+            return "delete";
+          case ".":
+            return "dot";
+          case ",":
+            return "comma";
+          case " ":
+            return "space";
+          default:
+            // Only log a-z
+            return event.key.toLowerCase(); // Normalize to lowercase
+        }
+        // return event.key
+      }
+
+      // Function to generate and download CSV for each text
+      function downloadCSV(index) {
+        let csvContent = "Key,Time (ms)\n";
+        const currentTimings = allTimings[index];
+        currentTimings.forEach((record) => {
+          csvContent += `${record.key},${record.time}\n`;
+        });
+
+        // Create a Blob and trigger a download
+        const blob = new Blob([csvContent], { type: "text/csv" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `video-${index}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      }
+    </script>
+  </body>
 </html>

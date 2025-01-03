@@ -13,6 +13,7 @@ import torch
 from PIL import Image
 from tqdm import tqdm
 from torchvision.transforms.functional import rotate
+import cv2
 
 import argparse
 
@@ -25,10 +26,7 @@ options = vision.HandLandmarkerOptions(
 detector = vision.HandLandmarker.create_from_options(options)
 
 
-def process_image(image_path):
-    img = torchvision.io.image.read_image(image_path)
-    img = img.permute(1, 2, 0).numpy()
-    pil_img = Image.fromarray(img)
+def process_image(pil_img):
     data = np.asarray(pil_img)
     media_pipe_img = mp.Image(
         image_format=mp.ImageFormat.SRGB,
@@ -44,9 +42,12 @@ def process_image(image_path):
         for landmark in hand_landmarks:
             coords[idx].append((landmark.x, landmark.y, landmark.z))
 
-    if len(coords[1]) == 21 and len(coords[0]) == 21:
-        return torch.tensor(coords)
-    return None
+    # Ensure each hand has 21 landmarks, fill with zeros if necessary
+    for idx in range(2):
+        while len(coords[idx]) < 21:
+            coords[idx].append((0.0, 0.0, 0.0))
+
+    return torch.tensor(coords)
 
 # Usage in the main loop.
 # frames = []
@@ -76,27 +77,39 @@ if __name__ == '__main__':
     if not os.path.exists(dest_dir):
         os.makedirs(dest_dir)
 
-    for video in range(1, 2):
-        video_name = f'video_{video}'
+    for video in range(0, 15):
+        video_name = f'video-{video}'
         print(f"Video {video_name}")
-        src = f'{src_dir}/{video_name}'
+        src = f'{src_dir}/{video_name}.mp4'
         dest = f'{dest_dir}/{video_name}.pt'
-        jpgs = sorted(glob.glob(f"{src}/*.jpg"))
-        to_img = False
 
+        # Open the video file
+        cap = cv2.VideoCapture(src)
         frames = []
         last_succeed = None
-        for i in range(len(jpgs)):
-            img_path = f"{src}/frame_{i}.jpg"
-            result = process_image(img_path)
+        frame_idx = 0
+
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            # Convert the frame to PIL Image
+            pil_img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            img_path = f"{src}/frame_{frame_idx}.jpg"  # Optional: Save frame as image if needed
+            result = process_image(pil_img)
             if result is not None:
                 last_succeed = result
                 frames.append(result)
             else:
-                if not last_succeed is None:
+                if last_succeed is not None:
                     frames.append(last_succeed)
-                print(f'Mediapipe failed at {i}')
+                print(f'Mediapipe failed at frame {frame_idx}')
+
+            frame_idx += 1
+
+        cap.release()
 
         frames = torch.stack(frames)
-        print(f"Sucessed {len(frames)}, shape {frames.shape}  in {len(jpgs)}")
+        print(f"Sucessed {len(frames)}, shape {frames.shape} in {frame_idx} frames")
         torch.save(frames, dest)
