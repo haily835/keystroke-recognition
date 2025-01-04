@@ -152,7 +152,7 @@ cython_debug/
 #.idea/
 resources/
 datasets/*/raw_frames/
-datasets/*/*.mp4
+datasets/*/videos
 logs/
 lightning_logs/
 notebooks/
