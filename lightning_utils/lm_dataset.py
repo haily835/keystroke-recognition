@@ -12,7 +12,7 @@ from mediapipe import solutions
 from mediapipe.framework.formats import landmark_pb2
 
 
-clf_id2label = ['comma', 'dot', 'delete', 'space', 'shift_l', 'shift_r',
+clf_id2label = ['comma', 'period', 'backspace', 'space', 'shift_l', 'shift_r',
                 '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
                 'a', 'b', 'c', 'd',
                 'e', 'f', 'g', 'h',
