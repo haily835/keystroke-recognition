@@ -153,6 +153,8 @@ cython_debug/
 resources/
 datasets/*/raw_frames/
 datasets/*/videos
+datasets/*.zip
+ckpts/*.zip
 logs/
 lightning_logs/
 notebooks/

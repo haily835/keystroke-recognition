@@ -74,7 +74,7 @@ def remove_consecutive_letters(s):
         if char != result[-1]:  # Only add if it's different from the last character
             result.append(char)
     
-    return ''.join(result)
+    return result
 
 def process_prediction(result_csv, active_thres = 0.5, key_thres = 0.9):
     result = pd.read_csv(result_csv)
@@ -101,7 +101,7 @@ def process_prediction(result_csv, active_thres = 0.5, key_thres = 0.9):
     
     # prediction = filter_string(''.join(processed))
     # prediction = remove_consecutive_letters(prediction)
-    return ''.join(processed)
+    return processed
 
 def evaluate(prediction, gt):
     prediction = filter_string(prediction)
