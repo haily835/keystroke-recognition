@@ -6,7 +6,7 @@ import pandas as pd
 def extract_and_merge_frames(video_path, 
                              csv_path, 
                              output_dir,
-                             n_samples=100,
+                             n_samples=10,
                              frames_before=3, 
                              frames_after=4):
     # Load the video
@@ -57,8 +57,8 @@ def extract_and_merge_frames(video_path,
             out.release()
             # print(f"Saved: {output_filename}")
         count += 1
-        # if count == n_samples:
-        #     break
+        if count == n_samples:
+            break
     
     # Release video capture
     cap.release()
@@ -66,10 +66,10 @@ def extract_and_merge_frames(video_path,
 
 
 if __name__ == "__main__":
-    for i in [8,9]:
+    for i in [18,19]:
         extract_and_merge_frames(
-            f'datasets/nhi-data/videos/video_{i}.mp4',
-            f'datasets/nhi-data/labels/video_{i}.csv',
-            f'output_videos/nhi-data/video_{i}',
+            f'datasets/nhi-v2/videos/video_{i}.mp4',
+            f'datasets/nhi-v2/labels/video_{i}.csv',
+            f'output_videos/nhi-v2/video_{i}',
         )
 
