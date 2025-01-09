@@ -7,22 +7,12 @@ import torchvision.transforms.functional
 import torchvision.transforms.v2 as v2
 import numpy as np
 import os
+import json
 
 from mediapipe import solutions
 from mediapipe.framework.formats import landmark_pb2
 
 
-clf_id2label = ['comma', 'period', 'backspace', 'space', 'shift',
-                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-                'a', 'b', 'c', 'd',
-                'e', 'f', 'g', 'h',
-                'i', 'j', 'k', 'l',
-                'm', 'n', 'o', 'p',
-                'q', 'r', 's', 't',
-                'u', 'v', 'w', 'x',
-                'y', 'z']
-
-clf_label2id = {label: idx for idx, label in enumerate(clf_id2label)}
 
 detect_id2label = ['idle', 'active']
 detect_label2id = {'idle': 0, 'active': 1}
@@ -69,12 +59,13 @@ class BaseStreamDataset(torch.utils.data.Dataset):
 
     @classmethod
     def create_dataset(cls, video_path: str, landmark_path:str, label_path: str,
-                       gap: int, f_before: int = 3, f_after: int = 4, delay: int = 10):
+                       gap: int, classes_path,  f_before: int = 3, f_after: int = 4, delay: int = 10):
         if gap:
             return KeyDetectDataset(
                 video_path=video_path,
                 label_path=label_path,
                 landmark_path=landmark_path,
+                classes_path=classes_path,
                 gap=gap,
                 f_after=f_after,
                 f_before=f_before,
@@ -84,6 +75,7 @@ class BaseStreamDataset(torch.utils.data.Dataset):
             video_path=video_path,
             label_path=label_path,
             landmark_path=landmark_path,
+            classes_path=classes_path,
             f_after=f_after,
             f_before=f_before,
             delay=delay)
@@ -145,6 +137,7 @@ class KeyClfStreamDataset(BaseStreamDataset):
     def __init__(self,
                  video_path: str,
                  label_path: str,
+                 classes_path: str,
                  landmark_path: str,
                  f_before=3,
                  f_after=4,
@@ -156,8 +149,14 @@ class KeyClfStreamDataset(BaseStreamDataset):
         self.video_name = video_path.split('/')[-1]
         self.data_dir = video_path.split('/')[-3]
         self.transforms = transforms
-        self.id2label = clf_id2label
-        self.label2id = clf_label2id
+
+
+        # Load the array of characters from the JSON file
+        with open(classes_path, 'r') as f:
+            self.id2label = json.load(f)
+
+            self.label2id = {label: idx for idx, label in enumerate(self.id2label)}
+        
         self.video = torch.load(self.landmark_path, weights_only=True)
         df = pd.read_csv(label_path)
 
@@ -190,10 +189,11 @@ class KeyDetectDataset(BaseStreamDataset):
                  video_path: str,
                  label_path: str,
                  landmark_path: str,
-                 gap,
-                 f_before=3,
-                 f_after=4,
-                 delay=4):
+                 classes_path: str,
+                 gap: int,
+                 f_before: str = 3,
+                 f_after: str = 4,
+                 delay: str = 4):
 
         self.video_path = video_path
         self.landmark_path = landmark_path
@@ -204,6 +204,8 @@ class KeyDetectDataset(BaseStreamDataset):
         total_window = f_before + f_after + 1
 
         segments = []
+        with open(classes_path, 'r') as f:
+            clf_id2label = json.load(f)
 
         self.id2label = detect_id2label
         self.label2id = detect_label2id
