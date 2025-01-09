@@ -13,6 +13,7 @@ def get_dataloader(
         frames_dir,
         labels_dir,
         landmarks_dir,
+        classes_path,
         videos,
         idle_gap=None,
         delay=10,
@@ -31,6 +32,7 @@ def get_dataloader(
                 video_path=f"{frames_dir}/video_{video}",
                 landmark_path=f"{landmarks_dir}/video_{video}.pt",
                 label_path=f"{labels_dir}/video_{video}.csv",
+                classes_path=classes_path,
                 gap=idle_gap,
                 delay=delay,
                 f_after=f_after,
@@ -60,6 +62,7 @@ class LmKeyStreamModule(L.LightningDataModule):
                  frames_dir: str,
                  landmarks_dir: str,
                  labels_dir: str,
+                 classes_path: str,
                  train_videos: List[int] = [],
                  val_videos: List[int] = [],
                  test_videos: List[int] = [],
@@ -79,6 +82,7 @@ class LmKeyStreamModule(L.LightningDataModule):
         self.frames_dir = frames_dir
         self.landmarks_dir = landmarks_dir
         self.labels_dir = labels_dir
+        self.classes_path = classes_path
         self.train_videos = train_videos
         self.val_videos = val_videos
         self.test_videos = test_videos
@@ -95,6 +99,7 @@ class LmKeyStreamModule(L.LightningDataModule):
             self.train_loader = get_dataloader(self.frames_dir,
                                            self.labels_dir,
                                            self.landmarks_dir,
+                                           self.classes_path,
                                            videos=self.train_videos,
                                            idle_gap=self.idle_gap,
                                            delay=self.delay,
@@ -107,6 +112,7 @@ class LmKeyStreamModule(L.LightningDataModule):
                 self.frames_dir,
                 self.labels_dir,
                 self.landmarks_dir,
+                self.classes_path,
                 videos=self.val_videos,
                 idle_gap=self.idle_gap,
                 delay=self.delay,
@@ -119,6 +125,7 @@ class LmKeyStreamModule(L.LightningDataModule):
                 self.frames_dir,
                 self.labels_dir,
                 self.landmarks_dir,
+                self.classes_path,
                 videos=self.test_videos,
                 idle_gap=self.idle_gap,
                 delay=self.delay,
@@ -135,4 +142,5 @@ class LmKeyStreamModule(L.LightningDataModule):
 
     def test_dataloader(self):
         return self.test_loader
+    
     
