@@ -12,8 +12,6 @@ import json
 from mediapipe import solutions
 from mediapipe.framework.formats import landmark_pb2
 
-
-
 detect_id2label = ['idle', 'active']
 detect_label2id = {'idle': 0, 'active': 1}
 

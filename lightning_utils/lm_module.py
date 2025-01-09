@@ -7,9 +7,8 @@ from sklearn.metrics import classification_report
 import pandas as pd
 from lightning_utils.dataset import *
 from models.resnet import *
-from pytorchvideo.models import *
 from utils.import_by_modulepath import initialize_class
-
+import json
 
 
 class LmKeyClf(L.LightningModule):
@@ -18,8 +17,7 @@ class LmKeyClf(L.LightningModule):
                  model_init_args: Dict[str, Any] | None , 
                  loss_fn_classpath: str,
                  loss_fn_init_args: Dict[str, Any] | None ,
-                 id2label: str,
-                 label2id: str,
+                 classes_path: str,
                  lr: float # learning rate
                 ):
         super().__init__()
@@ -28,8 +26,9 @@ class LmKeyClf(L.LightningModule):
         self.model = initialize_class(model_classpath, model_init_args)
         self.loss_fn = initialize_class(loss_fn_classpath, loss_fn_init_args)
         self.lr = lr
-        self.id2label = eval(id2label)
-        self.label2id = eval(label2id)
+        with open(classes_path, 'r') as f:
+            self.id2label = json.load(f)
+            self.label2id = {label: idx for idx, label in enumerate(self.id2label)}
         self.num_classes = len(self.id2label)
         self.train_acc = torchmetrics.Accuracy(
             task="multiclass", num_classes=self.num_classes)

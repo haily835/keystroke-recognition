@@ -14,8 +14,6 @@ model:
   init_args:
     loss_fn_classpath: torch.nn.CrossEntropyLoss
     loss_fn_init_args: null
-    id2label: clf_id2label
-    label2id: clf_label2id
     lr: 0.001
 data:
   class_path: lightning_utils.lm_datamodule.LmKeyStreamModule
