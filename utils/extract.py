@@ -63,8 +63,6 @@ def extract_and_merge_frames(video_path,
     # Release video capture
     cap.release()
 
-
-
 if __name__ == "__main__":
     for i in [18,19]:
         extract_and_merge_frames(
