@@ -7,140 +7,8 @@ import csv
 import os
 import tkinter.font as tkFont
 from tkinter import ttk
+from typing_data import typing_data
 
-typing_data = [
-    {
-        "title": "The Home Row [j k]",
-        "content": "jkj jkj jkj jkj kjk kjk kjk kjk jjj jjj jjj kkk kkk kkk jk jk jk kj kj kj jj kk jk kj kj jk jj jk kk kj j j j j k k k k j k k j j k k j jkj jjk kjj kkj jkk kkk jjj kjk"
-    },
-    {
-        "title": "The Home Row [l ;]",
-        "content": "l;l l;l l;l l;l ;l; ;l; ;l; ;l; lll lll lll ;;; ;;; ;;; l; l; l; ;l ;l ;l ll ;; l; ;l ;l l; ll l; ;; ;l l l l l ; ; ; ; l ; ; l l ; ; l l;l ll; ;ll ;;l l;; ;;; lll ;l;"
-    },
-
-    {
-        "title": "The Home Row [f d]",
-        "content": "fff fff fff fff ddd ddd ddd ddd fff ddd fff ddd fff ddd fdf fdf fdf fdf dfd dfd dfd dfd fff fff fff ddd ddd ddd fd fd fd df df df ff dd fd df df fd ff fd dd df"
-    },
-
-    {
-        "title": "The Home Row [s a]",
-        "content": "sss sss sss sss aaa aaa aaa aaa sss aaa sss aaa sss aaa sas sas sas sas asa asa asa asa sss sss sss aaa aaa aaa sa sa sa as as as ss aa sa as as sa ss sa aa as"
-    },
-
-    {
-        "title": "The Home Row [h g]",
-        "content": "hhh hhh hhh hhh ggg ggg ggg ggg hhh ggg hhh ggg hhh ggg hgh hgh hgh hgh ghg ghg ghg ghg hhh hhh hhh ggg ggg ggg hg hg hg gh gh gh hh gg hg gh gh hg hh hg gg gh"
-    },
-
-
-    {
-        "title": "The Home Row all together",
-        "content": "asa ada afa aga aha aja aka ala a;a ;l; ;k; ;j; ;h; ;g; ;f; ;d; ;s; ;s; ;a; sas sds sfs sgs shs sjs sks sls s;s l;l lkl ljl lhl lgl lfl ldl lsl lal dad dsd dfd dgd dhd dkd dld d;d k;k klk kjk khk kgk kfk kdk ksk kak faf fsf fdf fgf fhf fjf fkf flf f;f f;f jlj jkj jhj jgj jfj jdj jsj jaj gag gsg gdg gfg ghg gkg glg g;g h;h hlh hkh hjh hgh hfh hdh hsh hah a l s j d h g ; f k l f s ; j g k h a d"
-    },
-
-    {
-        "title": "The top row [u r] with home row",
-        "content": "uuu uuu rrr rrr uuu rrr jjj uuu jjj uuu fff rrr fff rrr juj juj frf frf uju uju rfr rfr ara ara srs srs frf frf drd drd grg grg hrh hrh jrj jrj lrl lrl ;r; ;r; aua aua sus sus dud dud fuf fuf gug gug huh huh juj juj kuk kuk lul lul ;u; ;u;"
-    },
-
-
-    {
-        "title": "The top row [i e] with home row",
-        "content": "iii iii eee eee iii eee kkk iii kkk iii ddd eee ddd eee kik kik ded ded iki iki ede ede aea aea ses ses ded ded fef fef geg geg heh heh jej jej kek kek lel lel ;e; aia aia sis sis did did fif fif gig gig hih hih jij jij kik kik lil lil ;i; ;i;"
-    },
-
-    {
-        "title": "The top row [o w] with home row",
-        "content": "ooo ooo www www ooo www lll ooo lll ooo sss www sss www lol lol sws sws olo olo wsw wsw awa awa sws sws dwd dwd fwf fwf gwg gwg hwh hwh jwj jwj kwk kwk lwl lwl ;w; ;w; aoa aoa sos sos dod dod fof fof gog gog hoh hoh joj joj kok kok lol lol ;o; ;o;"
-    },
-
-    {
-        "title": "The top row [p g] with home row",
-        "content": "ppp ppp qqq qqq ppp qqq ;;; ppp ;;; ppp aaa qqq aaa qqq ;p; ;p; aqa aqa p;p p;p qaq qaq aqa aqa sqs sqs dqd dqd fqf fqf gqg gqg hqh hqh jqj jqj kqk kqk lql lql ;q; ;q; apa apa sps sps dpd dpd fpf fpf gpg gpg hph hph jpj jpj kpk kpk lpl lpl ;p; ;p;"
-    },
-
-
-    {
-        "title": "The top row [y t] with home row",
-        "content": "yyy yyy ttt ttt yyy ttt ;;; yyy ;;; yyy aaa ttt aaa ttt ;y; ;y; ata ata y;y y;y tat tat ata ata sts sts dtd dtd ftf ftf gtg gtg hth hth jtj jtj ktk ktk ltl ltl ;t; ;t; aya aya sys sys dyd dyd fyf fyf gyg gyg hyh hyh jyj jyj kyk kyk lyl lyl ;y; ;y;"
-    },
-
-
-    {
-        "title": "The bottom row [m v] with home row",
-        "content": "mmm mmm vvv vvv mmm vvv jjj mmm jjj mmm fff vvv fff vvv jmj jmj fvf fvf mjm mjm vfv vfv ava ava svs svs dvd dvd fvf fvf gvg gvg hvh hvh jvj jvj lvl lvl ;v; ;v; ama ama sms sms dmd dmd fmf fmf gmg gmg hmh hmh jmj jmj kmk kmk lml lml ;m; ;m;"
-    },
-
-
-    {
-        "title": "The bottom row [, c] with home row",
-        "content": ",,, ,,, ccc ccc ,,, ccc kkk ,,, kkk ,,, ddd ccc ddd ccc k,k k,k dcd dcd ,k, ,k, cdc cdc aca aca scs scs dcd dcd fcf fcf gcg gcg hch hch jcj jcj kck kck lcl lcl ;c; ;c; a,a a,a s,s s,s d,d d,d f,f f,f g,g g,g h,h h,h j,j j,j k,k k,k l,l l,l ;,; ;,;"
-    },
-
-    {
-        "title": "The bottom row [. x] with home row",
-        "content": "... ... xxx xxx ... xxx lll ... lll ... sss xxx sss xxx l.l l.l sxs sxs .l. .l. xsx xsx axa axa sxs sxs dxd dxd fxf fxf gxg gxg hxh hxh jxj jxj kxk kxk lxl lxl ;x; ;x; a.a a.a s.s s.s d.d d.d f.f f.f g.g g.g h.h h.h j.j j.j k.k k.k l.l l.l ;.; ;.;"
-    },
-
-    {
-        "title": "The bottom row [/ z] with home row",
-        "content": "/// /// zzz zzz /// zzz ;;; /// ;;; /// aaa zzz aaa zzz ;/; ;/; aza aza /;/ /;/ zaz zaz aza aza szs szs dzd dzd fzf fzf gzg gzg hzh hzh jzj jzj kzk kzk lzl lzl ;z; ;z; a/a a/a s/s s/s d/d d/d f/f f/f g/g g/g h/h h/h j/j j/j k/k k/k l/l l/l ;/; ;/;"
-    },
-
-    {
-        "title": "The bottom row [n b] with home row",
-        "content": "nnn nnn bbb bbb nnn bbb ;;; nnn ;;; nnn aaa bbb aaa bbb ;n; ;n; aba aba n;n n;n bab bab aba aba sbs sbs dbd dbd fbf fbf gbg gbg hbh hbh jbj jbj kbk kbk lbl lbl ;b; ;b; ana ana sns sns dnd dnd fnf fnf gng gng hnh hnh jnj jnj knk knk lnl lnl ;n; ;n;"
-    },
-
-    
-    {
-        "title": "Right hand capital letters",
-        "content": "JJJ KKK LLL JjJ KkK LlL Jjj Kkk Lll HHH HhH Hhh UUU III OOO PPP UuU IiI OoO PpP Uuu Iii Ooo Ppp YYY YyY Yyy MMM  MmM Mmm NNN NnN Nnn"
-    },
-
-    {
-        "title": "Left hand capital letters",
-        "content": "FFF DDD SSS AAA FfF DdD SsS AaA Fff Ddd Sss Aaa GGG GgG Ggg RRR EEE WWW QQQ RrR EeE WwW QqQ Rrr Eee Www Qqq TTT  TtT Ttt VVV CCC XXX ZZZ VvV CcC XxX ZzZ Vvv Ccc Xxx Zzz BBB BbB Bbb"
-    },
-
-
-    {
-        "title": "Validate The top row",
-        "content": "the four lads stood quietly atop the tower; pear salad is a great quirky dish; plaid dads play golf; slide the glass to your good pal; we gladly yapped for two hours; wade through the water to us; either of us will go; we used our gold goose eggs well; let us do tea for two; go forward to the other side; other ghosts will spook us; the riders had quite a lot of leg power; you see how easy it is to type the top row; a little further to go yet; i wish i had read the flyer fully; read it for us please; joe sipped jade tea jealously; kate flew her fast kite sky high;"
-    },
-
-    {
-        "title": "Validate 1 The bottom row with words",
-        "content": "zebras are not exactly known for being quiet animals. she/he would very likely just play along for a while. you can make quite a lot of lemon zest with even larger sized lemons; please cover each plate. six foxes quickly woke axel; just in time. i caught five jelly fish, six octopus and two sea urchins for my buddy ben. eight / six is exactly equal to four / three."
-    },
-
-    {
-        "title": "Validate 2 Capital letters",
-        "content": "WOW. Four Jacks And One Queen, I Win. Please Do Not Go Up There Now. Zack Needs MORE Caramel Kettle Corn ASAP. Nobody Even HAS Any Purple Vests. Xavier Let Seventy Yellow BEES Into Our Cabin. YIKES. Good Lemons Are HARD To Pick. Do Not Watch Karen; She Is VERY Nervous."
-    },
-
-   
-    {
-        "title": "Test 1 pangrams",
-        "content": "The quick brown fox jumps over the lazy dog; Jack packs five dozen liquor jugs. Pack my box with five dozen liquor jugs, and quickly / adjust the bright quartz fox. Jumpy fox skips over black quartz / bright dwarves; lazy dogs bark. Bright vixens jump; dozy fowl quack, lazy dogs bark / quick quartz fixes. Jack big quartz fox skips over lazy dogs; adjust my vow / fix bright liquor jugs."
-    },
-
-    {
-        "title": "Test 2 pangrams",
-        "content": "Quickly adjust the quartz fox, pack my box; bright jugs overflow / lazy dwarves run. Jumping quickly over lazy dogs, the bright fox vexes dwarves; black quartz fills my box / liquor flows. Pack my box with five dozen liquor jugs; quick fox jumps / bright quartz glows. Jacks bright vixen jumps over lazy dogs; dwarves quack, quartz shimmers / bold fox skips. Black quartz, shining brightly, fills my vow; quick fox packs jugs / lazy dogs bark."
-    },
-
-    {
-        "title": "Test 3 pangrams",
-        "content": "The lazy dog jumps; Jacks bright quartz fox skips / over dwarves, packing liquor jugs. Quickly fix the quartz jug; Jacks bright fox jumps / over lazy dogs, vexing dwarves. Jack jumps over the bright quartz; pack my box / lazy dogs bark, quick vixen skips. Dwarves vex quick bright fox; pack my box with liquor jugs, quartz shines / lazy dog jumps. Fix my vow; Jacks quartz fox jumps / quickly over bright lazy dogs, packing liquor jugs. Jumpy dwarves quack; bright fox skips over lazy dogs / quartz fills the liquor jugs, Jack packs."
-    },
-
-    {
-        "title": "Test 4 email",
-        "content": "Good afternoon, The Board of Directors meetings have been scheduled as follows, January, previously confirmed, May, July, and October. Each meeting will take place from 9.00 AM to noon. Further logistical details will be announced closer to each meeting date. If you have any questions, please feel free to contact either Keith Larney or me. Thank you."
-    }
-]
 class TypingTestApp:
     def __init__(self, root):
         self.root = root
@@ -151,7 +19,7 @@ class TypingTestApp:
         default_font = tkFont.nametofont("TkDefaultFont")
         default_font.configure(size=14)  # Increase the font size
 
-        self.texts_to_type = [lesson["content"] for lesson in typing_data]  # Use content from typing_data
+        self.texts_to_type = typing_data # Use content from typing_data
         self.current_text_index = 0
         self.all_timings = [[] for _ in self.texts_to_type]
         self.media_recorder = None
@@ -181,7 +49,6 @@ class TypingTestApp:
 
         self.video_label = tk.Label(self.frame, font=("Arial", 14, "bold"), bg="#e0e0e0", justify=tk.LEFT)
         self.video_label.pack(anchor=tk.W, pady=5)
-
 
         self.label = tk.Label(self.frame, font=("Arial", 14), bg="#e0e0e0", justify=tk.LEFT)
         self.label.pack(anchor=tk.W, pady=5)
@@ -215,6 +82,9 @@ class TypingTestApp:
         self.indicator_label = tk.Label(self.frame, text="", font=("Arial", 10), bg="#e0e0e0")
         self.indicator_label.pack(anchor=tk.E, pady=5)
 
+        self.frequency_label = tk.Label(self.frame, font=("Arial", 12), bg="#e0e0e0", justify=tk.LEFT, wraplength=400)
+        self.frequency_label.pack(anchor=tk.W, pady=5)
+
         self.update_text_display()
 
         self.display_text.tag_config("correct", foreground="blue")  # Set color for correct letters
@@ -238,9 +108,17 @@ class TypingTestApp:
         self.typing_area.delete(1.0, tk.END)
         self.indicator_label.config(text=f"Text {self.current_text_index + 1} of {len(self.texts_to_type)}")
 
+        # Call the new method to display letter frequency
+        self.display_letter_frequency(self.texts_to_type[self.current_text_index])
+
         # Update to show the current lesson title and intro
         current_lesson = typing_data[self.current_text_index]
-        self.label.config(text=current_lesson['title'])  # Update label with title and intro
+        self.label.config(text=f"Video {self.current_text_index}")  # Update label with title and intro
+
+    def display_letter_frequency(self, text):
+        frequency = {char: text.count(char) for char in set(text) if char.isalpha()}  # Count frequency in one line
+        frequency_display = ", ".join(f"{char}: {count}" for char, count in frequency.items())
+        self.frequency_label.config(text=f"Letter Frequency: \n{frequency_display}")  # Update the label with frequency information
 
     def log_key(self, event):
         if not self.recording:
@@ -318,12 +196,12 @@ class TypingTestApp:
             # Define folder paths
             videos_folder = 'videos'
             labels_folder = 'labels'
-            ground_truth_folder = 'ground_truth'  # New folder for ground truth
+            # ground_truth_folder = 'ground_truth'  # New folder for ground truth
 
             # Create folders if they do not exist
             os.makedirs(videos_folder, exist_ok=True)
             os.makedirs(labels_folder, exist_ok=True)
-            os.makedirs(ground_truth_folder, exist_ok=True)  # Create ground truth folder
+            # os.makedirs(ground_truth_folder, exist_ok=True)  # Create ground truth folder
 
             # Update video filename to include the folder path
             video_filename = f'{videos_folder}/video_{self.current_text_index}.mp4'
