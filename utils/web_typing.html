@@ -20,9 +20,9 @@
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
       }
       .display-text {
-        width: 100%;
+        
         min-height: 100px;
-        font-size: 14px;
+        font-size: 16px;
         margin-bottom: 10px;
         white-space: pre-wrap;
         word-wrap: break-word;
@@ -37,7 +37,7 @@
       .typing-area {
         width: 100%;
         height: 100px;
-        font-size: 14px;
+        font-size: 16px;
         margin-bottom: 10px;
         border: 1px solid #ccc; /* Border for better visibility */
         border-radius: 4px; /* Rounded corners */
@@ -66,6 +66,7 @@
       }
     </style>
     <script src="https://cdn.jsdelivr.net/gh/Kagami/ffmpeg.js/ffmpeg.min.js"></script>
+    <script src="./text_to_type.js"></script>
   </head>
   <body>
     <h1>Typing Test</h1>
@@ -75,37 +76,7 @@
 
     <script>
       const textContainer = document.getElementById("text-container");
-      const textsToType = [
-        "The quick brown fox jumps over 123 lazy dogs five times! On January 1st, 2025, 7 zebras danced gracefully, eating 89 pizzas under 6 bright lamps. Curious owls (4 total) observed as 3 frogs croaked near the 0 degree pond. Bees buzzed 12 times before spotting 23 flowers growing in a vibrant A to Z rainbow. Xylophones, said the quirky parrots, make a joyful sound every 5 to 9 seconds.Meanwhile, 345 sailors sang sea shanties beneath 678 twinkling stars, their voices echoing 890 chords into the vast abyss.",
-
       
-        "Amid the vibrant festival on June 5th, 2024, 7 lively musicians played tunes from A to Z. Crowds cheered as 8 zebras dashed past 9 glowing lanterns, while 345 balloons floated above the scene. The quick fox jumped over 12 lazy dogs 6 times, barking loudly each time. An owl hooted 3 times as 0 frogs hopped along the muddy path, observing the scattered petals of a rainbow-colored bouquet. By midnight, 89 twinkling stars illuminated the stage, and 567 partygoers sang in harmony, clapping and shouting numbers like 1, 2, 3, and 4 with unbridled joy, celebrating life to the fullest.",
-
-
-        "On a crisp October evening, 5 daring adventurers set out to explore the forest, carrying maps marked from A to Z. They discovered 12 hidden caves, 8 sparkling streams, and 9 glowing fireflies that lit up the night. The quick brown fox dashed past 7 lazy squirrels, while 3 owls hooted loudly from 5 towering trees. Nearby, a group of 6 frogs leaped over 0 rocks into a pond that shimmered like silver under the moonlight. As they camped, 345 stars twinkled above, and they counted 678 fireflies circling around, marveling at the magical beauty of numbers and nature entwined.",
-
-
-        "Beneath the bright evening sky, 5 young explorers gathered to count the stars, each taking turns naming constellations from A to Z. The quick brown fox leapt gracefully over 7 sleepy dogs, while 3 chirping crickets serenaded the night. In the distance, 12 owls hooted, and 6 frogs splashed in a pond reflecting 89 twinkling stars. Around the campfire, they shared stories of the 345 adventures they'd dreamed of, punctuated by laughter and the sound of 0 worries in the world. By midnight, they had counted 678 glowing fireflies and marveled at how nature, like numbers, always found a way to bring magic to life.",
-
-        "In the bustling town square, 5 jugglers performed tricks with glowing balls marked A to Z, dazzling a crowd of 345 cheering onlookers. A quick brown fox darted between 7 colorful stalls, while 6 frogs croaked melodiously by a 0-degree fountain. Nearby, 12 musicians played a lively tune, their instruments creating a symphony of sound. As the clock struck 8, 9 firecrackers lit up the sky, and 89 children clapped in delight. The energy of the night was electric, with 678 stars twinkling above and laughter echoing from all corners, celebrating the unbreakable rhythm of life, letters, and numbers.",
-
-        "On a breezy summer afternoon, 5 adventurers trekked through a vibrant meadow, their backpacks labeled from A to Z. A quick brown fox dashed past 7 grazing deer, while 6 frogs hopped near a glimmering stream. Overhead, 9 birds circled the sky, and 12 dragonflies danced above 0 ripples in the water. Nearby, 345 flowers bloomed in radiant colors, attracting 89 buzzing bees. As dusk fell, the group gazed at 678 stars lighting up the heavens, marveling at the beauty of nature's endless patterns and the harmony between the alphabet and numbers in their journey.",
-
-        "At dawn, 5 curious children wandered into the enchanted forest, guided by a trail marked with letters A through Z. The quick brown fox playfully darted between 7 towering trees, while 6 frogs leapt into a 0-degree crystal-clear pond. Overhead, 9 sparrows chirped as they flew past 12 shimmering cobwebs glistening in the light. The adventurers counted 89 mushrooms growing in a spiral and spotted 345 fireflies blinking in rhythmic harmony. By nightfall, under a sky boasting 678 glittering stars, they shared stories, blending the magic of letters and numbers into an unforgettable tale.",
-
-
-        "Under the warm glow of 678 stars, 5 travelers ventured through a lively marketplace filled with signs from A to Z. A quick brown fox darted past 7 bustling stalls selling everything from 12 jars of honey to 89 vibrant scarves. Nearby, 6 frogs croaked in harmony beside a fountain at 0 degrees, its waters sparkling in the moonlight. Children laughed as they counted 345 lanterns lighting up the square, while 9 musicians played a cheerful tune. The night buzzed with energy, a perfect blend of numbers, letters, and the boundless joy of life.",
-
-        "As the sun set over the hills, 5 hikers gathered around a campfire, their backpacks embroidered with letters from A to Z. A quick brown fox darted past 7 chirping crickets and 6 frogs leaping near the 0-degree lake. Overhead, 9 bats flitted through the twilight, while 12 fireflies blinked in rhythm among the trees. The hikers shared stories of their 89-mile journey, marveling at the beauty of the 345 wildflowers blooming in the valley. Under the glow of 678 stars, they laughed and embraced the harmony of letters, numbers, and natures wonders.",
-
-
-        "On a cool spring evening, 5 friends explored a magical garden where flowers bloomed in patterns from A to Z. A quick brown fox dashed between 7 rows of roses, while 6 frogs sang near a pond chilled to 0 degrees. Overhead, 9 swallows darted gracefully, and 12 glowing butterflies danced in the air. The group counted 89 shining crystals embedded in a nearby fountain and marveled at 345 twinkling lights strung through the trees. As the clock struck midnight, 678 stars sparkled above, casting a celestial glow over the enchanted scene",
-
-        "good afternoon. the board of directors meetings have been scheduled as follows january previously confirmed, may, july, and october. the time of each meeting will be from  am to noon, however, further logistical details will be announced at a later date, prior to each meeting. please feel free to contact either keith larney or me if you have any questions. thank you.",
-
-        "dear dr. lay. i am pleased to invite you to join my cera colleages and me at our annual executive conference shooting the rapids strategies and risks for the energy future to be held february in houston texas this is the premier international gathering offering senior executives new ideas, insights and strategic thinking on the issues of facing the global energy industry. i believed you will find the conference and the related topic timely and of considerable value. our focus will be on the critical implications of the current market turmoil for energy strategies, investment, regulatory backlash, competitive dynamics, and industry structure. presentation cover all key regions and energy sectors, oil, natural gas, and power and their interconnection. the conference is the centerpiece of cera week, as well as informal interaction and networking. last year, participants included some executives from over countries. complete details on ceraweek can be found at. to register, please go directly to http cera .com cfm track email register.cera.com or call us. i hope you will join us. sincerely, daniel yergin chairman cambridge energy research associates.",
-      ];
-
       let allTimings = [];
 
       // Create typing sections dynamically
@@ -131,101 +102,25 @@
         logDiv.classList.add("log");
         logDiv.innerHTML = `<strong> Step 2: Type the text below</strong>`;
 
+        const downloadCsvBtn = document.createElement("button");
+        downloadCsvBtn.textContent = `Download CSV ${index + 1}`;
+        downloadCsvBtn.classList.add("button");
+        downloadCsvBtn.dataset.index = index;
+
+        const downloadTxtBtn = document.createElement("button");
+        downloadTxtBtn.textContent = `Download Input ${index + 1}`;
+        downloadTxtBtn.classList.add("button");
+        downloadTxtBtn.dataset.index = index;
 
         const clearBtn = document.createElement("button");
         clearBtn.textContent = `Clear ${index + 1}`;
         clearBtn.classList.add("button");
         clearBtn.dataset.index = index;
-
-        // Append the elements to the text section
-
-        let mediaRecorder; // Declare mediaRecorder
-        let recordedChunks = []; // Store recorded video chunks
-        let startTime; // Declare a variable to store the start time
-        let frameCounter = 0; // Initialize frame counter
-
-        // Add this function to start video recording
-        function startRecording() {
-          const constraints = {
-            video: true,
-            audio: false
-          };
-
-          navigator.mediaDevices.getUserMedia(constraints)
-            .then((stream) => {
-              const videoTrack = stream.getVideoTracks()[0];
-              console.log('Current frame rate:', videoTrack.getSettings().frameRate);
-
-              const options = {
-                mimeType: 'video/mp4;codecs=avc1.42E01E', // Attempt to use MP4 codec
-                videoBitsPerSecond: 5000000
-              };
-
-              mediaRecorder = new MediaRecorder(stream, options);
-
-              mediaRecorder.start(10); // Request data every 33.33ms for 30 FPS
-              startTime = Date.now();
-              console.log(`Recording started at: ${startTime} ms`);
-
-              mediaRecorder.ondataavailable = function(event) {
-                recordedChunks.push(event.data);
-              };
-
-              mediaRecorder.onstop = function() {
-                const endTime = Date.now();
-                const totalTime = (endTime - startTime) / 1000; // Convert to seconds
-                const totalFrames = recordedChunks.length;
-                const calculatedFPS = totalFrames / totalTime;
-                console.log(`Calculated FPS: ${calculatedFPS.toFixed(2)}`);
-
-                const blob = new Blob(recordedChunks, { type: options.mimeType });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `video-${index}.mp4`;
-                a.click();
-                URL.revokeObjectURL(url);
-                recordedChunks = [];
-              };
-            })
-            .catch((error) => {
-              console.error("Error accessing media devices:", error);
-            });
-        }
-
-        // Add this function to stop video recording
-        function stopRecording() {
-          if (mediaRecorder) {
-            mediaRecorder.stop();
-            downloadCSV(index)
-          } else {
-            console.log("Can not stop");
-          }
-        }
-
-        // Add buttons to start and stop recording
-        const startBtn = document.createElement("button");
-        startBtn.innerHTML = "Step 1: Start Recording"; // Play symbol for start
-        startBtn.classList.add("button");
-        startBtn.title = "Start Recording"; // Tooltip for accessibility
-        startBtn.addEventListener("click", startRecording);
-
-        const stopBtn = document.createElement("button");
-        stopBtn.innerHTML = "Step 3: Stop Recording"; // Square symbol for stop
-        stopBtn.classList.add("button");
-        stopBtn.title = "Step 3: Stop Recording"; // Tooltip for accessibility
-        stopBtn.addEventListener("click", stopRecording);
-
-        textSection.appendChild(videoDiv);
-        textSection.appendChild(startBtn);
-        textSection.appendChild(logDiv);
-        
         textSection.appendChild(displayText);
         textSection.appendChild(typingArea);
-        textSection.appendChild(stopBtn);
-
-        // textSection.appendChild(downloadBtn);
         textSection.appendChild(clearBtn);
+        textSection.appendChild(downloadCsvBtn);
+        textSection.appendChild(downloadTxtBtn);
         textContainer.appendChild(textSection);
 
         // Initialize timing data for each text section
@@ -237,7 +132,7 @@
           let key = formatKey(event);
 
           if (key) {
-            const log = { key: key, time: milliseconds - startTime };
+            const log = { key: key, time: milliseconds };
             allTimings[index].push(log);
             // logDiv.innerHTML += `<p>Key: ${key}, Time: ${milliseconds} ms</p>`;
           }
@@ -254,6 +149,16 @@
           updateDisplayText(displayText, text, ""); // Clear the highlighted text
           logDiv.innerHTML = `<strong>Log for Text ${index + 1}:</strong>`; // Clear the log
           allTimings[index] = []; // Clear the timing data
+        });
+
+        // Add event listener for CSV download
+        downloadCsvBtn.addEventListener("click", function () {
+          downloadCSV(index);
+        });
+
+        // Add event listener for TXT download
+        downloadTxtBtn.addEventListener("click", function () {
+          downloadTXT(index);
         });
       });
 
@@ -306,7 +211,20 @@
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `video-${index}.csv`;
+        a.download = `video_${index}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      }
+
+      // Function to generate and download TXT for user input
+      function downloadTXT(index) {
+        const typedText = document.querySelector(`textarea[data-index="${index}"]`).value;
+        const txtContent = `User Input:\n${typedText}`;
+        const blob = new Blob([txtContent], { type: "text/plain" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `video_${index}.txt`;
         a.click();
         window.URL.revokeObjectURL(url);
       }
