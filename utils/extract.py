@@ -18,14 +18,14 @@ def extract_and_merge_frames(video_path,
     
     # Define the frames per second (fps) for the output video
     fps = cap.get(cv2.CAP_PROP_FPS)
-
+    print(fps)
     count = 0
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
     for index, row in df.iterrows():
         key = row['Key']
-        frame_number = row['Frame'] + 3  # Use the 'Frame' column directly
+        frame_number = round((row['Time (ms)'] * fps) / 1000)  # Use the 'Frame' column directly
 
         frames = []
         for i in range(-frames_before, frames_after + 1):
@@ -64,10 +64,10 @@ def extract_and_merge_frames(video_path,
     cap.release()
 
 if __name__ == "__main__":
-    for i in [18,19]:
-        extract_and_merge_frames(
-            f'datasets/nhi-v2/videos/video_{i}.mp4',
-            f'datasets/nhi-v2/labels/video_{i}.csv',
-            f'output_videos/nhi-v2/video_{i}',
+    extract_and_merge_frames(
+            f'./video-0.mp4',
+            f'./video-0.csv',
+            f'output_videos/tablet/video_0',
         )
+        
 

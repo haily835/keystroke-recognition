@@ -123,12 +123,11 @@ class TypingTestApp:
     def log_key(self, event):
         if not self.recording:
             return
-        
         key = event.keysym.lower()
 
         if key == 'shift_l' or key == 'shift_r' or key == 'caps_lock':
             key = 'shift'
-        
+    
         self.all_timings[self.current_text_index].append((key, self.frame_count))
         print(f"Key: {key}, Frame Count: {self.frame_count}")
 
