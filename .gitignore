@@ -154,6 +154,7 @@ resources/
 datasets/oldata
 datasets/*/raw_frames/
 datasets/*/videos
+datasets/*/*/*.mp4
 datasets/*.zip
 ckpts/*.zip
 logs/
