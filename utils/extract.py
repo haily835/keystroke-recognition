@@ -25,8 +25,8 @@ def extract_and_merge_frames(video_path,
 
     for index, row in df.iterrows():
         key = row['Key']
-        frame_number = round((row['Time (ms)'] * fps) / 1000)  # Use the 'Frame' column directly
-
+        # frame_number = round((row['Time (ms)'] * fps) / 1000)  # Use the 'Frame' column directly
+        frame_number =  row['Frame']
         frames = []
         for i in range(-frames_before, frames_after + 1):
             frame_index = frame_number + i
@@ -65,9 +65,10 @@ def extract_and_merge_frames(video_path,
 
 if __name__ == "__main__":
     extract_and_merge_frames(
-            f'./video-0.mp4',
-            f'./video-0.csv',
-            f'output_videos/tablet/video_0',
+            "/Users/lyhai/Documents/GitHub/keystroke-recognition/videos/video_0.mp4",
+            "/Users/lyhai/Documents/GitHub/keystroke-recognition/labels/video_0.csv",
+            "/Users/lyhai/Documents/GitHub/keystroke-recognition/output/video_0",
+            20
         )
         
 

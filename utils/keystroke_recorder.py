@@ -50,13 +50,13 @@ class TypingTestApp:
         self.video_label = tk.Label(self.frame, font=("Arial", 14, "bold"), bg="#e0e0e0", justify=tk.LEFT)
         self.video_label.pack(anchor=tk.W, pady=5)
 
-        self.label = tk.Label(self.frame, font=("Arial", 14), bg="#e0e0e0", justify=tk.LEFT)
-        self.label.pack(anchor=tk.W, pady=5)
+        # self.label = tk.Label(self.frame, font=("Arial", 14), bg="#e0e0e0", justify=tk.LEFT)
+        # self.label.pack(anchor=tk.W, pady=5)
 
-        self.display_text = tk.Text(self.frame, height=5, wrap=tk.WORD, state=tk.DISABLED, bg="#f0f0f0", font=("Courier", 15, "bold"))
+        self.display_text = tk.Text(self.frame, height=5, wrap=tk.WORD, state=tk.DISABLED, bg="#f0f0f0", font=("Arial", 15))
         self.display_text.pack(fill=tk.BOTH, expand=True, pady=5)
 
-        self.typing_area = tk.Text(self.frame, height=5, wrap=tk.WORD, bg="#ffffff", font=("Courier", 15, "bold"))
+        self.typing_area = tk.Text(self.frame, height=5, wrap=tk.WORD, bg="#ffffff", font=("Arial", 15))
         self.typing_area.pack(fill=tk.BOTH, expand=True, pady=5)
         self.typing_area.bind("<KeyRelease>", self.log_key)
 
@@ -113,7 +113,7 @@ class TypingTestApp:
 
         # Update to show the current lesson title and intro
         current_lesson = typing_data[self.current_text_index]
-        self.label.config(text=f"Video {self.current_text_index}")  # Update label with title and intro
+        # self.label.config(text=f"Video {self.current_text_index}")  # Update label with title and intro
 
     def display_letter_frequency(self, text):
         frequency = {char: text.count(char) for char in set(text) if char.isalpha()}  # Count frequency in one line
@@ -208,7 +208,7 @@ class TypingTestApp:
                 video_filename,
                 cv2.VideoWriter_fourcc(*'mp4v'),
                 30.0,  # Assuming 30 FPS
-                (640, 480)  # Assuming a resolution of 640x480
+                (1080, 1440)  # Assuming a resolution of 640x480
             )
             print(f"Recording started: {video_filename}")
 
@@ -224,7 +224,7 @@ class TypingTestApp:
         while self.recording:
             ret, frame = cap.read()
             if ret:
-                frame = cv2.resize(frame, (640, 480))
+                frame = cv2.resize(frame, (1080, 1440))
                 self.media_recorder.write(frame)  # Write the frame to the video file
                 self.frame_count += 1  # Increment frame count
             else:
