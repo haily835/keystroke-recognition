@@ -65,8 +65,8 @@ def extract_and_merge_frames(video_path,
 
 if __name__ == "__main__":
     extract_and_merge_frames(
-            "/Users/lyhai/Documents/GitHub/keystroke-recognition/videos/video_0.mp4",
-            "/Users/lyhai/Documents/GitHub/keystroke-recognition/labels/video_0.csv",
+            "/Users/lyhai/Documents/GitHub/keystroke-recognition/datasets/tablet2/videos/video_0.mp4",
+            "/Users/lyhai/Documents/GitHub/keystroke-recognition/datasets/tablet2/labels/video_0.csv",
             "/Users/lyhai/Documents/GitHub/keystroke-recognition/output/video_0",
             20
         )
