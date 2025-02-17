@@ -145,9 +145,9 @@ class TypingTestApp:
         for i, char in enumerate(typed_text):
             if i < len(original_text):
                 if char == original_text[i]:
-                    self.display_text.tag_add("correct", f"1.0+{i}c", f"1.0+{i+1}c")  # Highlight correct letters in blue
+                    self.display_text.tag_add("correct", f"1.0+{i}c", f"1.0+{i+1}c") # Highlight correct letters in blue
                 else:
-                    self.display_text.tag_add("error", f"1.0+{i}c", f"1.0+{i+1}c")  # Highlight incorrect letters in red
+                    self.display_text.tag_add("error", f"1.0+{i}c", f"1.0+{i+1}c") # Highlight incorrect letters in red
 
         self.display_text.config(state=tk.DISABLED)  # Disable editing again
 
@@ -208,8 +208,9 @@ class TypingTestApp:
                 video_filename,
                 cv2.VideoWriter_fourcc(*'mp4v'),
                 30.0,  # Assuming 30 FPS
-                (1080, 1440)  # Assuming a resolution of 640x480
+                (640, 480)  # Assuming a resolution of 640x480
             )
+
             print(f"Recording started: {video_filename}")
 
             # Start a new thread to capture and write frames
@@ -224,7 +225,7 @@ class TypingTestApp:
         while self.recording:
             ret, frame = cap.read()
             if ret:
-                frame = cv2.resize(frame, (1080, 1440))
+                frame = cv2.resize(frame, (640, 480))
                 self.media_recorder.write(frame)  # Write the frame to the video file
                 self.frame_count += 1  # Increment frame count
             else:
