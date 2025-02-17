@@ -36,7 +36,6 @@ def extract_and_merge_frames(video_path,
                 ret, frame = cap.read()
                 if ret:
                     frames.append(frame)
-        
 
         if frames:
             # Stack frames horizontally
@@ -64,11 +63,10 @@ def extract_and_merge_frames(video_path,
     cap.release()
 
 if __name__ == "__main__":
-    extract_and_merge_frames(
-            "/Users/lyhai/Documents/GitHub/keystroke-recognition/datasets/tablet2/videos/video_0.mp4",
-            "/Users/lyhai/Documents/GitHub/keystroke-recognition/datasets/tablet2/labels/video_0.csv",
-            "/Users/lyhai/Documents/GitHub/keystroke-recognition/output/video_0",
-            20
+    for i in range(0, 44):
+        extract_and_merge_frames(
+            f"/Users/lyhai/Documents/GitHub/keystroke-recognition/datasets/tablet3/labels/video_{i}.mp4",
+            f"/Users/lyhai/Documents/GitHub/keystroke-recognition/datasets/tablet3/labels/video_{i}.csv",
+            f"/Users/lyhai/Documents/GitHub/keystroke-recognition/datasets/tablet3/output/video_{i}",
+            10
         )
-        
-
