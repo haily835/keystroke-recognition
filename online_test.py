@@ -129,7 +129,7 @@ def parse_arguments():
     parser.add_argument(
         '--clf_threshold_final',
         type=float,
-        default=0.15,
+        default=0.1,
         required=False
     )
 
@@ -381,7 +381,7 @@ def main():
                         if best1 != prev_best1:
                             if cum_sum[best1] > args.clf_threshold_final:
                                 results.append(((curr_frame * args.stride_len) + args.sample_duration_clf, best1))
-                                print('Early Detected - class : {} with prob : {} at frame {}'.format(best1, cum_sum[best1],
+                                print('Early Detected - class : {} with prob : {} at frame {}'.format(clf_id2label[best1], cum_sum[best1],
                                                                                                     (
                                                                                                                 curr_frame * args.stride_len) + args.sample_duration_clf))
                     else:
@@ -389,14 +389,14 @@ def main():
                             if best1 == prev_best1:
                                 if cum_sum[best1] > 5:
                                     results.append(((curr_frame * args.stride_len) + args.sample_duration_clf, best1))
-                                    print('Late Detected - class : {} with prob : {} at frame {}'.format(best1,
+                                    print('Late Detected - class : {} with prob : {} at frame {}'.format(clf_id2label[best1],
                                                                                                         cum_sum[best1], 
                                                                                                         (curr_frame * args.stride_len) + args.sample_duration_clf))
                             else:
                                 results.append(((curr_frame * args.stride_len) + args.sample_duration_clf, best1))
 
                                 print('Late Detected - class : {} with prob : {} at frame {}'.format(
-                                    best1, cum_sum[best1],
+                                    clf_id2label[best1], cum_sum[best1],
                                     (curr_frame * args.stride_len) + args.sample_duration_clf)
                                 )
 
