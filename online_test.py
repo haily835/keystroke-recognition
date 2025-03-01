@@ -132,6 +132,13 @@ def parse_arguments():
         default=0.15,
         required=False
     )
+
+    parser.add_argument(
+        '--clf_threshold_pre',
+        type=float,
+        default=1.0,
+        required=False
+    )
     
     parser.add_argument(
         '--n_classes_clf',
