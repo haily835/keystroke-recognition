@@ -287,6 +287,7 @@ def main():
         finished_prediction = None
         pre_predict = False
         results = []
+        prev_best1 = args.n_classes_clf
         cum_sum = np.zeros(args.n_classes_clf, )
         clf_selected_queue = np.zeros(args.n_classes_clf, )
         det_selected_queue = np.zeros(args.n_classes_det, )
