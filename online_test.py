@@ -129,7 +129,7 @@ def parse_arguments():
     parser.add_argument(
         '--clf_threshold_final',
         type=float,
-        default=0.1,
+        default=0.05,
         required=False
     )
 
