@@ -83,7 +83,7 @@ def parse_arguments():
         '--data_dir',
         type=str,
         help='Dataset directory',
-        default='/Users/lyhai/Documents/GitHub/keystroke-recognition/datasets/tablet7/landmarks',
+        default='datasets/tablet7/landmarks',
         required=False
     )
 
@@ -174,7 +174,7 @@ def parse_arguments():
         '--clf_ckpt',
         type=str,
         help='Path to the classifier checkpoint file.',
-        default='/Users/lyhai/Documents/GitHub/keystroke-recognition/ckpts/HyperGT-tablet/clf/epoch=34-step=1680.ckpt',
+        default='ckpts/HyperGT-tablet/clf/epoch=34-step=1680.ckpt',
         required=False
     )
 
@@ -182,7 +182,7 @@ def parse_arguments():
         '--det_ckpt',
         type=str,
         help='Path to the detector checkpoint file.',
-        default='/Users/lyhai/Documents/GitHub/keystroke-recognition/ckpts/HyperGT-tablet/det/epoch=20-step=1218.ckpt',
+        default='ckpts/HyperGT-tablet/det/epoch=20-step=1218.ckpt',
         required=False
     )
 
