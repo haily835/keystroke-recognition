@@ -104,11 +104,20 @@ def parse_arguments():
     )
 
     parser.add_argument(
+        '--det_counter',
+        type=int,
+        help='Window size to scan',
+        default=2,
+    )
+
+    parser.add_argument(
         '--stride_len',
         type=int,
         default=1,
         required=False
     )
+
+
 
     parser.add_argument(
         '--sample_duration_clf',
@@ -279,7 +288,7 @@ def main():
 
         while curr_frame < len(video):
             frame = video[curr_frame]
-            
+
             if not landmark:
                 frame = torchvision.io.read_image(
                     f"{data_dir}/video_{video_name}/frame_{curr_frame}.jpg"
