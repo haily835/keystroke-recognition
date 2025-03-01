@@ -279,7 +279,7 @@ def main():
 
         while curr_frame < len(video):
             frame = video[curr_frame]
-
+            
             if not landmark:
                 frame = torchvision.io.read_image(
                     f"{data_dir}/video_{video_name}/frame_{curr_frame}.jpg"
@@ -311,88 +311,88 @@ def main():
             prob_det = det_selected_queue[prediction_det]
 
             #### State of the detector is checked here as detector act as a switch for the classifier
-        if prediction_det == 1:
-            clf_logits = torch.nn.functional.softmax(clf(frames).squeeze(), dim=0)
-            # Push the probabilities to queue
-            myqueue_clf.enqueue(clf_logits.tolist())
-            passive_count = 0
+            if prediction_det == 1:
+                clf_logits = torch.nn.functional.softmax(clf(frames).squeeze(), dim=0)
+                # Push the probabilities to queue
+                myqueue_clf.enqueue(clf_logits.tolist())
+                passive_count = 0
 
-            if args.clf_strategy == 'raw':
-                clf_selected_queue = outputs_clf
-            elif args.clf_strategy == 'median':
-                clf_selected_queue = myqueue_clf.median
-            elif args.clf_strategy == 'ma':
-                clf_selected_queue = myqueue_clf.ma
-            elif args.clf_strategy == 'ewma':
-                clf_selected_queue = myqueue_clf.ewma
+                if args.clf_strategy == 'raw':
+                    clf_selected_queue = outputs_clf
+                elif args.clf_strategy == 'median':
+                    clf_selected_queue = myqueue_clf.median
+                elif args.clf_strategy == 'ma':
+                    clf_selected_queue = myqueue_clf.ma
+                elif args.clf_strategy == 'ewma':
+                    clf_selected_queue = myqueue_clf.ewma
 
-        else:
-            outputs_clf = np.zeros(args.n_classes_clf, )
-            # Push the probabilities to queue
-            myqueue_clf.enqueue(outputs_clf.tolist())
-            passive_count += 1
+            else:
+                outputs_clf = np.zeros(args.n_classes_clf, )
+                # Push the probabilities to queue
+                myqueue_clf.enqueue(outputs_clf.tolist())
+                passive_count += 1
 
-        if passive_count >= args.det_counter or curr_frame == (len(video) -2):
-            active = False
-        else:
-            active = True
+            if passive_count >= args.det_counter or curr_frame == (len(video) -2):
+                active = False
+            else:
+                active = True
 
-        # one of the following line need to be commented !!!!
-        if active:
-            active_index += 1
-            cum_sum = ((cum_sum * (active_index - 1)) + (
-                        weighting_func(active_index) * clf_selected_queue)) / active_index  # Weighted Aproach
-            # cum_sum = ((cum_sum * (x-1)) + (1.0 * clf_selected_queue))/x #Not Weighting Aproach
+            # one of the following line need to be commented !!!!
+            if active:
+                active_index += 1
+                cum_sum = ((cum_sum * (active_index - 1)) + (
+                            weighting_func(active_index) * clf_selected_queue)) / active_index  # Weighted Aproach
+                # cum_sum = ((cum_sum * (x-1)) + (1.0 * clf_selected_queue))/x #Not Weighting Aproach
 
-            best2, best1 = tuple(cum_sum.argsort()[-2:][::1])
-            if float(cum_sum[best1] - cum_sum[best2]) > args.clf_threshold_pre:
+                best2, best1 = tuple(cum_sum.argsort()[-2:][::1])
+                if float(cum_sum[best1] - cum_sum[best2]) > args.clf_threshold_pre:
+                    finished_prediction = True
+                    pre_predict = True
+
+            else:
+                active_index = 0
+
+            if active == False and prev_active == True:
                 finished_prediction = True
-                pre_predict = True
-
-        else:
-            active_index = 0
-
-        if active == False and prev_active == True:
-            finished_prediction = True
-        elif active == True and prev_active == False:
-            finished_prediction = False
-
-        if finished_prediction == True:
-            best2, best1 = tuple(cum_sum.argsort()[-2:][::1])
-            if cum_sum[best1] > args.clf_threshold_final:
-                if pre_predict == True:
-                    if best1 != prev_best1:
-                        if cum_sum[best1] > args.clf_threshold_final:
-                            results.append(((curr_frame * args.stride_len) + args.sample_duration_clf, best1))
-                            print('Early Detected - class : {} with prob : {} at frame {}'.format(best1, cum_sum[best1],
-                                                                                                  (
-                                                                                                              curr_frame * args.stride_len) + args.sample_duration_clf))
-                else:
-                    if cum_sum[best1] > args.clf_threshold_final:
-                        if best1 == prev_best1:
-                            if cum_sum[best1] > 5:
-                                results.append(((curr_frame * args.stride_len) + args.sample_duration_clf, best1))
-                                print('Late Detected - class : {} with prob : {} at frame {}'.format(best1,
-                                                                                                     cum_sum[best1], 
-                                                                                                     (curr_frame * args.stride_len) + args.sample_duration_clf))
-                        else:
-                            results.append(((curr_frame * args.stride_len) + args.sample_duration_clf, best1))
-
-                            print('Late Detected - class : {} with prob : {} at frame {}'.format(
-                                best1, cum_sum[best1],
-                                (curr_frame * args.stride_len) + args.sample_duration_clf)
-                            )
-
+            elif active == True and prev_active == False:
                 finished_prediction = False
-                prev_best1 = best1
 
-            cum_sum = np.zeros(args.n_classes_clf, )
+            if finished_prediction == True:
+                best2, best1 = tuple(cum_sum.argsort()[-2:][::1])
+                if cum_sum[best1] > args.clf_threshold_final:
+                    if pre_predict == True:
+                        if best1 != prev_best1:
+                            if cum_sum[best1] > args.clf_threshold_final:
+                                results.append(((curr_frame * args.stride_len) + args.sample_duration_clf, best1))
+                                print('Early Detected - class : {} with prob : {} at frame {}'.format(best1, cum_sum[best1],
+                                                                                                    (
+                                                                                                                curr_frame * args.stride_len) + args.sample_duration_clf))
+                    else:
+                        if cum_sum[best1] > args.clf_threshold_final:
+                            if best1 == prev_best1:
+                                if cum_sum[best1] > 5:
+                                    results.append(((curr_frame * args.stride_len) + args.sample_duration_clf, best1))
+                                    print('Late Detected - class : {} with prob : {} at frame {}'.format(best1,
+                                                                                                        cum_sum[best1], 
+                                                                                                        (curr_frame * args.stride_len) + args.sample_duration_clf))
+                            else:
+                                results.append(((curr_frame * args.stride_len) + args.sample_duration_clf, best1))
 
-        if active == False and prev_active == True:
-            pre_predict = False
+                                print('Late Detected - class : {} with prob : {} at frame {}'.format(
+                                    best1, cum_sum[best1],
+                                    (curr_frame * args.stride_len) + args.sample_duration_clf)
+                                )
 
-        prev_active = active
-        windows = windows[1:]
+                    finished_prediction = False
+                    prev_best1 = best1
+
+                cum_sum = np.zeros(args.n_classes_clf, )
+
+            if active == False and prev_active == True:
+                pre_predict = False
+
+            prev_active = active
+            windows = windows[1:]
         
 
 if __name__ == "__main__":
