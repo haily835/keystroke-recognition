@@ -166,7 +166,7 @@ def main():
                 clf_logits = torch.nn.functional.softmax(clf(frames).squeeze(), dim=0)
                 pred_id = torch.argmax(clf_logits, dim=0).item()
                 clf_label = clf_id2label[pred_id]
-                clf_record.append([curr_frame, clf_label] + clf_logits[pred_id].tolist())
+                clf_record.append([curr_frame, clf_label] + clf_logits.tolist())
                 windows = windows[1:]
 
         record_dict = {
