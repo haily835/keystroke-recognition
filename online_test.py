@@ -376,6 +376,8 @@ def main():
 
             if finished_prediction == True:
                 best2, best1 = tuple(cum_sum.argsort()[-2:][::1])
+                print(cum_sum[best1])
+                
                 if cum_sum[best1] > args.clf_threshold_final:
                     if pre_predict == True:
                         if best1 != prev_best1:
