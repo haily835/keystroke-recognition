@@ -162,19 +162,24 @@ def main():
                 else:
                     frames = frames.permute(1, 0, 2, 3).float().unsqueeze(dim=0).to(device)
                 detect_logits = torch.nn.functional.softmax(det(frames).squeeze(), dim=0)
-                detect_record.append([curr_frame, detect_logits[1].item()])
+                detect_record.append([curr_frame] + detect_logits.tolist())
                 clf_logits = torch.nn.functional.softmax(clf(frames).squeeze(), dim=0)
                 pred_id = torch.argmax(clf_logits, dim=0).item()
                 clf_label = clf_id2label[pred_id]
-                clf_record.append([curr_frame, clf_label, clf_logits[pred_id].item()])
+                clf_record.append([curr_frame, clf_label] + clf_logits[pred_id].tolist())
                 windows = windows[1:]
 
-        df = pd.DataFrame({
+        record_dict = {
             'Start frame': [record[0] - window_size for record in detect_record],
-            'Active Prob': [record[1] for record in detect_record],
             'Key prediction': [record[1] for record in clf_record],
-            'Key Prob': [record[2] for record in clf_record],
-        })
+            'Idle Prob': [record[1] for record in detect_record],
+            'Active Prob': [record[2] for record in detect_record],
+        }
+
+        for i in range(30):
+            record_dict[clf_id2label[i]] = [record[2 + i] for record in clf_record]
+
+        df = pd.DataFrame(record_dict)
 
         df.to_csv(f'{result_dir}/{video_name}.csv', index=False)
 
