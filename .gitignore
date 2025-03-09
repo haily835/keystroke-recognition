@@ -163,3 +163,5 @@ notebooks/
 results/
 stream_results/
 configs/api_keys.py
+
+datasets/*/output/
