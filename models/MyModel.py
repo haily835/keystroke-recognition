@@ -62,6 +62,7 @@ class MyModel(nn.Module):
         self.network = nn.Sequential(*layers)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = rearrange(x, 'n t v m c -> n t (v m) c')
+        x = rearrange(x, 'n c t v m -> n t (v m) c')
+        # print(x.shape)
         x = torch.stack([self.network(b) for b in x])
         return x
