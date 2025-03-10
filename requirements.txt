@@ -7,3 +7,4 @@ lightning[pytorch-extra]
 timm==1.0.7
 pandas==1.5.3
 git+https://github.com/facebookresearch/pytorchvideo.git
+torch_geometric
