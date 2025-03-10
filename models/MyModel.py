@@ -4,7 +4,7 @@ from torch_geometric.nn import MessagePassing, HypergraphConv
 from einops import rearrange
 import math
 from torchsummary import summary
-
+cuda0 = torch.device('cuda:0')
 # Hypergraph convolution with temperal attention.
 class HCTA(nn.Module):
     def __init__(self, in_channels, n_joints, out_channels):
@@ -28,6 +28,7 @@ class HCTA(nn.Module):
         [ 0,  0,  0,  0,  0,  1,  1,  1,  1,  1,  2,  2,  2,  2,  3,  3,  3,  3,
           4,  4,  4,  4,  4,  5,  5,  5,  5,  5,  6,  6,  6,  6,  6,  7,  7,  7,
           7,  8,  8,  8,  8,  9,  9,  9,  9,  9]])
+        HI.to(cuda0)
         T, N, F = x.size()
         x = torch.stack([self.hc(g, HI) for g in x])
         # print(x.shape)
