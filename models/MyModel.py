@@ -247,7 +247,7 @@ class MultiScale_TemporalConv(nn.Module):
         return out
     
 
-class STGCN(nn.Module):
+class MyModel(nn.Module):
     r"""Spatial temporal graph convolutional networks.
 
     Args:
