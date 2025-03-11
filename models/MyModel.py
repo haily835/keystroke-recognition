@@ -68,7 +68,7 @@ def get_hi(batch_size, num_frames):
 
 # Hypergraph convolution with temperal attention.
 class HCTA(nn.Module):
-    def __init__(self, in_channels, n_joints, out_channels, stride=4):
+    def __init__(self, in_channels, n_joints, out_channels):
         super().__init__()
         self.bn = nn.BatchNorm2d(in_channels)
         self.proj = nn.Linear(in_channels, out_channels)
@@ -77,18 +77,18 @@ class HCTA(nn.Module):
         
         self.bn1 = nn.BatchNorm2d(8)
         self.act1 = nn.ReLU()
-        self.conv = nn.Conv2d(in_channels=8, out_channels=8, kernel_size=(1,1), stride=(1,stride))
+        self.conv = nn.Conv2d(in_channels=8, out_channels=8, kernel_size=(1,1), stride=(1, 4))
         self.bn2 = nn.BatchNorm2d(8)
 
         
-        embed_dim = n_joints * out_channels // stride
+        embed_dim = n_joints * out_channels // 4
         self.ta = nn.MultiheadAttention(embed_dim=embed_dim, num_heads=3, batch_first=True) # return [time, outfeatures]
 
         self.W_q = nn.Linear(embed_dim, embed_dim)
         self.W_k = nn.Linear(embed_dim, embed_dim)
         self.W_v = nn.Linear(embed_dim, embed_dim)
 
-        self.fc = nn.Linear(embed_dim, embed_dim * stride)
+        self.fc = nn.Linear(embed_dim, embed_dim * 4)
         self.act = nn.ReLU()
 
     def forward(self, x: torch.Tensor, hi: torch.Tensor) -> torch.Tensor:
