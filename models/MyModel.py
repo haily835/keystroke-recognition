@@ -30,8 +30,8 @@ class HCTA(nn.Module):
         
         HI = HI.to(device='cuda')
 
-        print("HI", HI.get_device())
-        print("x", x.get_device())
+        # print("HI", HI.get_device())
+        # print("x", x.get_device())
         T, N, F = x.size()
         x = torch.stack([self.hc(g, HI) for g in x])
         
