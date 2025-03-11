@@ -7,6 +7,126 @@ import numpy as np
 from torchinfo import summary
 
 import torch
+def weights_init(m):
+    classname = m.__class__.__name__
+    if classname.find('Conv') != -1:
+        if hasattr(m, 'weight'):
+            nn.init.kaiming_normal_(m.weight, mode='fan_out')
+        if hasattr(m, 'bias') and m.bias is not None and isinstance(m.bias, torch.Tensor):
+            nn.init.constant_(m.bias, 0)
+    elif classname.find('BatchNorm') != -1:
+        if hasattr(m, 'weight') and m.weight is not None:
+            m.weight.data.normal_(1.0, 0.02)
+        if hasattr(m, 'bias') and m.bias is not None:
+            m.bias.data.fill_(0)
+
+def conv_init(conv):
+    if conv.weight is not None:
+        nn.init.kaiming_normal_(conv.weight, mode='fan_out')
+    if conv.bias is not None:
+        nn.init.constant_(conv.bias, 0)
+
+
+def bn_init(bn, scale):
+    nn.init.constant_(bn.weight, scale)
+    nn.init.constant_(bn.bias, 0)
+
+class TemporalConv(nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1, dilation=1):
+        super(TemporalConv, self).__init__()
+        pad = (kernel_size + (kernel_size-1) * (dilation-1) - 1) // 2
+        self.conv = nn.Conv2d(
+            in_channels,
+            out_channels,
+            kernel_size=(kernel_size, 1),
+            padding=(pad, 0),
+            stride=(stride, 1),
+            dilation=(dilation, 1))
+
+        self.bn = nn.BatchNorm2d(out_channels)
+
+    def forward(self, x):
+        x = self.conv(x)
+        x = self.bn(x)
+        return x
+
+
+class MultiScale_TemporalConv(nn.Module):
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size=3,
+                 stride=1,
+                 dilations=[1,2,3,4],
+                 residual=True,
+                 residual_kernel_size=1):
+
+        super().__init__()
+        assert out_channels % (len(dilations) + 2) == 0, '# out channels should be multiples of # branches'
+
+        # Multiple branches of temporal convolution
+        self.num_branches = len(dilations) + 2
+        branch_channels = out_channels // self.num_branches
+        if type(kernel_size) == list:
+            assert len(kernel_size) == len(dilations)
+        else:
+            kernel_size = [kernel_size]*len(dilations)
+        # Temporal Convolution branches
+        self.branches = nn.ModuleList([
+            nn.Sequential(
+                nn.Conv2d(
+                    in_channels,
+                    branch_channels,
+                    kernel_size=1,
+                    padding=0),
+                nn.BatchNorm2d(branch_channels),
+                nn.ReLU(inplace=True),
+                TemporalConv(
+                    branch_channels,
+                    branch_channels,
+                    kernel_size=ks,
+                    stride=stride,
+                    dilation=dilation),
+            )
+            for ks, dilation in zip(kernel_size, dilations)
+        ])
+
+        # Additional Max & 1x1 branch
+        self.branches.append(nn.Sequential(
+            nn.Conv2d(in_channels, branch_channels, kernel_size=1, padding=0),
+            nn.BatchNorm2d(branch_channels),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=(3,1), stride=(stride,1), padding=(1,0)),
+            nn.BatchNorm2d(branch_channels)  # 为什么还要加bn
+        ))
+
+        self.branches.append(nn.Sequential(
+            nn.Conv2d(in_channels, branch_channels, kernel_size=1, padding=0, stride=(stride,1)),
+            nn.BatchNorm2d(branch_channels)
+        ))
+
+        # Residual connection
+        if not residual:
+            self.residual = lambda x: 0
+        elif (in_channels == out_channels) and (stride == 1):
+            self.residual = lambda x: x
+        else:
+            self.residual = TemporalConv(in_channels, out_channels, kernel_size=residual_kernel_size, stride=stride)
+
+        # initialize
+        self.apply(weights_init)
+
+    def forward(self, x):
+        # Input dim: (N,C,T,V)
+        res = self.residual(x)
+        branch_outs = []
+        for tempconv in self.branches:
+            out = tempconv(x)
+            branch_outs.append(out)
+
+        out = torch.cat(branch_outs, dim=1)
+        out += res
+        return out
 
 def get_hi(batch_size, num_frames):
     vertices_per_graph = 42
@@ -65,129 +185,116 @@ def get_hi(batch_size, num_frames):
     
     return torch.stack([row_indices, col_indices])
 
+class unit_tcn(nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size=9, stride=1):
+        super(unit_tcn, self).__init__()
+        pad = int((kernel_size - 1) / 2)
+        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=(kernel_size, 1), padding=(pad, 0),
+                              stride=(stride, 1))
 
-# Hypergraph convolution with temperal attention.
-class HCTA(nn.Module):
-    def __init__(self, in_channels, n_joints, out_channels):
+        self.bn = nn.BatchNorm2d(out_channels)
+        self.relu = nn.ReLU(inplace=True)
+        conv_init(self.conv)
+        bn_init(self.bn, 1)
+
+    def forward(self, x):
+        
+        x = self.bn(self.conv(x))
+        return x
+
+
+class TCN_HC_unit(nn.Module):
+    def __init__(self, in_channels, out_channels, stride=1, residual=True, adaptive=True, kernel_size=5, dilations=[1,2]):
         super().__init__()
-        self.bn = nn.BatchNorm2d(in_channels)
-        self.proj = nn.Linear(in_channels, out_channels)
+        self.hc = HypergraphConv(in_channels=in_channels, out_channels=out_channels)
+        self.tcn = MultiScale_TemporalConv(out_channels, out_channels, 
+                                           kernel_size=kernel_size, 
+                                           stride=stride, 
+                                           dilations=dilations,residual=False)
+        self.relu = nn.ReLU(inplace=True)
 
-        self.hc = HypergraphConv(in_channels=in_channels, out_channels=out_channels) # return [nodes, outfeatures]
-        
-        self.bn1 = nn.BatchNorm2d(8)
-        self.act1 = nn.ReLU()
-        self.conv = nn.Conv2d(in_channels=8, out_channels=8, kernel_size=(1,1), stride=(1, 1))
-        self.bn2 = nn.BatchNorm2d(8)
+        if not residual:
+            self.residual = lambda x: 0
 
-        
-        embed_dim = n_joints * out_channels
-        self.ta = nn.MultiheadAttention(embed_dim=embed_dim, num_heads=6, batch_first=True) # return [time, outfeatures]
+        elif (in_channels == out_channels) and (stride == 1):
+            self.residual = lambda x: x
 
-        self.W_q = nn.Linear(embed_dim, embed_dim)
-        self.W_k = nn.Linear(embed_dim, embed_dim)
-        self.W_v = nn.Linear(embed_dim, embed_dim)
+        else:
+            self.residual = unit_tcn(in_channels, out_channels, kernel_size=1, stride=stride)
 
-        self.fc = nn.Linear(embed_dim, embed_dim)
-        self.act = nn.ReLU()
+    def forward(self, x: torch.Tensor,) -> torch.Tensor:
+        NM, C, T, V = x.size()
+        hi = get_hi(NM // 2, T).to(x.device)
 
-    def forward(self, x: torch.Tensor, hi: torch.Tensor) -> torch.Tensor:
-        # x shape (Time, Nodes, Features)
-        # print(x.shape, self.in_c, self.out_c)
-
-        # print("HI", HI.get_device())
-        # print("x", x.get_device())
-       #  print(x.shape)
-        N, C, T, V, M = x.size()
-
-        # Residual
-
-        res = rearrange(x, 'n c t v m -> n c (v m) t')
-        res = self.bn(res)
-        res = rearrange(res, 'n c vm t -> n t vm c')
-        res = self.proj(res)
-        res = rearrange(res, 'n t vm c -> n t (vm c)')
-        # print("Residue ", res.shape)
-        
-
-        x = rearrange(x, 'n c t v m -> (n t v m) c')
-        
+        res = self.residual(x)
+        x = rearrange(x, 'nm c t v -> (nm t v) c')
         x = self.hc(x, hi)
-        # print("After hyperconv", x.shape)
-        
-        x = x.view(N, -1, T, V, M)
-        x = rearrange(x, 'n c t v m -> n t (v m) c')
-        # print("Before conv across node feature", x.shape)
-        x = self.bn1(x)
-        x = self.act1(x)
-        x = self.conv(x)
-        x = self.bn2(x)
-        # print("After conv", x.shape)
-        # x = x.view(N, -1, T, V, M)
-        x = rearrange(x, 'n t vm c -> n t (c vm)')
-        
-        # print("Input for attention", x.shape)
-        q = self.W_q(x)
-        k = self.W_k(x)
-        v = self.W_v(x)
-        x, _ = self.ta(q, k, v)
-        # print("After temperal attention", x.shape)
-        # x = x.view(N, T, -1, V, M)
-        x = self.fc(x)
-        # print("After FC", x.shape)
-        x = self.act(x + res)
-       
-        # Reshape back the output to match the batch size
-        x = x.view(N, -1, T, V, M)
 
-        # print("Finish ", x.shape)
+        x = x.view(NM, -1, T, V)
+        x = self.tcn(x)
+        x = self.relu(x + res)
         return x
 
 class MyModel(nn.Module):
-    def __init__(self, in_channels=3, num_class=40, n_joints=42, n_layers=3, num_frames=8):
-        super().__init__()
+    def __init__(self, num_class=40, num_point=21, num_person=2, in_channels=3,
+                 drop_out=0, adaptive=True):
+        super(MyModel, self).__init__()
 
-        # print(self.hi)
-        self.l1=HCTA(3, n_joints, 4)
-        self.l2=HCTA(4, n_joints, 4)
-        self.l3=HCTA(4, n_joints, 4)
-        self.l4=HCTA(4, n_joints, 4)
-        self.l5=HCTA(4, n_joints, 4)
-        # self.l4=HCTA(16, n_joints, 16)
-        # self.l5=HCTA(16, n_joints, 16)
-        # self.l6=HCTA(16, n_joints, 16)
-        # self.l7=HCTA(16, n_joints, 16)
-        # self.l8=HCTA(16, n_joints, 16)
-        # self.l9=HCTA(16, n_joints, 16)
-        # self.l10=HCTA(16, n_joints, 16)
-       
-        self.flat = nn.Flatten(1)
-        self.fc = nn.Linear(4*n_joints*num_frames, num_class)
+        self.num_class = num_class
+        self.num_point = num_point
+        self.data_bn = nn.BatchNorm1d(num_person * in_channels * num_point)
+
+        base_channel = 96
+        self.l1 = TCN_HC_unit(in_channels, base_channel, residual=False, adaptive=adaptive)
+        self.l2 = TCN_HC_unit(base_channel, base_channel, adaptive=adaptive)
+        self.l3 = TCN_HC_unit(base_channel, base_channel, adaptive=adaptive)
+        self.l4 = TCN_HC_unit(base_channel, base_channel, adaptive=adaptive)
+        self.l5 = TCN_HC_unit(base_channel, base_channel*2, stride=2, adaptive=adaptive)
+        self.l6 = TCN_HC_unit(base_channel*2, base_channel*2, adaptive=adaptive)
+        self.l7 = TCN_HC_unit(base_channel*2, base_channel*2, adaptive=adaptive)
+        self.l8 = TCN_HC_unit(base_channel*2, base_channel*4, stride=2, adaptive=adaptive)
+        self.l9 = TCN_HC_unit(base_channel*4, base_channel*4, adaptive=adaptive)
+        self.l10 = TCN_HC_unit(base_channel*4, base_channel*4, adaptive=adaptive)
+        self.fc = nn.Linear(base_channel*4, num_class)
         nn.init.normal_(self.fc.weight, 0, math.sqrt(2. / num_class))
+        bn_init(self.data_bn, 1)
+        if drop_out:
+            self.drop_out = nn.Dropout(drop_out)
+        else:
+            self.drop_out = lambda x: x
+       
+       
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         N, C, T, V, M = x.size()
         
-        hi = get_hi(N, T).to(x.device)
-        x = self.l1(x, hi)
-        x = self.l2(x, hi)
-        x = self.l3(x, hi)
-        x = self.l4(x, hi)
-        x = self.l5(x, hi)
-        # x = self.l6(x, hi)
-        # x = self.l7(x, hi)
-        # x = self.l8(x, hi)
-        # x = self.l9(x, hi)
-        # x = self.l10(x, hi)
         
-        x = self.flat(x)
-        x = self.fc(x)
-       
-        return x
-    
+
+        x = x.permute(0, 4, 3, 1, 2).contiguous().view(N, M * V * C, T)
+        x = self.data_bn(x)
+        x = x.view(N, M, V, C, T).permute(0, 1, 3, 4, 2).contiguous().view(N * M, C, T, V)
+        x = self.l1(x)
+
+        x = self.l2(x)
+        x = self.l3(x)
+        x = self.l4(x)
+        x = self.l5(x)
+        x = self.l6(x)
+        x = self.l7(x)
+        x = self.l8(x)
+        x = self.l9(x)
+        x = self.l10(x)
+        print(x.shape)
+        # N*M,C,T,V
+        c_new = x.size(1)
+        x = x.view(N, M, c_new, -1)
+        x = x.mean(3).mean(1)
+        x = self.drop_out(x)
+
+        return self.fc(x)
 
 if __name__ == "__main__":
-    x = torch.rand((32, 3, 8, 21, 2))
+    # x = torch.rand((32, 3, 8, 21, 2))
     model = MyModel()
     print(summary(model, (32, 3, 8, 21, 2)))
-    x = model(x)
+    # x = model(x)
