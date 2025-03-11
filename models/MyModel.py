@@ -77,18 +77,18 @@ class HCTA(nn.Module):
         
         self.bn1 = nn.BatchNorm2d(8)
         self.act1 = nn.ReLU()
-        self.conv = nn.Conv2d(in_channels=8, out_channels=8, kernel_size=(1,1), stride=(1, 4))
+        self.conv = nn.Conv2d(in_channels=8, out_channels=8, kernel_size=(1,1), stride=(1, 8))
         self.bn2 = nn.BatchNorm2d(8)
 
         
-        embed_dim = n_joints * out_channels // 4
+        embed_dim = n_joints * out_channels // 8
         self.ta = nn.MultiheadAttention(embed_dim=embed_dim, num_heads=3, batch_first=True) # return [time, outfeatures]
 
         self.W_q = nn.Linear(embed_dim, embed_dim)
         self.W_k = nn.Linear(embed_dim, embed_dim)
         self.W_v = nn.Linear(embed_dim, embed_dim)
 
-        self.fc = nn.Linear(embed_dim, embed_dim * 4)
+        self.fc = nn.Linear(embed_dim, embed_dim * 8)
         self.act = nn.ReLU()
 
     def forward(self, x: torch.Tensor, hi: torch.Tensor) -> torch.Tensor:
@@ -151,11 +151,16 @@ class MyModel(nn.Module):
         self.l1=HCTA(3, n_joints, 8)
         self.l2=HCTA(8, n_joints, 16)
         self.l3=HCTA(16, n_joints, 16)
-        self.l4=HCTA(16, n_joints, 32)
-        self.l5=HCTA(32, n_joints, 32)
+        self.l4=HCTA(16, n_joints, 16)
+        self.l5=HCTA(16, n_joints, 16)
+        self.l6=HCTA(16, n_joints, 16)
+        self.l7=HCTA(16, n_joints, 16)
+        self.l8=HCTA(16, n_joints, 16)
+        self.l9=HCTA(16, n_joints, 16)
+        self.l10=HCTA(16, n_joints, 16)
        
         self.flat = nn.Flatten(1)
-        self.fc = nn.Linear(32*n_joints*num_frames, num_class)
+        self.fc = nn.Linear(16*n_joints*num_frames, num_class)
         nn.init.normal_(self.fc.weight, 0, math.sqrt(2. / num_class))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -167,6 +172,11 @@ class MyModel(nn.Module):
         x = self.l3(x, hi)
         x = self.l4(x, hi)
         x = self.l5(x, hi)
+        x = self.l6(x, hi)
+        x = self.l7(x, hi)
+        x = self.l8(x, hi)
+        x = self.l9(x, hi)
+        x = self.l10(x, hi)
         
         x = self.flat(x)
         x = self.fc(x)
