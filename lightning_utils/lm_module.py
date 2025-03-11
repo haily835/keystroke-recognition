@@ -7,6 +7,7 @@ import pandas as pd
 from models.resnet import *
 from utils.import_by_modulepath import initialize_class
 import json
+import os
 
 class LmKeyClf(L.LightningModule):
     def __init__(self, 
