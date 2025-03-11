@@ -17,8 +17,13 @@ class HCTA(nn.Module):
         self.W_k = nn.Linear(n_joints * out_channels, out_channels)
         self.W_v = nn.Linear(n_joints * out_channels, out_channels)
         
-        self.p = nn.Linear(in_channels, out_channels)
+        self.residual = nn.Sequential(
+            nn.LayerNorm((8, 42, in_channels)),
+            nn.Linear(in_channels, out_channels))
+        
+       
         self.fc = nn.Linear(out_channels, n_joints * out_channels)
+        self.act = nn.ReLU()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # x shape (Time, Nodes, Features)
@@ -35,9 +40,8 @@ class HCTA(nn.Module):
           7,  8,  8,  8,  8,  9,  9,  9,  9,  9]]).to(device=x.device)
         
         T, N, F = x.size()
-        res = self.p(x)
+        res = self.residual(x)
         
-        res = self.bn(res)
         x = torch.stack([self.hc(g, HI) for g in x])
         
         x = rearrange(x, 't v c -> t (v c)')
@@ -47,7 +51,7 @@ class HCTA(nn.Module):
         v = self.W_v(x)
         x, _ = self.ta(q, k, v)
         x = self.fc(x)
-        x = x.view(T, N, -1) + res
+        x = self.act(x.view(T, N, -1) + res)
         # Reshape back the output to match the batch size
         return x
 
@@ -58,6 +62,7 @@ class MyModel(nn.Module):
         layers = []
         last_dim = in_channels
         for i in range(n_layers):
+            # layers.append(nn.BatchNorm1d(last_dim))
             layers.append(
                 HCTA(last_dim, n_joints, 16 * (i + 1))
             )
@@ -65,7 +70,8 @@ class MyModel(nn.Module):
         flatten_layer = nn.Flatten(0)
         
         layers.append(flatten_layer)
-
+        
+        
         fc = nn.Linear(last_dim*n_joints*8, num_class)
         nn.init.normal_(fc.weight, 0, math.sqrt(2. / num_class))
         layers.append(fc)
@@ -74,6 +80,12 @@ class MyModel(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = rearrange(x, 'n c t v m -> n t (v m) c')
         # print(x.shape)
+
         x = torch.stack([self.network(b) for b in x])
         return x
     
+
+if __name__ == "__main__":
+    x = torch.rand((32, 3, 8, 21, 2))
+    model = MyModel()
+    x = model(x)
