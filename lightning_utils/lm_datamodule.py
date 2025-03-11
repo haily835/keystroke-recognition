@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List
 import torch
 import lightning as L
 import pandas as pd

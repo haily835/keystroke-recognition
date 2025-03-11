@@ -5,7 +5,6 @@ import torch
 import pandas as pd
 import torchvision
 import os
-from lightning_utils.dataset import clf_id2label, detect_id2label
 from lightning_utils.lm_module import LmKeyClf
 from utils.import_by_modulepath import import_by_modulepath
 
@@ -13,6 +12,16 @@ from utils.import_by_modulepath import import_by_modulepath
 device = (
     "cuda" if torch.cuda.is_available() else "cpu"
 )
+
+clf_id2label = [
+"a", "b", "c", "d", "e", 
+"f", "g", "h", "i", "j", 
+"k", "l", "m", "n", "o", 
+"p", "q", "r", "s", "t", 
+"u", "v", "w", "x", "y", "z", 
+"comma", "period", "space", "backspace",
+"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
+]
 
 print(f"Using {device} device")
 

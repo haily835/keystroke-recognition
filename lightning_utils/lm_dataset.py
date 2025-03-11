@@ -2,55 +2,11 @@ import torch
 import torch.utils
 import torch.utils.data
 import pandas as pd
-import torchvision
-import torchvision.transforms.functional
-import torchvision.transforms.v2 as v2
 import numpy as np
-import os
 import json
-
-from mediapipe import solutions
-from mediapipe.framework.formats import landmark_pb2
 
 detect_id2label = ['idle', 'active']
 detect_label2id = {'idle': 0, 'active': 1}
-
-#@markdown We implemented some functions to visualize the hand landmark detection results. <br/> Run the following cell to activate the functions.
-
-
-
-MARGIN = 10  # pixels
-FONT_SIZE = 1
-FONT_THICKNESS = 1
-HANDEDNESS_TEXT_COLOR = (88, 205, 54) # vibrant green
-
-def draw_landmarks_on_image(detection_result, rgb_img, mode):
-  if mode == 'image':
-    annotated_image = np.copy(rgb_img)
-    return torch.from_numpy(annotated_image)
-  elif mode == 'skeleton':
-    annotated_image = np.zeros_like(rgb_img)
-  elif mode == 'both':
-    annotated_image = np.copy(rgb_img)
-
-  # Loop through the detected hands to visualize.
-  for idx in range(len(detection_result)):
-    hand_landmarks = detection_result[idx]
-
-    # Draw the hand landmarks.
-    hand_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
-    hand_landmarks_proto.landmark.extend([
-      landmark_pb2.NormalizedLandmark(x=landmark[0], y=landmark[1], z=landmark[2]) for landmark in hand_landmarks
-    ])
-
-    solutions.drawing_utils.draw_landmarks(
-      annotated_image,
-      hand_landmarks_proto,
-      solutions.hands.HAND_CONNECTIONS,
-      solutions.drawing_styles.get_default_hand_landmarks_style(),
-      solutions.drawing_styles.get_default_hand_connections_style())
-
-  return torch.from_numpy(annotated_image)
 
 class BaseStreamDataset(torch.utils.data.Dataset):
     def __init__(self, *args, **kwargs): pass
@@ -100,37 +56,7 @@ class BaseStreamDataset(torch.utils.data.Dataset):
         df = pd.DataFrame({'label': self.id2label, 'count': counts})
         return df
 
-    def create_segment(self, idx, dest_folder=None, format='mp4', fps=3.0, mode='image'):
-        (start, end), label = self.segments[idx]
-       
-
-        annotated = []
-        
-
-        for idx in range(start, end+1):
-            lm = self.video[idx]
-            if mode == 'image' or mode == 'image_and_skeleton':
-                img = torchvision.io.image.read_image(f"{self.video_path}/frame_{idx}.jpg").permute(1, 2, 0).numpy()
-            else:
-                img = np.zeros(shape=[360, 640, 3])
-            annotated.append(draw_landmarks_on_image(
-                lm.numpy(), 
-                img,
-                mode=mode
-            ))
-        annotated = torch.stack(annotated)
-        
-        if format:
-            if not os.path.exists(f'{dest_folder}/segments_{format}'):
-                os.makedirs(f'{dest_folder}/segments_{format}')
-            video_name = f'{dest_folder}/segments_{format}/{self.video_name}_{label}_f{start}_{end}.{format}'
-            torchvision.io.video.write_video(
-                filename=video_name, 
-                video_array=annotated, 
-                fps=fps
-            )
-        else:
-            return annotated, label
+    
 class KeyClfStreamDataset(BaseStreamDataset):
     def __init__(self,
                  video_path: str,
@@ -245,46 +171,3 @@ class KeyDetectDataset(BaseStreamDataset):
                     j += total_window
         self.segments = segments
 
-
-if __name__ == "__main__":
-    # test = [0, 795, 355, 590, 1038, 329, 163, 455]
-    ids = []
-    for i in range(0, 12):
-        if i != 21:
-            ids.append(i)
-    for video_id in ids:
-        print('video_id: ', video_id)
-        clf_ds = BaseStreamDataset.create_dataset(
-            landmark_path=f'datasets/sideview/landmarks/video_{video_id}.pt',
-            video_path=f'datasets/sideview/raw_frames/video_{video_id}',
-            label_path=f'datasets/sideview/labels/video_{video_id}.csv',
-            gap=None,
-            delay=3
-        )
-
-        clf_ds.create_segment('datasets/sideview/', ids[video_id], mode='skeleton')
-        
-        for i in range(len(clf_ds)):
-            video, label = clf_ds.__getitem__(i)
-            if video.shape[1] != 8:
-                print(f"i {i}, label {label}")
-
-    for video_id in ids:
-        print('video_id: ', video_id)
-        clf_ds = BaseStreamDataset.create_dataset(
-            landmark_path=f'datasets/sideview/landmarks/video_{video_id}.pt',
-            video_path=f'datasets/sideview/raw_frames/video_{video_id}',
-            label_path=f'datasets/sideview/labels/video_{video_id}.csv',
-            gap=1,
-            delay=3
-        )
-
-        # clf_ds.create_segment('.', test[video_id], mode='image')
-
-        for i in range(len(clf_ds)):
-            video, label = clf_ds.__getitem__(i)
-            if video.shape[1] != 8:
-                print(f"i {i}, label {label}")
-    # print('label: ', clf_id2label[label])
-    # print('video: ', video)
-    # print(clf_ds.get_class_counts())
