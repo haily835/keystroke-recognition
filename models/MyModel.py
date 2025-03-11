@@ -68,24 +68,27 @@ def get_hi(batch_size, num_frames):
 
 # Hypergraph convolution with temperal attention.
 class HCTA(nn.Module):
-    def __init__(self, in_channels, n_joints, out_channels):
+    def __init__(self, in_channels, n_joints, out_channels, stride=4):
         super().__init__()
+        self.bn = nn.BatchNorm2d(in_channels)
+        self.proj = nn.Linear(in_channels, out_channels)
+
         self.hc = HypergraphConv(in_channels=in_channels, out_channels=out_channels) # return [nodes, outfeatures]
-        self.conv = nn.Conv2d(in_channels=8, out_channels=8, kernel_size=(1,1), stride=(1,8))
-        embed_dim = n_joints * out_channels // 8
         
+        self.bn1 = nn.BatchNorm2d(8)
+        self.act1 = nn.ReLU()
+        self.conv = nn.Conv2d(in_channels=8, out_channels=8, kernel_size=(1,1), stride=(1,stride))
+        self.bn2 = nn.BatchNorm2d(8)
+
         
+        embed_dim = n_joints * out_channels // stride
         self.ta = nn.MultiheadAttention(embed_dim=embed_dim, num_heads=3, batch_first=True) # return [time, outfeatures]
 
         self.W_q = nn.Linear(embed_dim, embed_dim)
         self.W_k = nn.Linear(embed_dim, embed_dim)
         self.W_v = nn.Linear(embed_dim, embed_dim)
-        
-        
-        self.bn = nn.BatchNorm2d(in_channels)
-        self.proj = nn.Linear(in_channels, out_channels)
-        
-        self.fc = nn.Linear(embed_dim, embed_dim * 8)
+
+        self.fc = nn.Linear(embed_dim, embed_dim * stride)
         self.act = nn.ReLU()
 
     def forward(self, x: torch.Tensor, hi: torch.Tensor) -> torch.Tensor:
@@ -115,7 +118,10 @@ class HCTA(nn.Module):
         x = x.view(N, -1, T, V, M)
         x = rearrange(x, 'n c t v m -> n t (v m) c')
         # print("Before conv across node feature", x.shape)
+        x = self.bn1(x)
+        x = self.act1(x)
         x = self.conv(x)
+        x = self.bn2(x)
         # print("After conv", x.shape)
         # x = x.view(N, -1, T, V, M)
         x = rearrange(x, 'n t vm c -> n t (c vm)')
@@ -143,19 +149,11 @@ class MyModel(nn.Module):
 
         # print(self.hi)
         self.l1=HCTA(3, n_joints, 8)
-        self.l2=HCTA(8, n_joints, 8)
-        self.l3=HCTA(8, n_joints, 16)
-
-        
-        self.l4=HCTA(16, n_joints, 16)
-        self.l5=HCTA(16, n_joints, 16)
-        self.l6=HCTA(16, n_joints, 32)
-
-        self.l7=HCTA(32, n_joints, 32)
-        self.l8=HCTA(32, n_joints, 32)
-        self.l9=HCTA(32, n_joints, 32)
-        
-        
+        self.l2=HCTA(8, n_joints, 16)
+        self.l3=HCTA(16, n_joints, 16)
+        self.l4=HCTA(16, n_joints, 32)
+        self.l5=HCTA(32, n_joints, 32)
+       
         self.flat = nn.Flatten(1)
         self.fc = nn.Linear(32*n_joints*num_frames, num_class)
         nn.init.normal_(self.fc.weight, 0, math.sqrt(2. / num_class))
@@ -169,10 +167,6 @@ class MyModel(nn.Module):
         x = self.l3(x, hi)
         x = self.l4(x, hi)
         x = self.l5(x, hi)
-        x = self.l6(x, hi)
-        x = self.l7(x, hi)
-        x = self.l8(x, hi)
-        x = self.l9(x, hi)
         
         x = self.flat(x)
         x = self.fc(x)
