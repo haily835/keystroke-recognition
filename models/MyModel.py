@@ -87,7 +87,7 @@ class HCTA(nn.Module):
 
         # print("HI", HI.get_device())
         # print("x", x.get_device())
-        print(x.shape)
+       #  print(x.shape)
         N, C, T, V, M = x.size()
 
         # Residual
