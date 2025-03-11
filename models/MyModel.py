@@ -284,7 +284,7 @@ class MyModel(nn.Module):
         x = self.l8(x)
         x = self.l9(x)
         x = self.l10(x)
-        print(x.shape)
+        # print(x.shape)
         # N*M,C,T,V
         c_new = x.size(1)
         x = x.view(N, M, c_new, -1)
