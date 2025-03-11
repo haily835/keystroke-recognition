@@ -6,60 +6,65 @@ import math
 import numpy as np
 from torchinfo import summary
 
+import torch
+
 def get_hi(batch_size, num_frames):
-    # Number of vertices in each graph and number of graphs
     vertices_per_graph = 42
-    num_graphs = batch_size * num_frames  # Example: 3 disconnected graphs
-    edges = [
-        {0, 1, 2, 3, 4},     # e1
-        {0, 5, 6, 7, 8},     # e2
-        {9, 10, 11, 12},     # e3
-        {13, 14, 15, 16},    # e4
-        {0, 17, 18, 19, 20}, # e5
-        {21, 22, 23, 24, 25},# e6
-        {22, 26, 27, 28, 29},# e7
-        {30, 31, 32, 33},    # e8
-        {34, 35, 36, 37},    # e9
-        {21, 38, 39, 40, 41} # e10
-    ]
+    num_graphs = batch_size * num_frames
+    edges_per_graph = 10
+    
+    # Given incidence matrix for one graph
+    incidence_matrix_single = torch.tensor([
+        [1, 1, 0, 0, 1, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+        [0, 0, 0, 0, 0, 1, 1, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+    ], dtype=torch.long)
+    
+    row_indices, col_indices = incidence_matrix_single.nonzero(as_tuple=True)
+    row_indices = row_indices.repeat(num_graphs) + torch.arange(num_graphs).repeat_interleave(len(row_indices)) * vertices_per_graph
+    col_indices = col_indices.repeat(num_graphs) + torch.arange(num_graphs).repeat_interleave(len(col_indices)) * edges_per_graph
+    
+    return torch.stack([row_indices, col_indices])
 
-    # Total number of vertices in all graphs
-    total_vertices = vertices_per_graph * num_graphs
-    # Number of edges (same for each graph)
-    num_edges = len(edges)
-
-    # Initialize the merged incidence matrix with all zeros
-    incidence_matrix = np.zeros((total_vertices, num_edges * num_graphs), dtype=int)
-
-    # Populate the incidence matrix for each graph
-    for graph_index in range(num_graphs):
-        # Shift the vertices for each graph
-        vertex_offset = graph_index * vertices_per_graph
-        
-        for col, edge in enumerate(edges):
-            for vertex in edge:
-                # Adjust the vertex number by the graph offset
-                incidence_matrix[vertex + vertex_offset, col + graph_index * num_edges] = 1
-
-   
-    # Define the sparse incidence matrix
-    # Example from before
-    incidence_matrix = incidence_matrix.T
-
-    # Initialize lists to store row indices, column indices, and data
-    row_indices = []
-    col_indices = []
-    data = []
-
-    # Iterate through the incidence matrix and record the non-zero entries
-    for i in range(incidence_matrix.shape[0]):  # Iterate over rows (vertices)
-        for j in range(incidence_matrix.shape[1]):  # Iterate over columns (hyperedges)
-            if incidence_matrix[i, j] == 1:
-                row_indices.append(i)  # Store row index (vertex)
-                col_indices.append(j)  # Store column index (hyperedge)
-                data.append(1)          # Store the data (value)
-
-    return torch.tensor([col_indices, row_indices])
 
 # Hypergraph convolution with temperal attention.
 class HCTA(nn.Module):
