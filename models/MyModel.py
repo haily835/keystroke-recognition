@@ -131,10 +131,9 @@ class HCTA(nn.Module):
         return x
 
 class MyModel(nn.Module):
-    def __init__(self, in_channels=3, num_class=40, n_joints=42, n_layers=3, batch_size=32, num_frames=8):
+    def __init__(self, in_channels=3, num_class=40, n_joints=42, n_layers=3, num_frames=8):
         super().__init__()
 
-        self.hi = get_hi(batch_size, num_frames)
         # print(self.hi)
         self.l1=HCTA(3, n_joints, 16)
         self.l2=HCTA(16, n_joints, 32)
@@ -148,7 +147,7 @@ class MyModel(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         N, C, T, V, M = x.size()
         
-        hi = self.hi.to(x.device)
+        hi = get_hi(N, T).to(x.device)
         x = self.l1(x, hi)
         # print("- L1 ", x.shape)
         x = self.l2(x, hi)
