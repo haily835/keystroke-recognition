@@ -132,7 +132,7 @@ def get_hi(batch_size, num_frames):
     vertices_per_graph = 42
     num_graphs = batch_size * num_frames
     edges_per_graph = 10
-    
+
     # Given incidence matrix for one graph
     incidence_matrix_single = torch.tensor([
         [1, 1, 0, 0, 1, 0, 0, 0, 0, 0],
@@ -177,13 +177,14 @@ def get_hi(batch_size, num_frames):
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
-    ], dtype=torch.long)
-    
+    ], dtype=torch.long).T
+
     row_indices, col_indices = incidence_matrix_single.nonzero(as_tuple=True)
-    row_indices = row_indices.repeat(num_graphs) + torch.arange(num_graphs).repeat_interleave(len(row_indices)) * vertices_per_graph
-    col_indices = col_indices.repeat(num_graphs) + torch.arange(num_graphs).repeat_interleave(len(col_indices)) * edges_per_graph
-    
-    return torch.stack([row_indices, col_indices])
+  
+    row = row_indices.repeat(num_graphs) + torch.arange(num_graphs).repeat_interleave(len(row_indices)) * edges_per_graph
+    col = col_indices.repeat(num_graphs) + torch.arange(num_graphs).repeat_interleave(len(col_indices)) * vertices_per_graph
+
+    return torch.stack([col, row])
 
 class unit_tcn(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size=9, stride=1):
@@ -244,7 +245,7 @@ class MyModel(nn.Module):
         self.num_point = num_point
         self.data_bn = nn.BatchNorm1d(num_person * in_channels * num_point)
 
-        base_channel = 96
+        base_channel = 64
         self.l1 = TCN_HC_unit(in_channels, base_channel, residual=False, adaptive=adaptive)
         self.l2 = TCN_HC_unit(base_channel, base_channel, adaptive=adaptive)
         self.l3 = TCN_HC_unit(base_channel, base_channel, adaptive=adaptive)
@@ -267,8 +268,6 @@ class MyModel(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         N, C, T, V, M = x.size()
-        
-        
 
         x = x.permute(0, 4, 3, 1, 2).contiguous().view(N, M * V * C, T)
         x = self.data_bn(x)
