@@ -205,7 +205,7 @@ class unit_tcn(nn.Module):
 
 
 class unit_gcn(nn.Module):
-    def __init__(self, in_channels, out_channels, coff_embedding=4, residual=True):
+    def __init__(self, in_channels, out_channels, residual=True):
         super(unit_gcn, self).__init__()
         
         self.out_c = out_channels
@@ -256,7 +256,7 @@ class unit_gcn(nn.Module):
     
 
 class TCN_HC_unit(nn.Module):
-    def __init__(self, in_channels, out_channels, stride=1, residual=True, adaptive=True, kernel_size=5, dilations=[1,2]):
+    def __init__(self, in_channels, out_channels, stride=1, residual=True, kernel_size=5, dilations=[1,2]):
         super().__init__()
         self.hc = unit_gcn(in_channels=in_channels, out_channels=out_channels)
         self.tcn = MultiScale_TemporalConv(out_channels, out_channels, 
