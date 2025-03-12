@@ -245,7 +245,7 @@ class MyModel(nn.Module):
         self.num_point = num_point
         self.data_bn = nn.BatchNorm1d(num_person * in_channels * num_point)
 
-        base_channel = 64
+        base_channel = 96
         self.l1 = TCN_HC_unit(in_channels, base_channel, residual=False, adaptive=adaptive)
         self.l2 = TCN_HC_unit(base_channel, base_channel, adaptive=adaptive)
         self.l3 = TCN_HC_unit(base_channel, base_channel, adaptive=adaptive)
