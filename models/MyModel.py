@@ -206,11 +206,7 @@ class unit_tcn(nn.Module):
 
 class unit_gcn(nn.Module):
     def __init__(self, in_channels, out_channels, residual=True):
-        super(unit_gcn, self).__init__()
-        
-        self.out_c = out_channels
-        self.in_c = in_channels
-    
+        super(unit_gcn, self).__init__()    
         self.convs = nn.ModuleList()
         for i in range(4):
             self.convs.append(HypergraphConv(in_channels, out_channels))
@@ -226,9 +222,8 @@ class unit_gcn(nn.Module):
         else:
             self.down = lambda x: 0
         
-        self.alpha = nn.Parameter(torch.zeros(1))
+        
         self.bn = nn.BatchNorm2d(out_channels)
-        self.soft = nn.Softmax(-2)
         self.relu = nn.ReLU(inplace=True)
 
         for m in self.modules():
