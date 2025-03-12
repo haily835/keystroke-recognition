@@ -276,7 +276,6 @@ class TCN_HC_unit(nn.Module):
 
     def forward(self, x: torch.Tensor,) -> torch.Tensor:
         NM, C, T, V = x.size()
-        hi = get_hi(NM // 2, T).to(x.device)
 
         res = self.residual(x)
        
